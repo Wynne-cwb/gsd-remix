@@ -39,7 +39,7 @@ npx get-shit-done-cc@latest
 
 **被 Amazon、Google、Shopify 和 Webflow 的工程师信赖使用。**
 
-[我为什么开发这个](#我为什么开发这个) · [工作原理](#工作原理) · [命令](#命令) · [为什么有效](#为什么有效) · [用户指南](USER-GUIDE.md)
+[我为什么开发这个](#我为什么开发这个) · [工作原理](#工作原理) · [命令](#命令) · [为什么有效](#为什么有效) · [用户指南](USER-GUIDE.md) · [Claude Code 深入教程](CLAUDE-CODE-DEEP-DIVE.md) · [Claude Code 图解版 HTML](CLAUDE-CODE-DEEP-DIVE.html)
 
 </div>
 

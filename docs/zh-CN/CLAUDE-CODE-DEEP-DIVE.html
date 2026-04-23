@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GSD Claude Code 实现深度教程</title>
+    <style>
+      :root {
+        --bg: #f5efe4;
+        --bg-soft: #fbf7ef;
+        --ink: #1f2a25;
+        --muted: #5b655f;
+        --line: #d8cdbb;
+        --card: rgba(255, 250, 241, 0.88);
+        --accent: #0c6b58;
+        --accent-soft: #d7efe8;
+        --accent-2: #c95f36;
+        --accent-2-soft: #f9e2d9;
+        --accent-3: #3b5cc9;
+        --shadow: 0 18px 40px rgba(55, 42, 21, 0.12);
+        --radius: 22px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+        line-height: 1.7;
+        background:
+          radial-gradient(circle at top left, rgba(12, 107, 88, 0.12), transparent 28%),
+          radial-gradient(circle at top right, rgba(201, 95, 54, 0.10), transparent 24%),
+          linear-gradient(180deg, #f7f1e7 0%, #f4ecde 100%);
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      code,
+      pre,
+      .mono {
+        font-family: "SFMono-Regular", "JetBrains Mono", "Menlo", "Consolas", monospace;
+      }
+
+      .page {
+        width: min(1280px, calc(100% - 32px));
+        margin: 24px auto 56px;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(140deg, rgba(255, 251, 245, 0.92), rgba(244, 233, 216, 0.92));
+        border: 1px solid rgba(113, 96, 68, 0.14);
+        border-radius: 32px;
+        box-shadow: var(--shadow);
+        padding: 36px;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -40px;
+        top: -40px;
+        width: 220px;
+        height: 220px;
+        background:
+          radial-gradient(circle at center, rgba(12, 107, 88, 0.18), rgba(12, 107, 88, 0.04) 55%, transparent 72%);
+        pointer-events: none;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(2.2rem, 4vw, 4rem);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+      }
+
+      .hero p {
+        margin: 14px 0 0;
+        max-width: 840px;
+        font-size: 1.08rem;
+        color: var(--muted);
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(12, 107, 88, 0.14);
+        background: rgba(255, 255, 255, 0.72);
+        font-size: 0.95rem;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.3fr 0.9fr;
+        gap: 20px;
+        margin-top: 28px;
+      }
+
+      .hero-card,
+      .panel,
+      .section {
+        background: var(--card);
+        border: 1px solid rgba(113, 96, 68, 0.14);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      .hero-card {
+        padding: 22px 24px;
+      }
+
+      .hero-card h2 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+      }
+
+      .hero-card ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 270px minmax(0, 1fr);
+        gap: 20px;
+        margin-top: 22px;
+        align-items: start;
+      }
+
+      .toc {
+        position: sticky;
+        top: 18px;
+        padding: 18px 18px 16px;
+      }
+
+      .toc h2 {
+        margin: 0 0 12px;
+        font-size: 1rem;
+      }
+
+      .toc ol {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .toc li + li {
+        margin-top: 10px;
+      }
+
+      .main {
+        display: grid;
+        gap: 20px;
+      }
+
+      .section {
+        padding: 28px;
+      }
+
+      .section h2 {
+        margin: 0 0 8px;
+        font-size: clamp(1.5rem, 2vw, 2.1rem);
+        letter-spacing: -0.02em;
+      }
+
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 10px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 0.84rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .lede {
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+
+      .callout {
+        margin: 16px 0 0;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: linear-gradient(120deg, rgba(215, 239, 232, 0.88), rgba(249, 246, 235, 0.92));
+        border: 1px solid rgba(12, 107, 88, 0.14);
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .card {
+        padding: 18px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.62);
+        border: 1px solid rgba(113, 96, 68, 0.12);
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+
+      .card p,
+      .card ul {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .card ul {
+        padding-left: 18px;
+      }
+
+      .figure {
+        margin: 20px 0;
+        padding: 16px;
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(247, 240, 228, 0.96));
+        border: 1px solid rgba(113, 96, 68, 0.14);
+      }
+
+      .figure figcaption {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .path-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .path-item {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(113, 96, 68, 0.12);
+      }
+
+      .path-item strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      pre {
+        margin: 14px 0 0;
+        padding: 14px 16px;
+        border-radius: 18px;
+        overflow-x: auto;
+        background: #1d2522;
+        color: #edf5f0;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      }
+
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      .stack-item {
+        display: grid;
+        grid-template-columns: 170px minmax(0, 1fr);
+        gap: 16px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.64);
+        border: 1px solid rgba(113, 96, 68, 0.12);
+      }
+
+      .stack-item .label {
+        font-weight: 700;
+      }
+
+      .steps {
+        display: grid;
+        gap: 12px;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr);
+        gap: 14px;
+        align-items: start;
+      }
+
+      .step .num {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .footer-note {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 1040px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .toc {
+          position: static;
+        }
+
+        .hero-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .page {
+          width: min(100% - 18px, 100%);
+          margin: 12px auto 34px;
+        }
+
+        .hero,
+        .section {
+          padding: 22px;
+        }
+
+        .card-grid,
+        .path-list {
+          grid-template-columns: 1fr;
+        }
+
+        .stack-item {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <span class="eyebrow">Claude Code Visual Guide</span>
+        <h1>GSD Claude Code 实现深度教程</h1>
+        <p>
+          这是给长期使用 GSD 的人的图解版源码导读，但它真正的目标不该停在“看懂仓库”。更高的标准应该是：你读完之后，
+          能自己复刻一套最小可用版 GSD。重点不在“功能清单”，而在帮你建立一条稳定的实现链路：
+          <span class="mono">/gsd-*</span> 从哪里进，workflow 怎样做调度，agent 怎样各司其职，状态怎样写进
+          <span class="mono">.planning/</span>，以及 hook 怎样嵌进 Claude Code。
+        </p>
+        <div class="hero-actions">
+          <a class="chip" href="CLAUDE-CODE-DEEP-DIVE.md">阅读完整版 Markdown</a>
+          <a class="chip" href="README.md">返回中文文档首页</a>
+          <a class="chip" href="../ARCHITECTURE.md">对照 Architecture 文档</a>
+        </div>
+        <div class="hero-grid">
+          <section class="hero-card">
+            <h2>这份 HTML 现在的目标</h2>
+            <ul>
+              <li>先用图看懂 GSD 在 Claude Code 中的整体形态</li>
+              <li>再顺着核心 workflow 看清输入、输出和状态回写</li>
+              <li>最后能按顺序复刻出一套最小可用版 GSD</li>
+            </ul>
+          </section>
+          <section class="hero-card">
+            <h2>建议的阅读姿势</h2>
+            <ul>
+              <li>先问“这一层解决什么问题”</li>
+              <li>再问“它读什么，写什么，如何推进状态”</li>
+              <li>最后问“如果我自己做一版，最小实现是什么”</li>
+            </ul>
+          </section>
+        </div>
+      </header>
+
+      <div class="layout">
+        <aside class="toc panel">
+          <h2>目录</h2>
+          <ol>
+            <li><a href="#mental-model">整体心智模型</a></li>
+            <li><a href="#install-shape">Claude Code 安装形态</a></li>
+            <li><a href="#lifecycle-overview">主流程全景</a></li>
+            <li><a href="#init-workflows">new-project 与 new-milestone</a></li>
+            <li><a href="#discuss-phase-deep">discuss-phase 深入</a></li>
+            <li><a href="#plan-phase">图解 /gsd-plan-phase</a></li>
+            <li><a href="#execute-phase">图解 /gsd-execute-phase</a></li>
+            <li><a href="#state-layer">.planning 状态层</a></li>
+            <li><a href="#hooks">Hook 护栏系统</a></li>
+            <li><a href="#sdk">SDK / Query / Runner</a></li>
+            <li><a href="#reading-order">源码阅读顺序</a></li>
+          </ol>
+        </aside>
+
+        <main class="main">
+          <section class="section" id="mental-model">
+            <span class="eyebrow">0. Whole System</span>
+            <h2>整体心智模型</h2>
+            <p class="lede">
+              最重要的一句话是: <strong>GSD 不是几个 slash commands，而是一个运行在 Claude Code 上的工作流操作系统。</strong>
+              它把原本松散的一次次对话，变成一个有状态、可恢复、可分工的开发流水线。
+            </p>
+
+            <figure class="figure">
+              <svg viewBox="0 0 1120 410" aria-label="GSD Claude Code architecture flow">
+                <defs>
+                  <marker id="arrowA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#0c6b58"></path>
+                  </marker>
+                </defs>
+
+                <rect x="30" y="28" width="220" height="80" rx="22" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="140" y="58" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">用户入口</text>
+                <text x="140" y="84" text-anchor="middle" font-size="18" fill="#18473d">Claude Code 中输入 /gsd-*</text>
+
+                <rect x="300" y="28" width="220" height="80" rx="22" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="410" y="58" text-anchor="middle" font-size="24" font-weight="700" fill="#3a342b">命令层</text>
+                <text x="410" y="84" text-anchor="middle" font-size="18" fill="#3a342b">commands/gsd/*.md</text>
+
+                <rect x="570" y="28" width="250" height="80" rx="22" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="695" y="58" text-anchor="middle" font-size="24" font-weight="700" fill="#3a342b">编排层</text>
+                <text x="695" y="84" text-anchor="middle" font-size="18" fill="#3a342b">workflows/*.md 负责调度</text>
+
+                <rect x="870" y="28" width="220" height="80" rx="22" fill="#f9e2d9" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="980" y="58" text-anchor="middle" font-size="24" font-weight="700" fill="#8c3d1e">角色层</text>
+                <text x="980" y="84" text-anchor="middle" font-size="18" fill="#8c3d1e">agents/*.md 专职子代理</text>
+
+                <rect x="130" y="194" width="340" height="92" rx="24" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="300" y="226" text-anchor="middle" font-size="24" font-weight="700" fill="#26418f">查询 / 工具层</text>
+                <text x="300" y="254" text-anchor="middle" font-size="18" fill="#26418f">gsd-sdk query + gsd-tools.cjs</text>
+                <text x="300" y="278" text-anchor="middle" font-size="16" fill="#5b678f">提供 init、state、phase、commit 等结构化接口</text>
+
+                <rect x="520" y="184" width="300" height="112" rx="24" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="670" y="218" text-anchor="middle" font-size="24" font-weight="700" fill="#3a342b">状态层</text>
+                <text x="670" y="248" text-anchor="middle" font-size="18" fill="#3a342b">.planning/ 不是附件，是数据库</text>
+                <text x="670" y="272" text-anchor="middle" font-size="16" fill="#6a6357">PROJECT / REQUIREMENTS / ROADMAP / STATE / phases/*</text>
+
+                <rect x="870" y="194" width="220" height="92" rx="24" fill="#fffaf2" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="980" y="226" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">护栏层</text>
+                <text x="980" y="252" text-anchor="middle" font-size="18" fill="#18473d">hooks + statusLine</text>
+                <text x="980" y="276" text-anchor="middle" font-size="16" fill="#4d655f">上下文监控 / 注入扫描 / 读前改前提示</text>
+
+                <path d="M 250 68 H 300" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowA)"></path>
+                <path d="M 520 68 H 570" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowA)"></path>
+                <path d="M 820 68 H 870" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowA)"></path>
+                <path d="M 695 108 V 150 H 300 V 194" stroke="#0c6b58" stroke-width="4" fill="none" marker-end="url(#arrowA)"></path>
+                <path d="M 695 108 V 148 H 670 V 184" stroke="#0c6b58" stroke-width="4" fill="none" marker-end="url(#arrowA)"></path>
+                <path d="M 980 108 V 194" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowA)"></path>
+                <path d="M 470 240 H 520" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowA)"></path>
+                <path d="M 820 240 H 870" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowA)"></path>
+              </svg>
+              <figcaption>
+                这个图是全篇最重要的总览。你可以把 GSD 看成“命令入口 + workflow 编排 + agent 分工 + 文件状态 + hook 护栏”的组合系统。
+              </figcaption>
+            </figure>
+
+            <div class="card-grid">
+              <article class="card">
+                <h3>为什么 GSD 有效</h3>
+                <p>它把长对话拆成多个新上下文的子任务，尽量避免 context rot，同时把状态稳定地写回磁盘。</p>
+              </article>
+              <article class="card">
+                <h3>最容易误判的点</h3>
+                <p>很多人以为核心逻辑在命令文件里。实际上命令层极薄，真正的 orchestrator 在 workflow 层。</p>
+              </article>
+              <article class="card">
+                <h3>教程的成功标准</h3>
+                <p>不是“你知道仓库里有哪些文件”，而是“你能说清每个子系统的边界，并且自己搭出一套最小版 GSD”。</p>
+              </article>
+              <article class="card">
+                <h3>最小可复刻子系统</h3>
+                <p>至少要有命令入口、.planning 状态层、init/query、discuss 产出 CONTEXT、plan 产出 PLAN、execute 产出 SUMMARY，以及一个 next 式状态推进器。</p>
+              </article>
+            </div>
+
+            <div class="callout">
+              读后目标应该升级成：<strong>先复刻骨架，再补高级能力。</strong> 第一版先做
+              <span class="mono">command → workflow → context → plan → execute → state update → next</span>，
+              AI-SPEC、UI-SPEC、Nyquist、bounce、seeds、hooks 全量护栏都可以后置。
+            </div>
+
+            <div class="stack" style="margin-top: 16px;">
+              <div class="stack-item">
+                <div class="label">复刻顺序 1</div>
+                <div>先做 <span class="mono">.planning/</span> 和状态读写。没有状态层，你其实还没开始做 GSD。</div>
+              </div>
+              <div class="stack-item">
+                <div class="label">复刻顺序 2</div>
+                <div>再做 <span class="mono">init.*</span> 这类 query，把文件系统事实收敛成 workflow 可消费的 JSON 快照。</div>
+              </div>
+              <div class="stack-item">
+                <div class="label">复刻顺序 3</div>
+                <div>然后做 <span class="mono">discuss-phase</span>、<span class="mono">plan-phase</span>、<span class="mono">execute-phase</span> 这三个闭环核心。</div>
+              </div>
+              <div class="stack-item">
+                <div class="label">复刻顺序 4</div>
+                <div>最后再补 <span class="mono">next</span>、milestone、hooks，以及 AI/UI/security 这些高级 gate。</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section" id="install-shape">
+            <span class="eyebrow">1. Runtime Layout</span>
+            <h2>Claude Code 安装形态</h2>
+            <p class="lede">
+              从 Claude Code 视角看，安装器的工作不是“复制几个 prompt”，而是把一整套命令、skill、agent、hook 和引擎映射到
+              <span class="mono">.claude</span> 运行时目录里。
+            </p>
+
+            <figure class="figure">
+              <svg viewBox="0 0 1120 500" aria-label="Claude Code install layout">
+                <defs>
+                  <marker id="arrowB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#c95f36"></path>
+                  </marker>
+                </defs>
+
+                <rect x="40" y="28" width="480" height="410" rx="28" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="80" y="66" font-size="28" font-weight="700" fill="#2f2a22">全局安装</text>
+                <text x="80" y="96" font-size="18" fill="#5b655f">新版 Claude Code 更偏向 skills 形态</text>
+
+                <rect x="76" y="128" width="408" height="62" rx="18" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="96" y="165" font-size="20" fill="#18473d">~/.claude/skills/gsd-*/SKILL.md</text>
+
+                <rect x="76" y="208" width="408" height="58" rx="18" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="96" y="242" font-size="20" fill="#26418f">~/.claude/agents/*.md</text>
+
+                <rect x="76" y="284" width="408" height="58" rx="18" fill="#fff4e7" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="96" y="318" font-size="20" fill="#8c3d1e">~/.claude/hooks/*.js</text>
+
+                <rect x="76" y="360" width="408" height="50" rx="18" fill="#f2f4ea" stroke="#819064" stroke-width="2"></rect>
+                <text x="96" y="392" font-size="20" fill="#53613e">~/.claude/settings.json + statusLine + hooks</text>
+
+                <rect x="600" y="28" width="480" height="410" rx="28" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="640" y="66" font-size="28" font-weight="700" fill="#2f2a22">本地安装</text>
+                <text x="640" y="96" font-size="18" fill="#5b655f">项目内仍然是 commands 形态，这点非常关键</text>
+
+                <rect x="636" y="128" width="408" height="62" rx="18" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="656" y="165" font-size="20" fill="#18473d">./.claude/commands/gsd/*.md</text>
+
+                <rect x="636" y="208" width="408" height="58" rx="18" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="656" y="242" font-size="20" fill="#26418f">./.claude/get-shit-done/*</text>
+
+                <rect x="636" y="284" width="408" height="58" rx="18" fill="#fff4e7" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="656" y="318" font-size="20" fill="#8c3d1e">./.claude/hooks/*.js</text>
+
+                <rect x="636" y="360" width="408" height="50" rx="18" fill="#f2f4ea" stroke="#819064" stroke-width="2"></rect>
+                <text x="656" y="392" font-size="20" fill="#53613e">./.claude/settings.json</text>
+
+                <path d="M 520 232 H 600" stroke="#c95f36" stroke-width="4" marker-end="url(#arrowB)"></path>
+                <text x="560" y="214" text-anchor="middle" font-size="18" fill="#8c3d1e">同一套内容，不同包装</text>
+              </svg>
+              <figcaption>
+                GSD 在 Claude Code 里有“全局偏向 skill、本地偏向 commands”的双形态。理解这一点，后面看
+                <span class="mono">bin/install.js</span> 会顺很多。
+              </figcaption>
+            </figure>
+
+            <div class="path-list">
+              <div class="path-item">
+                <strong>.claude/commands/gsd/</strong>
+                Claude Code 的命令入口，本地项目里最常见。
+              </div>
+              <div class="path-item">
+                <strong>.claude/skills/gsd-*/SKILL.md</strong>
+                全局安装时的现代 skill 入口，本质上是命令文件的重包装。
+              </div>
+              <div class="path-item">
+                <strong>.claude/agents/</strong>
+                可被 <span class="mono">Task(subagent_type=...)</span> 调用的角色卡。
+              </div>
+              <div class="path-item">
+                <strong>.claude/get-shit-done/</strong>
+                workflow、references、templates、legacy CLI 等运行核心。
+              </div>
+            </div>
+
+            <div class="callout">
+              这也是为什么 GSD 看起来不像普通 prompt 工具。它必须同时占住命令入口、子代理入口、状态目录和 hook 生命周期。
+            </div>
+          </section>
+
+          <section class="section" id="lifecycle-overview">
+            <span class="eyebrow">2. Lifecycle</span>
+            <h2>主流程全景: 从 <span class="mono">new-project</span> 到 <span class="mono">new-milestone</span></h2>
+            <p class="lede">
+              之前那版图解最大的问题，是直接从 <span class="mono">plan-phase</span> 讲起了。真实的 GSD 主流程不是单条链，而是两个闭环：首次建项闭环和里程碑循环闭环。
+            </p>
+
+            <figure class="figure">
+              <svg viewBox="0 0 1120 420" aria-label="full lifecycle">
+                <defs>
+                  <marker id="arrowF" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#0c6b58"></path>
+                  </marker>
+                </defs>
+
+                <rect x="38" y="76" width="164" height="88" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="120" y="110" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">new-project</text>
+                <text x="120" y="136" text-anchor="middle" font-size="16" fill="#18473d">定义项目 + requirements + roadmap</text>
+
+                <rect x="244" y="76" width="160" height="88" rx="24" fill="#fff4e7" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="324" y="110" text-anchor="middle" font-size="24" font-weight="700" fill="#8c3d1e">discuss-phase</text>
+                <text x="324" y="136" text-anchor="middle" font-size="16" fill="#8c3d1e">写 CONTEXT.md</text>
+
+                <rect x="446" y="76" width="150" height="88" rx="24" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="521" y="110" text-anchor="middle" font-size="24" font-weight="700" fill="#26418f">plan-phase</text>
+                <text x="521" y="136" text-anchor="middle" font-size="16" fill="#26418f">写 RESEARCH / PLAN</text>
+
+                <rect x="638" y="76" width="164" height="88" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="720" y="110" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">execute-phase</text>
+                <text x="720" y="136" text-anchor="middle" font-size="16" fill="#18473d">写 SUMMARY / commit</text>
+
+                <rect x="844" y="76" width="164" height="88" rx="24" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="926" y="110" text-anchor="middle" font-size="24" font-weight="700" fill="#3a342b">verify-work</text>
+                <text x="926" y="136" text-anchor="middle" font-size="16" fill="#3a342b">写 UAT / gaps</text>
+
+                <rect x="752" y="246" width="220" height="92" rx="24" fill="#fff4e7" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="862" y="280" text-anchor="middle" font-size="24" font-weight="700" fill="#8c3d1e">complete-milestone</text>
+                <text x="862" y="306" text-anchor="middle" font-size="16" fill="#8c3d1e">归档本轮里程碑</text>
+
+                <rect x="448" y="246" width="238" height="92" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="567" y="280" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">new-milestone</text>
+                <text x="567" y="306" text-anchor="middle" font-size="16" fill="#18473d">基于历史状态再初始化下一轮</text>
+
+                <rect x="148" y="246" width="236" height="92" rx="24" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="266" y="280" text-anchor="middle" font-size="24" font-weight="700" fill="#3a342b">/gsd-next</text>
+                <text x="266" y="306" text-anchor="middle" font-size="16" fill="#3a342b">按 .planning 状态自动路由到下一步</text>
+
+                <path d="M 202 120 H 244" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowF)"></path>
+                <path d="M 404 120 H 446" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowF)"></path>
+                <path d="M 596 120 H 638" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowF)"></path>
+                <path d="M 802 120 H 844" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowF)"></path>
+                <path d="M 926 164 V 206 H 862 V 246" stroke="#0c6b58" stroke-width="4" fill="none" marker-end="url(#arrowF)"></path>
+                <path d="M 752 292 H 686" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowF)"></path>
+                <path d="M 448 292 H 384" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowF)"></path>
+              </svg>
+              <figcaption>
+                GSD 的真实主流程是“项目初始化 -> phase 生命周期 -> milestone 归档 -> 下一轮再初始化”。之前缺掉的正是这条外层循环。
+              </figcaption>
+            </figure>
+
+            <div class="card-grid">
+              <article class="card">
+                <h3>为什么这张图重要</h3>
+                <p>因为它解释了为什么仓库里不仅有 plan/execute，还一定会有 new-project、new-milestone、complete-milestone、next 这些看起来“偏管理”的命令。</p>
+              </article>
+              <article class="card">
+                <h3>/gsd-next 的真实定位</h3>
+                <p>它不是神奇工作流，而是一个状态路由器。真正的状态跃迁还是靠 new-project、new-milestone、discuss-phase、plan-phase、execute-phase 这些主命令完成。</p>
+              </article>
+              <article class="card">
+                <h3>一个关键澄清</h3>
+                <p><span class="mono">new-project</span> 和 <span class="mono">new-milestone</span> 不是串联步骤，而是不同轮次的入口。首次建项走 <span class="mono">new-project</span>，只有当前 milestone 完成后，下一轮才进入 <span class="mono">new-milestone</span>。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="section" id="init-workflows">
+            <span class="eyebrow">3. Init vs Re-init</span>
+            <h2><span class="mono">new-project</span> 与 <span class="mono">new-milestone</span></h2>
+            <p class="lede">
+              这两个命令共享一条骨架：收集目标、研究、requirements、roadmap、state 更新。但语义不同。一个是首次建项，一个是已有项目进入下一轮。
+            </p>
+
+            <figure class="figure">
+              <svg viewBox="0 0 1120 460" aria-label="new project vs new milestone">
+                <rect x="40" y="34" width="490" height="390" rx="28" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="76" y="74" font-size="28" font-weight="700" fill="#2f2a22">new-project</text>
+                <text x="76" y="102" font-size="18" fill="#5b655f">greenfield init / 也支持接入已有代码的 brownfield onboarding</text>
+                <text x="76" y="148" font-size="20" fill="#18473d">1. init.new-project</text>
+                <text x="76" y="178" font-size="17" fill="#5b655f">检测 git、existing code、是否需要先 map-codebase</text>
+                <text x="76" y="220" font-size="20" fill="#18473d">2. deep questioning</text>
+                <text x="76" y="250" font-size="17" fill="#5b655f">“What do you want to build?” 持续追问到足以写 PROJECT.md</text>
+                <text x="76" y="292" font-size="20" fill="#18473d">3. project research</text>
+                <text x="76" y="322" font-size="17" fill="#5b655f">并行起 researcher（stack / features / architecture / pitfalls）</text>
+                <text x="76" y="364" font-size="20" fill="#18473d">4. requirements → roadmap</text>
+                <text x="76" y="394" font-size="17" fill="#5b655f">写 PROJECT / REQUIREMENTS / ROADMAP / STATE / config</text>
+
+                <rect x="590" y="34" width="490" height="390" rx="28" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="626" y="74" font-size="28" font-weight="700" fill="#2f2a22">new-milestone</text>
+                <text x="626" y="102" font-size="18" fill="#5b655f">brownfield re-init / 基于已有历史重新进入 requirements-roadmap 循环</text>
+                <text x="626" y="148" font-size="20" fill="#8c3d1e">1. 先读历史状态</text>
+                <text x="626" y="178" font-size="17" fill="#5b655f">PROJECT / MILESTONES / STATE / MILESTONE-CONTEXT</text>
+                <text x="626" y="220" font-size="20" fill="#8c3d1e">2. scan seeds + versioning</text>
+                <text x="626" y="250" font-size="17" fill="#5b655f">把种下的未来想法重新 surface，确认本轮 milestone summary</text>
+                <text x="626" y="292" font-size="20" fill="#8c3d1e">3. 更新 PROJECT / STATE</text>
+                <text x="626" y="322" font-size="17" fill="#5b655f">显式切换到“下一轮定义中”，并清理或归档旧 phase 目录</text>
+                <text x="626" y="364" font-size="20" fill="#8c3d1e">4. 再做 requirements → roadmap</text>
+                <text x="626" y="394" font-size="17" fill="#5b655f">必要时支持 --reset-phase-numbers 和新一轮 project research</text>
+              </svg>
+              <figcaption>
+                <span class="mono">new-milestone</span> 不是“改一下 ROADMAP.md”。它是一个 milestone 级状态迁移工作流。
+              </figcaption>
+            </figure>
+
+            <div class="callout">
+              最实用的理解方式：<strong>new-project 负责把一个想法变成项目；new-milestone 负责把一个已有项目重新变成“下一轮可规划的项目”。</strong>
+            </div>
+          </section>
+
+          <section class="section" id="discuss-phase-deep">
+            <span class="eyebrow">4. Decision Capture</span>
+            <h2><span class="mono">discuss-phase</span> 为什么是规划质量分水岭</h2>
+            <p class="lede">
+              这里是上一版最欠缺的部分。<span class="mono">discuss-phase</span> 不是“前置聊聊天”，而是把产品意图转成后续 research / planner 能直接消费的 locked decisions。
+            </p>
+
+            <figure class="figure">
+              <svg viewBox="0 0 1120 470" aria-label="discuss phase modes">
+                <defs>
+                  <marker id="arrowG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#c95f36"></path>
+                  </marker>
+                </defs>
+
+                <rect x="42" y="42" width="220" height="88" rx="24" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="152" y="78" text-anchor="middle" font-size="24" font-weight="700" fill="#26418f">init.phase-op</text>
+                <text x="152" y="104" text-anchor="middle" font-size="16" fill="#26418f">phase 快照 + 现有 context/plans</text>
+
+                <rect x="310" y="42" width="250" height="88" rx="24" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="435" y="78" text-anchor="middle" font-size="24" font-weight="700" fill="#3a342b">load prior context</text>
+                <text x="435" y="104" text-anchor="middle" font-size="16" fill="#3a342b">PROJECT / REQUIREMENTS / STATE / prior CONTEXT</text>
+
+                <rect x="608" y="42" width="230" height="88" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="723" y="78" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">gray area analysis</text>
+                <text x="723" y="104" text-anchor="middle" font-size="16" fill="#18473d">识别哪些选择会改变结果</text>
+
+                <rect x="886" y="42" width="192" height="88" rx="24" fill="#fff4e7" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="982" y="78" text-anchor="middle" font-size="24" font-weight="700" fill="#8c3d1e">write CONTEXT.md</text>
+                <text x="982" y="104" text-anchor="middle" font-size="16" fill="#8c3d1e">给 researcher / planner 用</text>
+
+                <rect x="94" y="226" width="260" height="156" rx="24" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="224" y="262" text-anchor="middle" font-size="24" font-weight="700" fill="#2f2a22">标准 discuss 模式</text>
+                <text x="224" y="290" text-anchor="middle" font-size="17" fill="#5b655f">用户选择 gray areas</text>
+                <text x="224" y="316" text-anchor="middle" font-size="17" fill="#5b655f">逐块深挖直到满意</text>
+                <text x="224" y="342" text-anchor="middle" font-size="17" fill="#5b655f">拦截 scope creep</text>
+                <text x="224" y="368" text-anchor="middle" font-size="17" fill="#5b655f">沉淀 decisions / deferred ideas</text>
+
+                <rect x="430" y="226" width="260" height="156" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="560" y="262" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">assumptions 模式</text>
+                <text x="560" y="290" text-anchor="middle" font-size="17" fill="#18473d">先读代码，再形成假设</text>
+                <text x="560" y="316" text-anchor="middle" font-size="17" fill="#18473d">gsd-assumptions-analyzer 深挖</text>
+                <text x="560" y="342" text-anchor="middle" font-size="17" fill="#18473d">只让用户纠正不对的地方</text>
+
+                <rect x="766" y="226" width="260" height="156" rx="24" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="896" y="262" text-anchor="middle" font-size="24" font-weight="700" fill="#26418f">power 模式</text>
+                <text x="896" y="290" text-anchor="middle" font-size="17" fill="#26418f">一次生成 QUESTIONS.json + HTML</text>
+                <text x="896" y="316" text-anchor="middle" font-size="17" fill="#26418f">异步答题，refresh / finalize</text>
+                <text x="896" y="342" text-anchor="middle" font-size="17" fill="#26418f">适合灰区很多的大 phase</text>
+
+                <path d="M 262 86 H 310" stroke="#c95f36" stroke-width="4" marker-end="url(#arrowG)"></path>
+                <path d="M 560 86 H 608" stroke="#c95f36" stroke-width="4" marker-end="url(#arrowG)"></path>
+                <path d="M 838 86 H 886" stroke="#c95f36" stroke-width="4" marker-end="url(#arrowG)"></path>
+                <path d="M 723 130 V 184 H 224 V 226" stroke="#c95f36" stroke-width="4" fill="none" marker-end="url(#arrowG)"></path>
+                <path d="M 723 130 V 184 H 560 V 226" stroke="#c95f36" stroke-width="4" fill="none" marker-end="url(#arrowG)"></path>
+                <path d="M 723 130 V 184 H 896 V 226" stroke="#c95f36" stroke-width="4" fill="none" marker-end="url(#arrowG)"></path>
+              </svg>
+              <figcaption>
+                <span class="mono">discuss-phase</span> 是一个多模式系统，不只是一个“问几个问题”的命令。它的真正作用是产出后续规划用的高价值 <span class="mono">CONTEXT.md</span>。
+              </figcaption>
+            </figure>
+
+            <div class="card-grid">
+              <article class="card">
+                <h3>为什么它会直接影响 planning 质量</h3>
+                <p>因为 planner 会同时读取 ROADMAP、REQUIREMENTS、RESEARCH、CONTEXT。少了 CONTEXT，planner 只能用默认判断；有了 CONTEXT，locked decisions 会直接进入 plan 约束。</p>
+              </article>
+              <article class="card">
+                <h3>怎么理解 --all / --auto / --chain</h3>
+                <p>别把它们当参数表。它们本质上是在重新分配控制权：是先自动选灰区、自动选答案，还是只在 discuss 后自动接 plan/execute。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="section" id="plan-phase">
+            <span class="eyebrow">5. Planning Chain</span>
+            <h2>图解 <span class="mono">/gsd-plan-phase 1</span></h2>
+            <p class="lede">
+              这条链最能说明 GSD 的核心设计：命令层只做入口，workflow 做调度，planner / checker 才是真正的专业角色。
+            </p>
+
+            <figure class="figure">
+              <svg viewBox="0 0 1120 370" aria-label="plan phase flow">
+                <defs>
+                  <marker id="arrowC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#0c6b58"></path>
+                  </marker>
+                </defs>
+
+                <rect x="36" y="112" width="150" height="90" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="111" y="146" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">命令</text>
+                <text x="111" y="174" text-anchor="middle" font-size="18" fill="#18473d">plan-phase.md</text>
+
+                <rect x="226" y="112" width="190" height="90" rx="24" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="321" y="146" text-anchor="middle" font-size="24" font-weight="700" fill="#3a342b">workflow</text>
+                <text x="321" y="174" text-anchor="middle" font-size="18" fill="#3a342b">workflows/plan-phase.md</text>
+
+                <rect x="456" y="42" width="210" height="88" rx="24" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="561" y="76" text-anchor="middle" font-size="24" font-weight="700" fill="#26418f">init.plan-phase</text>
+                <text x="561" y="102" text-anchor="middle" font-size="17" fill="#26418f">一次返回 phase/config/file 快照</text>
+
+                <rect x="456" y="154" width="210" height="88" rx="24" fill="#f9e2d9" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="561" y="188" text-anchor="middle" font-size="24" font-weight="700" fill="#8c3d1e">gsd-phase-researcher</text>
+                <text x="561" y="214" text-anchor="middle" font-size="17" fill="#8c3d1e">可选，负责领域研究</text>
+
+                <rect x="706" y="70" width="180" height="88" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="796" y="104" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">gsd-planner</text>
+                <text x="796" y="130" text-anchor="middle" font-size="17" fill="#18473d">生成多个 PLAN.md</text>
+
+                <rect x="926" y="70" width="160" height="88" rx="24" fill="#fff4e7" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="1006" y="104" text-anchor="middle" font-size="24" font-weight="700" fill="#8c3d1e">gsd-plan-checker</text>
+                <text x="1006" y="130" text-anchor="middle" font-size="17" fill="#8c3d1e">不通过就回 revision loop</text>
+
+                <rect x="706" y="206" width="380" height="98" rx="24" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="896" y="240" text-anchor="middle" font-size="24" font-weight="700" fill="#3a342b">Phase Artifacts</text>
+                <text x="896" y="268" text-anchor="middle" font-size="18" fill="#3a342b">01-CONTEXT.md / 01-RESEARCH.md / 01-01-PLAN.md / 01-02-PLAN.md</text>
+
+                <path d="M 186 158 H 226" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowC)"></path>
+                <path d="M 416 158 H 456" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowC)"></path>
+                <path d="M 666 86 H 706" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowC)"></path>
+                <path d="M 666 198 H 706" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowC)"></path>
+                <path d="M 886 114 H 926" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowC)"></path>
+                <path d="M 1006 158 V 182 H 796 V 158" stroke="#0c6b58" stroke-width="4" fill="none" marker-end="url(#arrowC)"></path>
+                <path d="M 796 158 V 206" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowC)"></path>
+              </svg>
+              <figcaption>
+                核心认识：<strong>workflow 自己不规划，它负责把正确上下文送进正确角色，再把结果收回来。</strong>
+              </figcaption>
+            </figure>
+
+            <div class="steps">
+              <div class="step">
+                <div class="num">1</div>
+                <div>
+                  <strong>命令文件只是入口壳</strong><br>
+                  <span class="mono">commands/gsd/plan-phase.md</span> 主要做三件事：声明工具、说明目标、把执行上下文指向 <span class="mono">workflows/plan-phase.md</span>。
+                </div>
+              </div>
+              <div class="step">
+                <div class="num">2</div>
+                <div>
+                  <strong>workflow 先拉状态，不先拍脑袋</strong><br>
+                  通过 <span class="mono">gsd-sdk query init.plan-phase</span> 一次拿齐 phase 目录、模型、开关、现有工件、文件路径，再决定接下来分支。
+                </div>
+              </div>
+              <div class="step">
+                <div class="num">3</div>
+                <div>
+                  <strong>planner 和 checker 职责彻底分离</strong><br>
+                  planner 只负责把 phase 拆成可执行 PLAN，checker 只负责验证计划是否覆盖目标并能执行。
+                </div>
+              </div>
+            </div>
+
+            <div class="callout">
+              上面这张图只解决“谁调谁”。如果你要真正读透 <span class="mono">/gsd-plan-phase</span>，必须继续往下看
+              <span class="mono">workflows/plan-phase.md</span> 的 step 级逻辑，因为真正复杂的是 gate、revision loop 和状态写盘。
+            </div>
+
+            <div class="stack" style="margin-top: 16px;">
+              <div class="stack-item">
+                <div class="label">Step 0-3</div>
+                <div>
+                  <strong>初始化与参数规范化</strong><br>
+                  先声明 planning 阶段不切分支，然后调用 <span class="mono">init.plan-phase</span> 一次取回 phase / config / file-path 快照。接着解析
+                  <span class="mono">--research</span>、<span class="mono">--skip-research</span>、<span class="mono">--gaps</span>、<span class="mono">--prd</span>、
+                  <span class="mono">--reviews</span> 等参数；如果 roadmap 里有 phase 但磁盘目录还没建，会在这里补齐。随后再校验
+                  <span class="mono">--reviews</span> 前置条件和 roadmap phase 是否存在。
+                </div>
+              </div>
+
+              <div class="stack-item">
+                <div class="label">Step 3.5-5.7</div>
+                <div>
+                  <strong>planning 前置 gate</strong><br>
+                  这里不是直接起 planner，而是连续过门：<span class="mono">--prd</span> 可以直接把 PRD 转成
+                  <span class="mono">CONTEXT.md</span>；没有 <span class="mono">CONTEXT.md</span> 会提示先跑 discuss；AI 相关 phase 会检查
+                  <span class="mono">AI-SPEC.md</span>；research 根据现有 <span class="mono">RESEARCH.md</span> 和 flags 决定是否复用；然后还有
+                  Nyquist、security threat model、UI-SPEC、schema push 这些专门 gate。
+                </div>
+              </div>
+
+              <div class="stack-item">
+                <div class="label">Step 6-8</div>
+                <div>
+                  <strong>真正生成 PLAN 之前的上下文编排</strong><br>
+                  如果已经有旧的 <span class="mono">PLAN.md</span>，workflow 会分流到追加 / 查看 / 重规划。之后把
+                  <span class="mono">STATE.md</span>、<span class="mono">ROADMAP.md</span>、<span class="mono">REQUIREMENTS.md</span>、
+                  <span class="mono">CONTEXT.md</span>、<span class="mono">RESEARCH.md</span>、<span class="mono">REVIEWS.md</span>、
+                  <span class="mono">UI-SPEC.md</span> 等路径展开给 planner；如果没 <span class="mono">PATTERNS.md</span>，还会先起
+                  <span class="mono">gsd-pattern-mapper</span> 去找代码库里的现成模式。
+                </div>
+              </div>
+
+              <div class="stack-item">
+                <div class="label">Step 8</div>
+                <div>
+                  <strong>planner 不是自由发挥，而是重约束生成</strong><br>
+                  <span class="mono">gsd-planner</span> 拿到的不只是 phase 描述，而是完整输入包和一整套输出合同：每个 task 必须有
+                  <span class="mono">&lt;read_first&gt;</span>、<span class="mono">&lt;acceptance_criteria&gt;</span>、
+                  具体值写死的 <span class="mono">&lt;action&gt;</span>，frontmatter 里还必须带
+                  <span class="mono">wave</span>、<span class="mono">depends_on</span>、<span class="mono">files_modified</span>、
+                  <span class="mono">autonomous</span>。这一步本质上是在为 execute-phase 生产机器可消费的 plan。
+                </div>
+              </div>
+
+              <div class="stack-item">
+                <div class="label">Step 9-12.5</div>
+                <div>
+                  <strong>planner 返回后还有质量回路</strong><br>
+                  planner 不只会返回 <span class="mono">PLANNING COMPLETE</span>，也可能返回 phase split 建议、source audit gaps、
+                  checkpoint 或 inconclusive。之后 <span class="mono">gsd-plan-checker</span> 会验证 coverage 和可执行性；如果失败，
+                  workflow 会把 checker 的结构化问题回喂给 planner，最多跑 3 轮 revision loop。可选的 bounce 步骤还会把 plan 送去外部脚本 refinement，
+                  但必须再次过 frontmatter 校验和 checker。
+                </div>
+              </div>
+
+              <div class="stack-item">
+                <div class="label">Step 13-15</div>
+                <div>
+                  <strong>收尾、写盘、自动推进</strong><br>
+                  plans 通过后，还要再做 requirements coverage gate，确认 REQ-ID 和 CONTEXT 决策都被覆盖。然后更新
+                  <span class="mono">STATE.md</span>、给 <span class="mono">ROADMAP.md</span> 标注 wave / cross-cutting constraints，
+                  按配置提交 docs。若命中了 <span class="mono">--auto</span> / <span class="mono">--chain</span> / <span class="mono">auto_advance</span>，
+                  workflow 还会直接跳进 <span class="mono">gsd-execute-phase</span>。
+                </div>
+              </div>
+            </div>
+
+            <pre>/gsd-plan-phase 1
+  → commands/gsd/plan-phase.md
+  → workflows/plan-phase.md
+  → gsd-sdk query init.plan-phase 1
+  → Task(subagent_type="gsd-planner", ...)
+  → Task(subagent_type="gsd-plan-checker", ...)
+  → .planning/phases/01-*/01-01-PLAN.md</pre>
+          </section>
+
+          <section class="section" id="execute-phase">
+            <span class="eyebrow">6. Execution Chain</span>
+            <h2>图解 <span class="mono">/gsd-execute-phase 1</span></h2>
+            <p class="lede">
+              执行阶段最像一个调度系统。它不直接写代码，而是用 <span class="mono">phase-plan-index</span> 发现哪些 plan 未完成、它们属于哪一 wave，再把每个 plan 发给 executor。
+            </p>
+
+            <figure class="figure">
+              <svg viewBox="0 0 1120 430" aria-label="execute phase waves">
+                <defs>
+                  <marker id="arrowD" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b5cc9"></path>
+                  </marker>
+                </defs>
+
+                <rect x="40" y="34" width="250" height="88" rx="24" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="165" y="68" text-anchor="middle" font-size="24" font-weight="700" fill="#26418f">init.execute-phase</text>
+                <text x="165" y="94" text-anchor="middle" font-size="18" fill="#26418f">phase/config/parallelization 快照</text>
+
+                <rect x="330" y="34" width="250" height="88" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="455" y="68" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">phase-plan-index</text>
+                <text x="455" y="94" text-anchor="middle" font-size="18" fill="#18473d">按 wave 分组，过滤 has_summary</text>
+
+                <rect x="620" y="34" width="460" height="88" rx="24" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="850" y="68" text-anchor="middle" font-size="24" font-weight="700" fill="#3a342b">orchestrator: discover → group → spawn → collect</text>
+                <text x="850" y="94" text-anchor="middle" font-size="18" fill="#3a342b">并行只发生在同 wave 内，跨 wave 永远顺序</text>
+
+                <rect x="86" y="190" width="230" height="152" rx="24" fill="#fff4e7" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="201" y="226" text-anchor="middle" font-size="24" font-weight="700" fill="#8c3d1e">Wave 1</text>
+                <text x="201" y="258" text-anchor="middle" font-size="18" fill="#8c3d1e">01-01 PLAN</text>
+                <text x="201" y="286" text-anchor="middle" font-size="18" fill="#8c3d1e">01-02 PLAN</text>
+                <text x="201" y="322" text-anchor="middle" font-size="16" fill="#8c3d1e">可并行：两个 gsd-executor</text>
+
+                <rect x="446" y="190" width="230" height="152" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="561" y="226" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">Wave 2</text>
+                <text x="561" y="258" text-anchor="middle" font-size="18" fill="#18473d">01-03 PLAN</text>
+                <text x="561" y="286" text-anchor="middle" font-size="18" fill="#18473d">等待 Wave 1 完成后执行</text>
+                <text x="561" y="322" text-anchor="middle" font-size="16" fill="#18473d">继续写 SUMMARY / commit</text>
+
+                <rect x="806" y="190" width="230" height="152" rx="24" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="921" y="226" text-anchor="middle" font-size="24" font-weight="700" fill="#26418f">Wave 3</text>
+                <text x="921" y="258" text-anchor="middle" font-size="18" fill="#26418f">Verifier / completion</text>
+                <text x="921" y="286" text-anchor="middle" font-size="18" fill="#26418f">01-VERIFICATION.md</text>
+                <text x="921" y="322" text-anchor="middle" font-size="16" fill="#26418f">判断 phase 是否真正完成</text>
+
+                <path d="M 290 78 H 330" stroke="#3b5cc9" stroke-width="4" marker-end="url(#arrowD)"></path>
+                <path d="M 580 78 H 620" stroke="#3b5cc9" stroke-width="4" marker-end="url(#arrowD)"></path>
+                <path d="M 316 266 H 446" stroke="#3b5cc9" stroke-width="4" marker-end="url(#arrowD)"></path>
+                <path d="M 676 266 H 806" stroke="#3b5cc9" stroke-width="4" marker-end="url(#arrowD)"></path>
+              </svg>
+              <figcaption>
+                Wave 的意义不是好看，而是为了把 AI 子任务调度成一个可并行、可恢复、可验证的 DAG。
+              </figcaption>
+            </figure>
+
+            <div class="card-grid">
+              <article class="card">
+                <h3>为什么必须有 phase-plan-index</h3>
+                <p>因为执行阶段首先要知道“哪些 plan 已完成、哪些未完成、哪些可以并行”。这个查询把文件系统事实整理成 workflow 可消费的 JSON。</p>
+              </article>
+              <article class="card">
+                <h3>executor 真正负责什么</h3>
+                <p>读单个 PLAN、逐 task 实现、跑验证、按 task commit、写 SUMMARY。它是实施工，不是调度器。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="section" id="state-layer">
+            <span class="eyebrow">7. File Database</span>
+            <h2><span class="mono">.planning/</span> 是文件型数据库</h2>
+            <p class="lede">
+              这层不是附带文档。它就是 GSD 的状态存储。Claude 读它，人也读它，git 也能追踪它。
+            </p>
+
+            <figure class="figure">
+              <svg viewBox="0 0 1120 470" aria-label="planning directory map">
+                <rect x="42" y="36" width="1036" height="398" rx="28" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="78" y="78" font-size="30" font-weight="700" fill="#2f2a22">.planning/</text>
+                <text x="78" y="108" font-size="18" fill="#5b655f">这是状态树，不是附件堆</text>
+
+                <rect x="78" y="146" width="220" height="68" rx="18" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="188" y="174" text-anchor="middle" font-size="22" font-weight="700" fill="#18473d">PROJECT.md</text>
+                <text x="188" y="196" text-anchor="middle" font-size="16" fill="#18473d">项目目标与边界</text>
+
+                <rect x="326" y="146" width="220" height="68" rx="18" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="436" y="174" text-anchor="middle" font-size="22" font-weight="700" fill="#26418f">REQUIREMENTS.md</text>
+                <text x="436" y="196" text-anchor="middle" font-size="16" fill="#26418f">REQ-ID 和范围</text>
+
+                <rect x="574" y="146" width="220" height="68" rx="18" fill="#fff4e7" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="684" y="174" text-anchor="middle" font-size="22" font-weight="700" fill="#8c3d1e">ROADMAP.md</text>
+                <text x="684" y="196" text-anchor="middle" font-size="16" fill="#8c3d1e">phase 分解与映射</text>
+
+                <rect x="822" y="146" width="220" height="68" rx="18" fill="#f2f4ea" stroke="#819064" stroke-width="2"></rect>
+                <text x="932" y="174" text-anchor="middle" font-size="22" font-weight="700" fill="#53613e">STATE.md</text>
+                <text x="932" y="196" text-anchor="middle" font-size="16" fill="#53613e">当前做到哪里了</text>
+
+                <rect x="78" y="250" width="250" height="132" rx="22" fill="#fff" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="98" y="284" font-size="24" font-weight="700" fill="#2f2a22">config.json</text>
+                <text x="98" y="312" font-size="17" fill="#5b655f">mode / workflow / hooks / parallelization</text>
+                <text x="98" y="338" font-size="17" fill="#5b655f">这里定义“这套系统怎么跑”</text>
+
+                <rect x="360" y="250" width="682" height="132" rx="22" fill="#fff" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="388" y="284" font-size="24" font-weight="700" fill="#2f2a22">phases/01-foo/</text>
+                <text x="388" y="314" font-size="18" fill="#5b655f">01-CONTEXT.md → 你想怎么做</text>
+                <text x="388" y="340" font-size="18" fill="#5b655f">01-RESEARCH.md → 外部知识和实现路线</text>
+                <text x="388" y="366" font-size="18" fill="#5b655f">01-01-PLAN.md / 01-01-SUMMARY.md / 01-VERIFICATION.md / 01-UAT.md</text>
+              </svg>
+              <figcaption>
+                一旦你接受“.planning 是数据库”这个心智模型，GSD 里很多看似“文档操作”的逻辑就会突然变得合理。
+              </figcaption>
+            </figure>
+
+            <div class="stack">
+              <div class="stack-item">
+                <div class="label">PROJECT.md</div>
+                <div>回答“这个项目是什么”。这是最上层的产品语义。</div>
+              </div>
+              <div class="stack-item">
+                <div class="label">ROADMAP.md</div>
+                <div>回答“它分成哪些 phase 来做”。是规划层的主轴。</div>
+              </div>
+              <div class="stack-item">
+                <div class="label">STATE.md</div>
+                <div>回答“当前做到哪里、最近发生了什么、接下来该做什么”。是会话恢复的核心。</div>
+              </div>
+              <div class="stack-item">
+                <div class="label">phases/*</div>
+                <div>记录某个 phase 从 context 到 research 到 plan 到 execute 到 verify 的完整生命周期。</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section" id="hooks">
+            <span class="eyebrow">8. Guard Rails</span>
+            <h2>Hook 护栏系统</h2>
+            <p class="lede">
+              Claude Code 集成真正变强，不只是因为命令多，而是因为 GSD 把自己挂进了 <span class="mono">settings.json</span> 的生命周期事件里。
+            </p>
+
+            <figure class="figure">
+              <svg viewBox="0 0 1120 360" aria-label="hook lifecycle">
+                <defs>
+                  <marker id="arrowE" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#0c6b58"></path>
+                  </marker>
+                </defs>
+
+                <rect x="46" y="126" width="180" height="86" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="136" y="162" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">SessionStart</text>
+                <text x="136" y="188" text-anchor="middle" font-size="16" fill="#18473d">check-update / session-state</text>
+
+                <rect x="278" y="58" width="210" height="86" rx="24" fill="#fff4e7" stroke="#c95f36" stroke-width="2"></rect>
+                <text x="383" y="94" text-anchor="middle" font-size="24" font-weight="700" fill="#8c3d1e">PreToolUse</text>
+                <text x="383" y="120" text-anchor="middle" font-size="16" fill="#8c3d1e">prompt-guard / read-guard</text>
+
+                <rect x="278" y="204" width="210" height="86" rx="24" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
+                <text x="383" y="240" text-anchor="middle" font-size="24" font-weight="700" fill="#26418f">PostToolUse</text>
+                <text x="383" y="266" text-anchor="middle" font-size="16" fill="#26418f">context-monitor / read scanner</text>
+
+                <rect x="540" y="126" width="240" height="86" rx="24" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
+                <text x="660" y="162" text-anchor="middle" font-size="24" font-weight="700" fill="#3a342b">statusLine bridge</text>
+                <text x="660" y="188" text-anchor="middle" font-size="16" fill="#3a342b">写上下文指标，供 monitor 读取</text>
+
+                <rect x="832" y="126" width="242" height="86" rx="24" fill="#d7efe8" stroke="#0c6b58" stroke-width="2"></rect>
+                <text x="953" y="162" text-anchor="middle" font-size="24" font-weight="700" fill="#18473d">additionalContext</text>
+                <text x="953" y="188" text-anchor="middle" font-size="16" fill="#18473d">把警告重新注入给 agent</text>
+
+                <path d="M 226 169 H 278" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowE)"></path>
+                <path d="M 488 101 H 540" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowE)"></path>
+                <path d="M 488 247 H 540" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowE)"></path>
+                <path d="M 780 169 H 832" stroke="#0c6b58" stroke-width="4" marker-end="url(#arrowE)"></path>
+              </svg>
+              <figcaption>
+                GSD 的 hook 不是噱头。它们的作用是把“状态感知”和“安全预警”直接嵌进 Claude Code 的运行生命周期。
+              </figcaption>
+            </figure>
+
+            <div class="card-grid">
+              <article class="card">
+                <h3>gsd-context-monitor.js</h3>
+                <p>读取 statusline 产出的上下文指标，低于阈值时用 <span class="mono">additionalContext</span> 提醒 agent “别再开新大活了”。</p>
+              </article>
+              <article class="card">
+                <h3>gsd-prompt-guard.js</h3>
+                <p>在写入 <span class="mono">.planning/</span> 前扫描 prompt injection 模式，作为 advisory-only 预警，不强行阻断流程。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="section" id="sdk">
+            <span class="eyebrow">9. Programmatic Core</span>
+            <h2>SDK / Query / Runner 这一层在干什么</h2>
+            <p class="lede">
+              当你看到 workflow 里反复出现 <span class="mono">gsd-sdk query ...</span>，本质上是在调用一层面向 orchestration 的 API，而不是直接读文件。
+            </p>
+
+            <div class="stack">
+              <div class="stack-item">
+                <div class="label">sdk/src/query/index.ts</div>
+                <div>注册大量 query handler。这里像一个内部 API 注册表，负责 state、phase、roadmap、init、commit 等操作。</div>
+              </div>
+              <div class="stack-item">
+                <div class="label">sdk/src/query/init.ts</div>
+                <div>最关键的一层。把多个底层查询组合成 <span class="mono">init.plan-phase</span>、<span class="mono">init.execute-phase</span> 这种“启动快照”。</div>
+              </div>
+              <div class="stack-item">
+                <div class="label">sdk/src/gsd-tools.ts</div>
+                <div>工具桥。上层 runner 不必关心当前命令是走 SDK registry 还是 fallback 到 legacy CJS。</div>
+              </div>
+              <div class="stack-item">
+                <div class="label">sdk/src/phase-runner.ts</div>
+                <div>把 discuss → research → plan → execute → verify 这条生命周期程序化成显式状态机。</div>
+              </div>
+            </div>
+
+            <div class="callout">
+              一句话总结：<strong>workflow 是 prompt 级 orchestrator，runner 是代码级 orchestrator，query 层是两者共享的数据接口。</strong>
+            </div>
+          </section>
+
+          <section class="section" id="reading-order">
+            <span class="eyebrow">10. Study Path</span>
+            <h2>建议的源码阅读顺序</h2>
+            <p class="lede">
+              如果你的目标是从“会用 GSD”升级到“能改 GSD”，最有效的是按一条功能链逐层下钻，而不是随机翻目录。
+            </p>
+
+            <div class="card-grid">
+              <article class="card">
+                <h3>第一轮：看大图</h3>
+                <ul>
+                  <li><span class="mono">README.md</span></li>
+                  <li><span class="mono">docs/ARCHITECTURE.md</span></li>
+                  <li><span class="mono">docs/COMMANDS.md</span></li>
+                  <li><span class="mono">docs/AGENTS.md</span></li>
+                </ul>
+              </article>
+              <article class="card">
+                <h3>第二轮：先追初始化和 discuss</h3>
+                <ul>
+                  <li><span class="mono">commands/gsd/new-project.md</span></li>
+                  <li><span class="mono">workflows/new-project.md</span></li>
+                  <li><span class="mono">commands/gsd/new-milestone.md</span></li>
+                  <li><span class="mono">workflows/new-milestone.md</span></li>
+                  <li><span class="mono">commands/gsd/discuss-phase.md</span></li>
+                  <li><span class="mono">workflows/discuss-phase.md</span></li>
+                </ul>
+              </article>
+              <article class="card">
+                <h3>第三轮：再追 planning</h3>
+                <ul>
+                  <li><span class="mono">commands/gsd/plan-phase.md</span></li>
+                  <li><span class="mono">workflows/plan-phase.md</span></li>
+                  <li><span class="mono">agents/gsd-planner.md</span></li>
+                  <li><span class="mono">sdk/src/query/init.ts</span></li>
+                </ul>
+              </article>
+              <article class="card">
+                <h3>第四轮：只追 execution</h3>
+                <ul>
+                  <li><span class="mono">commands/gsd/execute-phase.md</span></li>
+                  <li><span class="mono">workflows/execute-phase.md</span></li>
+                  <li><span class="mono">agents/gsd-executor.md</span></li>
+                  <li><span class="mono">sdk/src/query/phase.ts</span></li>
+                </ul>
+              </article>
+              <article class="card">
+                <h3>第五轮：看 Claude Code 集成</h3>
+                <ul>
+                  <li><span class="mono">bin/install.js</span></li>
+                  <li><span class="mono">hooks/gsd-context-monitor.js</span></li>
+                  <li><span class="mono">hooks/gsd-prompt-guard.js</span></li>
+                  <li><span class="mono">templates/claude-md.md</span></li>
+                </ul>
+              </article>
+            </div>
+
+            <p class="footer-note">
+              如果你更喜欢先看完整文字版，再回来对照这些图，请直接打开
+              <a href="CLAUDE-CODE-DEEP-DIVE.md">CLAUDE-CODE-DEEP-DIVE.md</a>。
+            </p>
+          </section>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
