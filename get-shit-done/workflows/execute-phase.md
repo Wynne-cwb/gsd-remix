@@ -1392,6 +1392,45 @@ Also: `/gsd-verify-work {X} ${GSD_WS}` — manual testing first
 Gap closure cycle: `/gsd-plan-phase {X} --gaps ${GSD_WS}` reads VERIFICATION.md → creates gap plans with `gap_closure: true` → user runs `/gsd-execute-phase {X} --gaps-only ${GSD_WS}` → verifier re-runs.
 </step>
 
+<step name="capture_failure_memory">
+**Persist failure signals for future self-evolution memory.**
+
+This step is non-blocking and should run immediately after verification writes its artifacts.
+
+```bash
+gsd-sdk query failure.capture-phase "${PHASE_NUMBER}" 2>/dev/null || echo '{"captured":0}'
+```
+
+This captures:
+- `SUMMARY.md` execution issues
+- `SUMMARY.md` self-check failures
+- `VERIFICATION.md` non-passed outcomes
+- `.continue-here.md` blocking anti-patterns
+
+**If capture fails:** Ignore the error and continue. Failure-memory logging must never block phase execution.
+</step>
+
+<step name="promote_failure_memory">
+**Compile captured failure events into longer-lived memory artifacts.**
+
+This step is also non-blocking and should run after `capture_failure_memory`.
+
+```bash
+gsd-sdk query failure.promote-phase "${PHASE_NUMBER}" 2>/dev/null || echo '{"entries":0}'
+```
+
+This rebuilds:
+- `.planning/failure-memory/index.json`
+- `.planning/FAILURE-MEMORY.md`
+- `.planning/failure-memory/FM-xxx.md` detail files
+
+Promotion is conservative:
+- blocking anti-patterns promote immediately
+- other failures promote only after repeated matching evidence
+
+**If promotion fails:** Ignore the error and continue. Self-evolution indexing must never block phase execution.
+</step>
+
 <step name="update_roadmap">
 **Mark phase complete and update all tracking files:**
 

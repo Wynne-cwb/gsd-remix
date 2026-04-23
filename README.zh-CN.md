@@ -74,6 +74,7 @@ npx gsd-remix@latest
 当前已经存在的差异包括：
 - 独立以 `gsd-remix` 的 npm 包名发布，但保留 `/gsd-*` 命令面和核心 planning 布局兼容
 - 主流程的 token 优化，包括 discuss 历史摘要优先加载，以及小型 plan 的低复杂度 inline 路由
+- 通过 `.planning/failure-memory/` 增加 failure-memory 采集与晋升，把重复执行错误沉淀成项目内记忆，并编译成执行前的确定性守卫
 
 ---
 

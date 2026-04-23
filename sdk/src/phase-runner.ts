@@ -29,6 +29,7 @@ import { runPhaseStepSession, runPlanSession } from './session-runner.js';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { checkResearchGate } from './research-gate.js';
+import { recordPhaseArtifactFailureEvents, recordPlanResultFailure } from './failure-memory.js';
 
 // ─── Error type ──────────────────────────────────────────────────────────────
 
@@ -298,6 +299,8 @@ export class PhaseRunner {
       totalDurationMs,
       stepsCompleted: steps.length,
     });
+
+    await this.recordFailureSignals(phaseNumber, phaseName, phaseOp.phase_dir, steps);
 
     return {
       phaseNumber,
@@ -1159,6 +1162,42 @@ export class PhaseRunner {
     } catch (err) {
       this.logger?.warn(`Verification callback threw, auto-accepting: ${err instanceof Error ? err.message : String(err)}`);
       return 'accept'; // Auto-approve on error
+    }
+  }
+
+  private async recordFailureSignals(
+    phaseNumber: string,
+    phaseName: string,
+    phaseDir: string,
+    steps: PhaseStepResult[],
+  ): Promise<void> {
+    try {
+      for (const step of steps) {
+        for (const result of step.planResults ?? []) {
+          if (!result.success) {
+            await recordPlanResultFailure(
+              this.projectDir,
+              {
+                phaseNumber,
+                phaseName,
+                phaseDir,
+                step: step.step,
+              },
+              result,
+            );
+          }
+        }
+      }
+
+      await recordPhaseArtifactFailureEvents(this.projectDir, {
+        phaseNumber,
+        phaseName,
+        phaseDir,
+      });
+    } catch (err) {
+      this.logger?.warn(
+        `Failure memory capture failed for phase ${phaseNumber}: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 }

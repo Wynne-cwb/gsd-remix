@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, rm, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { PhaseRunner, PhaseRunnerError } from './phase-runner.js';
@@ -361,6 +361,53 @@ describe('PhaseRunner', () => {
       expect(executeStep!.planResults![0].success).toBe(true);
       expect(executeStep!.planResults![1].success).toBe(false);
       expect(executeStep!.success).toBe(false); // overall execute step fails
+    });
+
+    it('persists execute failures into failure-memory events', async () => {
+      const projectDir = await mkdtemp(join(tmpdir(), 'gsd-phase-runner-failure-'));
+      const phaseDir = join(projectDir, '.planning', 'phases', '01-auth');
+      await mkdir(phaseDir, { recursive: true });
+
+      try {
+        const phaseOp = makePhaseOp({
+          has_context: true,
+          plan_count: 1,
+          phase_dir: phaseDir,
+        });
+        const config = makeConfig({ workflow: { research: false, verifier: false, skip_discuss: true, plan_check: false } as any });
+        const deps = makeDeps({ config, projectDir });
+        (deps.tools.initPhaseOp as ReturnType<typeof vi.fn>).mockResolvedValue(phaseOp);
+        (deps.tools.phasePlanIndex as ReturnType<typeof vi.fn>).mockResolvedValue(makePlanIndex(1));
+
+        mockRunPhaseStepSession.mockImplementation(async (_prompt, step) => {
+          if (step === PhaseStepType.Execute) {
+            return makePlanResult({
+              success: false,
+              error: { subtype: 'error_during_execution', messages: ['Node version mismatch'] },
+            });
+          }
+          return makePlanResult();
+        });
+
+        const runner = new PhaseRunner(deps);
+        await runner.run('1');
+
+        const eventsPath = join(projectDir, '.planning', 'failure-memory', 'events.jsonl');
+        const persisted = (await readFile(eventsPath, 'utf-8'))
+          .trim()
+          .split('\n')
+          .filter(Boolean)
+          .map(line => JSON.parse(line) as Record<string, unknown>);
+
+        expect(persisted).toHaveLength(1);
+        expect(persisted[0]).toMatchObject({
+          kind: 'session_error',
+          step: 'execute',
+          error_subtype: 'error_during_execution',
+        });
+      } finally {
+        await rm(projectDir, { recursive: true, force: true });
+      }
     });
   });
 

@@ -145,6 +145,21 @@ describe('createRegistry', () => {
     expect(registry.has('plan.execution-route')).toBe(true);
   });
 
+  it('has failure.capture-phase registered', () => {
+    const registry = createRegistry();
+    expect(registry.has('failure.capture-phase')).toBe(true);
+  });
+
+  it('has failure.preflight registered', () => {
+    const registry = createRegistry();
+    expect(registry.has('failure.preflight')).toBe(true);
+  });
+
+  it('has failure.promote-phase registered', () => {
+    const registry = createRegistry();
+    expect(registry.has('failure.promote-phase')).toBe(true);
+  });
+
   it('can dispatch generate-slug', async () => {
     const registry = createRegistry();
     const result = await registry.dispatch('generate-slug', ['My Phase'], '/tmp');

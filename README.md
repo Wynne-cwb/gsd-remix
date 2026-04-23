@@ -74,6 +74,7 @@ All remix-specific changes are tracked in [docs/REMIX-DIFFERENCES.md](docs/REMIX
 Current highlights:
 - Published independently on npm as `gsd-remix`, while keeping the `/gsd-*` command surface and core planning layout compatible
 - Token-efficiency changes in the main workflow path, including summary-first discuss history loading and low-complexity inline execution routing
+- Failure-memory event capture and promotion via `.planning/failure-memory/`, turning repeated execution mistakes into project-local memory and deterministic execute preflight checks
 
 ---
 

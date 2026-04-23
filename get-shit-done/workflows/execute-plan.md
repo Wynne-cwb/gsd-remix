@@ -29,6 +29,24 @@ Extract from init JSON: `executor_model`, `commit_docs`, `sub_repos`, `phase_dir
 If `.planning/` missing: error.
 </step>
 
+<step name="failure_memory_preflight">
+Run deterministic preflight checks compiled from promoted failure memories:
+
+```bash
+FAILURE_PREFLIGHT=$(gsd-sdk query failure.preflight 2>/dev/null || echo '{}')
+```
+
+Parse JSON for: `passed`, `checks[]`, `blockers[]`, `warnings[]`, `recommended_package_manager`, `expected_node_version`, `related_memory_ids[]`.
+
+Rules:
+- Do NOT read `FM-xxx.md` files by default. This preflight already compresses the relevant memory into short checks.
+- If `blockers[]` is non-empty: STOP before executing any task. Present the blocker exactly and wait for the user to fix the environment or explicitly override.
+- If `recommended_package_manager` is present: prefer that tool for install/test/build commands unless the plan explicitly requires something else.
+- If `warnings[]` is non-empty: treat them as short guardrails during execution; do not expand them into long historical context.
+
+This step exists to turn repeated failures into deterministic execution guards without growing prompt context.
+</step>
+
 <step name="identify_plan">
 ```bash
 # Use plans/summaries from INIT JSON, or list files

@@ -65,3 +65,27 @@ This lets the remix stay close to upstream usage patterns while still making opi
 - **Rationale:** Avoid unnecessary subagent overhead for small, low-risk plans without broadly changing upstream execution semantics
 - **Key files:** [get-shit-done/workflows/execute-plan.md](../get-shit-done/workflows/execute-plan.md), [sdk/src/query/plan-execution-route.ts](../sdk/src/query/plan-execution-route.ts)
 - **Compatibility impact:** Medium. Execution routing can differ from upstream in bounded low-complexity cases.
+
+### 2026-04-23 — Failure Memory Event Capture
+
+- **Area:** Memory / self-evolution groundwork
+- **Change:** Add failure event capture into `.planning/failure-memory/events.jsonl`
+- **Rationale:** Create a structured, machine-readable evidence trail for repeated failures before building any higher-level “self-evolution” or long-term memory promotion logic
+- **Key files:** [sdk/src/failure-memory.ts](../sdk/src/failure-memory.ts), [sdk/src/query/failure-capture.ts](../sdk/src/query/failure-capture.ts), [sdk/src/phase-runner.ts](../sdk/src/phase-runner.ts), [get-shit-done/workflows/execute-phase.md](../get-shit-done/workflows/execute-phase.md)
+- **Compatibility impact:** Low. This is additive and non-blocking; it records failures without changing success criteria.
+
+### 2026-04-23 — Failure Memory Promotion
+
+- **Area:** Memory / self-evolution behavior
+- **Change:** Promote repeated failure signatures and explicit blocking anti-patterns into `.planning/failure-memory/index.json`, `.planning/FAILURE-MEMORY.md`, and `FM-xxx.md` detail files
+- **Rationale:** Move from raw event capture to project-local, reviewable long-term memory without feeding more context back into prompts by default
+- **Key files:** [sdk/src/failure-memory.ts](../sdk/src/failure-memory.ts), [sdk/src/query/failure-capture.ts](../sdk/src/query/failure-capture.ts), [get-shit-done/workflows/execute-phase.md](../get-shit-done/workflows/execute-phase.md)
+- **Compatibility impact:** Low to medium. The remix now persists higher-level failure memory artifacts after phase execution, but this remains additive and non-blocking.
+
+### 2026-04-23 — Failure-Memory Execute Preflight
+
+- **Area:** Execute guardrails / self-evolution behavior
+- **Change:** Add `failure.preflight` and call it from `execute-plan` before task execution so promoted failure memories can compile into deterministic environment/package-manager/script/env checks
+- **Rationale:** Use past failures to prevent repeated execution mistakes without inflating prompt context or requiring the model to read long historical memory entries
+- **Key files:** [sdk/src/failure-memory.ts](../sdk/src/failure-memory.ts), [sdk/src/query/failure-capture.ts](../sdk/src/query/failure-capture.ts), [get-shit-done/workflows/execute-plan.md](../get-shit-done/workflows/execute-plan.md)
+- **Compatibility impact:** Medium. Execution may now stop earlier for strong environment mismatches that upstream would only discover during task execution.
