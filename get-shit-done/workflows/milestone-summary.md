@@ -53,7 +53,7 @@ Read all files that exist. Missing files are fine — the summary adapts to what
 Find all phase directories:
 
 ```bash
-gsd-sdk query init.progress
+gsd-remix-sdk query init.progress
 ```
 
 This returns phase metadata. For each phase in the milestone scope:
@@ -189,7 +189,7 @@ mkdir -p .planning/reports
 
 Write the summary, then commit:
 ```bash
-gsd-sdk query commit "docs(v${VERSION}): generate milestone summary for onboarding" \
+gsd-remix-sdk query commit "docs(v${VERSION}): generate milestone summary for onboarding" \
   ".planning/reports/MILESTONE_SUMMARY-v${VERSION}.md"
 ```
 
@@ -217,7 +217,7 @@ If the user is done:
 ## Step 9: Update STATE.md
 
 ```bash
-gsd-sdk query state.record-session "" \
+gsd-remix-sdk query state.record-session "" \
   "Milestone v${VERSION} summary generated" \
   ".planning/reports/MILESTONE_SUMMARY-v${VERSION}.md"
 ```

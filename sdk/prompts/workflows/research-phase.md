@@ -21,7 +21,7 @@ Check if RESEARCH.md already exists for this phase. If exists and no force-refre
 Load phase context from injected context files:
 - Context file (CONTEXT.md) — user decisions
 - Requirements file (REQUIREMENTS.md) — project requirements
-- Prefer `gsd-sdk query state-snapshot` for project status, blockers, and recent decisions
+- Prefer `gsd-remix-sdk query state-snapshot` for project status, blockers, and recent decisions
 - Read full STATE.md only if the snapshot indicates you need exact wording from a blocker or prior decision
 </step>
 

@@ -23,7 +23,7 @@ Resolve model for:
 @~/.claude/get-shit-done/references/phase-argument-parsing.md
 
 ```bash
-PHASE_INFO=$(gsd-sdk query roadmap.get-phase "${PHASE}")
+PHASE_INFO=$(gsd-remix-sdk query roadmap.get-phase "${PHASE}")
 ```
 
 If `found` is false: Error and exit.
@@ -39,11 +39,11 @@ If exists: Offer update/view/skip options.
 ## Step 3: Gather Phase Context
 
 ```bash
-INIT=$(gsd-sdk query init.phase-op "${PHASE}")
+INIT=$(gsd-remix-sdk query init.phase-op "${PHASE}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 # Extract: phase_dir, padded_phase, phase_number, state_path, requirements_path, context_path
-STATE_SNAPSHOT=$(gsd-sdk query state-snapshot 2>/dev/null || echo "{}")
-AGENT_SKILLS_RESEARCHER=$(gsd-sdk query agent-skills gsd-researcher 2>/dev/null)
+STATE_SNAPSHOT=$(gsd-remix-sdk query state-snapshot 2>/dev/null || echo "{}")
+AGENT_SKILLS_RESEARCHER=$(gsd-remix-sdk query agent-skills gsd-researcher 2>/dev/null)
 ```
 
 ## Step 4: Spawn Researcher

@@ -1,6 +1,6 @@
 # GSD CLI Tools Reference
 
-> Surface-area reference for `get-shit-done/bin/gsd-tools.cjs` (legacy Node CLI). Workflows and agents should prefer `gsd-sdk query` or `@gsd-build/sdk` where a handler exists — see [SDK and programmatic access](#sdk-and-programmatic-access). For slash commands and user flows, see [Command Reference](COMMANDS.md).
+> Surface-area reference for `get-shit-done/bin/gsd-tools.cjs` (legacy Node CLI). Workflows and agents should prefer `gsd-remix-sdk query` or `@gsd-remix/sdk` where a handler exists — see [SDK and programmatic access](#sdk-and-programmatic-access). For slash commands and user flows, see [Command Reference](COMMANDS.md).
 
 ---
 
@@ -13,7 +13,7 @@
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Shipped path**   | `get-shit-done/bin/gsd-tools.cjs`                                                                                                                                                                      |
 | **Implementation** | 20 domain modules under `get-shit-done/bin/lib/` (the directory is authoritative)                                                                                                                        |
-| **Status**         | Maintained for parity tests and CJS-only entrypoints; `gsd-sdk query` / SDK registry are the supported path for new orchestration (see [QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md)). |
+| **Status**         | Maintained for parity tests and CJS-only entrypoints; `gsd-remix-sdk query` / SDK registry are the supported path for new orchestration (see [QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md)). |
 
 
 **Usage (CJS):**
@@ -38,28 +38,28 @@ node gsd-tools.cjs <command> [args] [--raw] [--cwd <path>]
 
 Use this when authoring workflows, not when you only need the command list below.
 
-**1. CLI — `gsd-sdk query <argv…>`**
+**1. CLI — `gsd-remix-sdk query <argv…>`**
 
 - Resolves argv with the same **longest-prefix** rules as the typed registry (`resolveQueryArgv` in `sdk/src/query/registry.ts`). Unregistered commands **fail fast** — use `node …/gsd-tools.cjs` only for handlers not in the registry.
 - Full matrix (CJS command → registry key, CLI-only tools, aliases, golden tiers): [sdk/src/query/QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md).
 
-**2. TypeScript — `@gsd-build/sdk` (`GSDTools`, `createRegistry`)**
+**2. TypeScript — `@gsd-remix/sdk` (`GSDTools`, `createRegistry`)**
 
-- `GSDTools` (used by `PhaseRunner`, `InitRunner`, and `GSD.createTools()`) always shells out to `gsd-tools.cjs` via `execFile` — there is no in-process registry path on this class. For typed, in-process dispatch use `createRegistry()` from `sdk/src/query/index.ts`, or invoke `gsd-sdk query` (see [QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md)).
+- `GSDTools` (used by `PhaseRunner`, `InitRunner`, and `GSD.createTools()`) always shells out to `gsd-tools.cjs` via `execFile` — there is no in-process registry path on this class. For typed, in-process dispatch use `createRegistry()` from `sdk/src/query/index.ts`, or invoke `gsd-remix-sdk query` (see [QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md)).
 - Conventions: mutation event wiring, `GSDError` vs `{ data: { error } }`, locks, and stubs — [QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md).
 
 **CJS → SDK examples (same project directory):**
 
 
-| Legacy CJS                               | Preferred `gsd-sdk query` (examples) |
+| Legacy CJS                               | Preferred `gsd-remix-sdk query` (examples) |
 | ---------------------------------------- | ------------------------------------ |
-| `node gsd-tools.cjs init phase-op 12`    | `gsd-sdk query init phase-op 12`     |
-| `node gsd-tools.cjs phase-plan-index 12` | `gsd-sdk query phase-plan-index 12`  |
-| `node gsd-tools.cjs state json`          | `gsd-sdk query state json`           |
-| `node gsd-tools.cjs roadmap analyze`     | `gsd-sdk query roadmap analyze`      |
+| `node gsd-tools.cjs init phase-op 12`    | `gsd-remix-sdk query init phase-op 12`     |
+| `node gsd-tools.cjs phase-plan-index 12` | `gsd-remix-sdk query phase-plan-index 12`  |
+| `node gsd-tools.cjs state json`          | `gsd-remix-sdk query state json`           |
+| `node gsd-tools.cjs roadmap analyze`     | `gsd-remix-sdk query roadmap analyze`      |
 
 
-**SDK state reads:** `gsd-sdk query state json` / `state.json` and `gsd-sdk query state load` / `state.load` currently share one native handler (rebuilt STATE.md frontmatter — CJS `cmdStateJson`). The legacy CJS `state load` payload (`config`, `state_raw`, existence flags) is still **CLI-only** via `node …/gsd-tools.cjs state load` until a separate registry handler exists. Full routing and golden rules: [QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md).
+**SDK state reads:** `gsd-remix-sdk query state json` / `state.json` and `gsd-remix-sdk query state load` / `state.load` currently share one native handler (rebuilt STATE.md frontmatter — CJS `cmdStateJson`). The legacy CJS `state load` payload (`config`, `state_raw`, existence flags) is still **CLI-only** via `node …/gsd-tools.cjs state load` until a separate registry handler exists. Full routing and golden rules: [QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md).
 
 **CLI-only (not in registry):** e.g. **graphify**, **from-gsd2** / **gsd2-import** — call `gsd-tools.cjs` until registered.
 
@@ -425,7 +425,7 @@ node gsd-tools.cjs websearch <query> [--limit N] [--freshness day|week|month]
 
 ## Graphify
 
-Build, query, and inspect the project knowledge graph in `.planning/graphs/`. Requires `graphify.enabled: true` in `config.json` (see [Configuration Reference](CONFIGURATION.md#graphify-settings)). Graphify is **CJS-only**: `gsd-sdk query` does not yet register graphify handlers — always use `node gsd-tools.cjs graphify …`.
+Build, query, and inspect the project knowledge graph in `.planning/graphs/`. Requires `graphify.enabled: true` in `config.json` (see [Configuration Reference](CONFIGURATION.md#graphify-settings)). Graphify is **CJS-only**: `gsd-remix-sdk query` does not yet register graphify handlers — always use `node gsd-tools.cjs graphify …`.
 
 ```bash
 # Build or rebuild the knowledge graph
@@ -478,5 +478,5 @@ User-facing entry point: `/gsd-graphify` (see [Command Reference](COMMANDS.md#gs
 ## See also
 
 - [sdk/src/query/QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md) — registry matrix, routing, golden parity, intentional CJS differences
-- [Architecture](ARCHITECTURE.md) — where `gsd-sdk query` fits in orchestration
+- [Architecture](ARCHITECTURE.md) — where `gsd-remix-sdk query` fits in orchestration
 - [Command Reference](COMMANDS.md) — user-facing `/gsd:` commands

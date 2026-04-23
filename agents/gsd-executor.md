@@ -66,7 +66,7 @@ Before executing, discover project context:
 Load execution context:
 
 ```bash
-INIT=$(gsd-sdk query init.execute-phase "${PHASE}")
+INIT=$(gsd-remix-sdk query init.execute-phase "${PHASE}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
@@ -74,9 +74,9 @@ Extract from init JSON: `executor_model`, `commit_docs`, `sub_repos`, `phase_dir
 
 Also load planning state (position, decisions, blockers) via the SDK — **use `node` to invoke the CLI** (not `npx`):
 ```bash
-node ./node_modules/@gsd-build/sdk/dist/cli.js query state.load 2>/dev/null
+node ./node_modules/@gsd-remix/sdk/dist/cli.js query state.load 2>/dev/null
 ```
-If the SDK is not installed under `node_modules`, use the same `query state.load` argv with your local `gsd-sdk` CLI on `PATH`.
+If the SDK is not installed under `node_modules`, use the same `query state.load` argv with your local `gsd-remix-sdk` CLI on `PATH`.
 
 If STATE.md missing but .planning/ exists: offer to reconstruct or continue without.
 If .planning/ missing: Error — project not initialized.
@@ -243,8 +243,8 @@ Do NOT continue reading. Analysis without action is a stuck signal.
 Check if auto mode is active at executor start (chain flag or user preference):
 
 ```bash
-AUTO_CHAIN=$(gsd-sdk query config-get workflow._auto_chain_active 2>/dev/null || echo "false")
-AUTO_CFG=$(gsd-sdk query config-get workflow.auto_advance 2>/dev/null || echo "false")
+AUTO_CHAIN=$(gsd-remix-sdk query config-get workflow._auto_chain_active 2>/dev/null || echo "false")
+AUTO_CFG=$(gsd-remix-sdk query config-get workflow.auto_advance 2>/dev/null || echo "false")
 ```
 
 Auto mode is active if either `AUTO_CHAIN` or `AUTO_CFG` is `"true"`. Store the result for checkpoint handling below.
@@ -383,7 +383,7 @@ git add src/types/user.ts
 
 **If `sub_repos` is configured (non-empty array from init context):** Use `commit-to-subrepo` to route files to their correct sub-repo:
 ```bash
-gsd-sdk query commit-to-subrepo "{type}({phase}-{plan}): {concise task description}" --files file1 file2 ...
+gsd-remix-sdk query commit-to-subrepo "{type}({phase}-{plan}): {concise task description}" --files file1 file2 ...
 ```
 Returns JSON with per-repo commit hashes: `{ committed: true, repos: { "backend": { hash: "abc", files: [...] }, ... } }`. Record all hashes for SUMMARY.
 
@@ -510,36 +510,36 @@ Do NOT skip. Do NOT proceed to state updates if self-check fails.
 </self_check>
 
 <state_updates>
-After SUMMARY.md, update STATE.md using `gsd-sdk query` state handlers (positional args; see `sdk/src/query/QUERY-HANDLERS.md`):
+After SUMMARY.md, update STATE.md using `gsd-remix-sdk query` state handlers (positional args; see `sdk/src/query/QUERY-HANDLERS.md`):
 
 ```bash
 # Advance plan counter (handles edge cases automatically)
-gsd-sdk query state.advance-plan
+gsd-remix-sdk query state.advance-plan
 
 # Recalculate progress bar from disk state
-gsd-sdk query state.update-progress
+gsd-remix-sdk query state.update-progress
 
 # Record execution metrics (phase, plan, duration, tasks, files)
-gsd-sdk query state.record-metric \
+gsd-remix-sdk query state.record-metric \
   "${PHASE}" "${PLAN}" "${DURATION}" "${TASK_COUNT}" "${FILE_COUNT}"
 
 # Add decisions (extract from SUMMARY.md key-decisions)
 for decision in "${DECISIONS[@]}"; do
-  gsd-sdk query state.add-decision "${decision}"
+  gsd-remix-sdk query state.add-decision "${decision}"
 done
 
 # Update session info (timestamp, stopped-at, resume-file)
-gsd-sdk query state.record-session \
+gsd-remix-sdk query state.record-session \
   "" "Completed ${PHASE}-${PLAN}-PLAN.md" "None"
 ```
 
 ```bash
 # Update ROADMAP.md progress for this phase (plan counts, status)
-gsd-sdk query roadmap.update-plan-progress "${PHASE_NUMBER}"
+gsd-remix-sdk query roadmap.update-plan-progress "${PHASE_NUMBER}"
 
 # Mark completed requirements from PLAN.md frontmatter
 # Extract the `requirements` array from the plan's frontmatter, then mark each complete
-gsd-sdk query requirements.mark-complete ${REQ_IDS}
+gsd-remix-sdk query requirements.mark-complete ${REQ_IDS}
 ```
 
 **Requirement IDs:** Extract from the PLAN.md frontmatter `requirements:` field (e.g., `requirements: [AUTH-01, AUTH-02]`). Pass all IDs to `requirements mark-complete`. If the plan has no requirements field, skip this step.
@@ -557,13 +557,13 @@ gsd-sdk query requirements.mark-complete ${REQ_IDS}
 
 **For blockers found during execution:**
 ```bash
-gsd-sdk query state.add-blocker "Blocker description"
+gsd-remix-sdk query state.add-blocker "Blocker description"
 ```
 </state_updates>
 
 <final_commit>
 ```bash
-gsd-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" \
+gsd-remix-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" \
   .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/STATE.md .planning/ROADMAP.md .planning/REQUIREMENTS.md
 ```
 

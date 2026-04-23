@@ -54,7 +54,7 @@ GSD is a **meta-prompting framework** that sits between the user and AI coding a
        │              │                 │
 ┌──────▼──────────────▼─────────────────▼──────────────┐
 │              CLI TOOLS LAYER                          │
-│   gsd-sdk query (sdk/src/query) + gsd-tools.cjs       │
+│   gsd-remix-sdk query (sdk/src/query) + gsd-tools.cjs       │
 │   (State, config, phase, roadmap, verify, templates)  │
 └──────────────────────┬───────────────────────────────┘
                        │
@@ -77,7 +77,7 @@ Every agent spawned by an orchestrator gets a clean context window (up to 200K t
 
 Workflow files (`get-shit-done/workflows/*.md`) never do heavy lifting. They:
 
-- Load context via `gsd-sdk query init.<workflow>` (or legacy `gsd-tools.cjs init <workflow>`)
+- Load context via `gsd-remix-sdk query init.<workflow>` (or legacy `gsd-tools.cjs init <workflow>`)
 - Spawn specialized agents with focused prompts
 - Collect results and route to the next step
 - Update state between steps
@@ -123,7 +123,7 @@ User-facing entry points. Each file contains YAML frontmatter (name, description
 
 Orchestration logic that commands reference. Contains the step-by-step process including:
 
-- Context loading via `gsd-sdk query` init handlers (or legacy `gsd-tools.cjs init`)
+- Context loading via `gsd-remix-sdk query` init handlers (or legacy `gsd-tools.cjs init`)
 - Agent spawn instructions with model resolution
 - Gate/checkpoint definitions
 - State update patterns
@@ -198,7 +198,7 @@ The planner agent (`agents/gsd-planner.md`) was decomposed from a single monolit
 
 ### Templates (`get-shit-done/templates/`)
 
-Markdown templates for all planning artifacts. Used by `gsd-sdk query template.fill` / `phase.scaffold` (and legacy `gsd-tools.cjs template fill` / top-level `scaffold`) to create pre-structured files:
+Markdown templates for all planning artifacts. Used by `gsd-remix-sdk query template.fill` / `phase.scaffold` (and legacy `gsd-tools.cjs template fill` / top-level `scaffold`) to create pre-structured files:
 - `project.md`, `requirements.md`, `roadmap.md`, `state.md` — Core project files
 - `phase-prompt.md` — Phase execution prompt template
 - `summary.md` (+ `summary-minimal.md`, `summary-standard.md`, `summary-complex.md`) — Granularity-aware summary templates
@@ -265,10 +265,10 @@ Node.js CLI utility (`gsd-tools.cjs`) with domain modules split across `get-shit
 ```
 Orchestrator (workflow .md)
     │
-    ├── Load context: gsd-sdk query init.<workflow> <phase> (or legacy gsd-tools.cjs init)
+    ├── Load context: gsd-remix-sdk query init.<workflow> <phase> (or legacy gsd-tools.cjs init)
     │   Returns JSON with: project info, config, state, phase details
     │
-    ├── Resolve model: gsd-sdk query resolve-model <agent-name>
+    ├── Resolve model: gsd-remix-sdk query resolve-model <agent-name>
     │   Returns: opus | sonnet | haiku | inherit
     │
     ├── Spawn Agent (Task/SubAgent call)
@@ -279,7 +279,7 @@ Orchestrator (workflow .md)
     │
     ├── Collect result
     │
-    └── Update state: gsd-sdk query state.update / state.patch / state.advance-plan (or legacy gsd-tools.cjs)
+    └── Update state: gsd-remix-sdk query state.update / state.patch / state.advance-plan (or legacy gsd-tools.cjs)
 ```
 
 ### Primary Agent Spawn Categories
@@ -330,7 +330,7 @@ When the context window is 500K+ tokens (1M-class models like Opus 4.6, Sonnet 4
 - **Executor agents** receive prior wave SUMMARY.md files and the phase CONTEXT.md/RESEARCH.md, enabling cross-plan awareness within a phase
 - **Verifier agents** receive all PLAN.md, SUMMARY.md, CONTEXT.md files plus REQUIREMENTS.md, enabling history-aware verification
 
-The orchestrator reads `context_window` from config (`gsd-sdk query config-get context_window`, or legacy `gsd-tools.cjs config-get`) and conditionally includes richer context when the value is >= 500,000. For standard 200K windows, prompts use truncated versions with cache-friendly ordering to maximize context efficiency.
+The orchestrator reads `context_window` from config (`gsd-remix-sdk query config-get context_window`, or legacy `gsd-tools.cjs config-get`) and conditionally includes richer context when the value is >= 500,000. For standard 200K windows, prompts use truncated versions with cache-friendly ordering to maximize context efficiency.
 
 #### Parallel Commit Safety
 

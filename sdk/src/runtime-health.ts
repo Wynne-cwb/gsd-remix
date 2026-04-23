@@ -171,7 +171,7 @@ async function probeLegacyBridge(
         code: 'legacy_bridge_missing',
         level: 'warn',
         message: 'No gsd-tools.cjs bridge could be found for CJS fallback commands.',
-        fix: 'Run /gsd-update to restore the bundled bridge, or reinstall gsd-remix and @gsd-build/sdk together.',
+        fix: 'Run /gsd-update to restore the bundled bridge, or reinstall gsd-remix and @gsd-remix/sdk together.',
       },
       path: null,
       source: 'missing',

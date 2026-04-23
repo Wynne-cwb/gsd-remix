@@ -73,6 +73,7 @@ npx gsd-remix@latest
 
 当前已经存在的差异包括：
 - 独立以 `gsd-remix` 的 npm 包名发布，但保留 `/gsd-*` 命令面和核心 planning 布局兼容
+- 将 SDK 命名空间隔离成 `@gsd-remix/sdk` / `gsd-remix-sdk`，避免 remix 安装与上游 `@gsd-build/sdk` 互相覆盖
 - 主流程的 token 优化，包括 discuss 历史摘要优先加载，以及小型 plan 的低复杂度 inline 路由
 - 通过 `.planning/failure-memory/` 增加 failure-memory 采集与晋升，把重复执行错误沉淀成项目内记忆，并编译成执行前的确定性守卫
 - 通过主 workflow 的自动预检和 `/gsd-health --runtime` 提供 runtime health 诊断，让安装损坏或不受支持的 Node 版本更早失败，而不是静默退化
@@ -111,6 +112,7 @@ GSD 解决的就是这个问题。它是让 Claude Code 变得可靠的上下文
 - **Agent 大小预算约束** — 分级行数上限（XL: 1600、Large: 1000、Default: 500）用于压缩 agent prompt，超限会在 CI 中暴露
 - **共享 boilerplate 抽取** — 将 mandatory-initial-read 和 project-skills-discovery 等逻辑提取到 reference 文件，减少多个 agent 之间的重复内容
 - **Runtime health 检查** — `discuss-phase`、`plan-phase` 和 `execute-phase` 现在都会先运行确定性的 runtime 预检；同时可以用 `/gsd-health --runtime` 手动查看安装/runtime 诊断
+- **独立 SDK 包与二进制** — remix 现在通过 `@gsd-remix/sdk` 和 `gsd-remix-sdk` 发布自己的 SDK，不再和上游 `@gsd-build/sdk` 共用全局命名空间
 
 ---
 
@@ -208,6 +210,7 @@ npx gsd-remix --all --global      # 安装到所有目录
 
 使用 `--global`（`-g`）或 `--local`（`-l`）可以跳过安装位置提示。
 使用 `--claude`、`--opencode`、`--gemini`、`--kilo`、`--codex`、`--copilot`、`--cursor`、`--windsurf`、`--antigravity`、`--augment`、`--trae`、`--codebuddy`、`--cline` 或 `--all` 可以跳过运行时提示。
+`GSD Remix SDK` CLI（`gsd-remix-sdk`）会自动安装，它是 `/gsd-*` 命令运行所必需的。可用 `--no-sdk` 跳过 SDK 安装，或用 `--sdk` 强制重装。
 
 </details>
 

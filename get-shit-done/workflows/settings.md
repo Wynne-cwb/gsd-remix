@@ -12,8 +12,8 @@ Read all files referenced by the invoking prompt's execution_context before star
 Ensure config exists and load current state:
 
 ```bash
-gsd-sdk query config-ensure-section
-INIT=$(gsd-sdk query state.load)
+gsd-remix-sdk query config-ensure-section
+INIT=$(gsd-remix-sdk query state.load)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 # `state.load` returns STATE frontmatter JSON from the SDK — it does not include `config_path`. Orchestrators may set `GSD_CONFIG_PATH` from init phase-op JSON; otherwise resolve the same path gsd-tools uses for flat vs active workstream (#2282).
 if [[ -z "${GSD_CONFIG_PATH:-}" ]]; then

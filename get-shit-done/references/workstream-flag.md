@@ -93,19 +93,19 @@ This ensures workstream scope chains automatically through the workflow:
 ## CLI Usage
 
 ```bash
-# All gsd-sdk query commands accept --ws
-gsd-sdk query state.json --ws feature-a
-gsd-sdk query find-phase 3 --ws feature-b
+# All gsd-remix-sdk query commands accept --ws
+gsd-remix-sdk query state.json --ws feature-a
+gsd-remix-sdk query find-phase 3 --ws feature-b
 
 # Session-local switching without --ws on every command
-GSD_SESSION_KEY=my-terminal-a gsd-sdk query workstream.set feature-a
-GSD_SESSION_KEY=my-terminal-a gsd-sdk query state.json
-GSD_SESSION_KEY=my-terminal-b gsd-sdk query workstream.set feature-b
-GSD_SESSION_KEY=my-terminal-b gsd-sdk query state.json
+GSD_SESSION_KEY=my-terminal-a gsd-remix-sdk query workstream.set feature-a
+GSD_SESSION_KEY=my-terminal-a gsd-remix-sdk query state.json
+GSD_SESSION_KEY=my-terminal-b gsd-remix-sdk query workstream.set feature-b
+GSD_SESSION_KEY=my-terminal-b gsd-remix-sdk query state.json
 
 # Workstream CRUD
-gsd-sdk query workstream.create <name>
-gsd-sdk query workstream.list
-gsd-sdk query workstream.status <name>
-gsd-sdk query workstream.complete <name>
+gsd-remix-sdk query workstream.create <name>
+gsd-remix-sdk query workstream.list
+gsd-remix-sdk query workstream.status <name>
+gsd-remix-sdk query workstream.complete <name>
 ```

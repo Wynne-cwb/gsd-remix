@@ -2,7 +2,7 @@
  * GSD Tools Bridge — programmatic access to GSD planning operations.
  *
  * By default routes commands through the SDK **query registry** (same handlers as
- * `gsd-sdk query`) so `PhaseRunner`, `InitRunner`, and `GSD` share contracts with
+ * `gsd-remix-sdk query`) so `PhaseRunner`, `InitRunner`, and `GSD` share contracts with
  * the typed CLI. Runner hot-path helpers (`initPhaseOp`, `phasePlanIndex`,
  * `phaseComplete`, `initNewProject`, `configSet`, `commit`) call
  * `registry.dispatch()` with canonical keys when native query is active, avoiding
@@ -115,7 +115,7 @@ export class GSDTools {
     gsdToolsPath?: string;
     timeoutMs?: number;
     workstream?: string;
-    /** When set, mutation handlers emit the same events as `gsd-sdk query`. */
+    /** When set, mutation handlers emit the same events as `gsd-remix-sdk query`. */
     eventStream?: GSDEventStream;
     /** Correlation id for mutation events when `eventStream` is set. */
     sessionId?: string;
@@ -550,8 +550,8 @@ export class GSDTools {
 }
 
 /**
- * Run `gsd-sdk query` semantics in-process: normalize argv, resolve registry, dispatch.
- * Returns handler JSON payload (same as stdout from the `gsd-sdk query` CLI without `--pick`).
+ * Run `gsd-remix-sdk query` semantics in-process: normalize argv, resolve registry, dispatch.
+ * Returns handler JSON payload (same as stdout from the `gsd-remix-sdk query` CLI without `--pick`).
  */
 export async function runGsdToolsQuery(projectDir: string, queryArgv: string[]): Promise<unknown> {
   const { createRegistry } = await import('./query/index.js');

@@ -248,7 +248,7 @@ Any GSD agent type can receive skills. Common types:
 
 ### How It Works
 
-At spawn time, workflows call `gsd-sdk query agent-skills <type>` (or legacy `node gsd-tools.cjs agent-skills <type>`) to load configured skills. If skills exist for the agent type, they are injected as an `<agent_skills>` block in the Task() prompt:
+At spawn time, workflows call `gsd-remix-sdk query agent-skills <type>` (or legacy `node gsd-tools.cjs agent-skills <type>`) to load configured skills. If skills exist for the agent type, they are injected as an `<agent_skills>` block in the Task() prompt:
 
 ```xml
 <agent_skills>
@@ -265,7 +265,7 @@ If no skills are configured, the block is omitted (zero overhead).
 Set skills via the CLI:
 
 ```bash
-gsd-sdk query config-set agent_skills.gsd-executor '["skills/my-skill"]'
+gsd-remix-sdk query config-set agent_skills.gsd-executor '["skills/my-skill"]'
 ```
 
 ---
@@ -293,10 +293,10 @@ Toggle optional capabilities via the `features.*` config namespace. Feature flag
 
 ```bash
 # Enable a feature
-gsd-sdk query config-set features.global_learnings true
+gsd-remix-sdk query config-set features.global_learnings true
 
 # Disable a feature
-gsd-sdk query config-set features.thinking_partner false
+gsd-remix-sdk query config-set features.thinking_partner false
 ```
 
 The `features.*` namespace is a dynamic key pattern — new feature flags can be added without modifying `VALID_CONFIG_KEYS`. Any key matching `features.<name>` is accepted by the config system.

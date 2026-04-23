@@ -65,7 +65,7 @@ Gap: Flow "View dashboard" broken at data fetch
 Find highest existing phase:
 ```bash
 # Get sorted phase list, extract last one
-HIGHEST=$(gsd-sdk query phases.list --pick directories[-1])
+HIGHEST=$(gsd-remix-sdk query phases.list --pick directories[-1])
 ```
 
 New phases continue from there:
@@ -146,7 +146,7 @@ mkdir -p ".planning/phases/{NN}-{name}"
 ## 9. Commit Roadmap and Requirements Update
 
 ```bash
-gsd-sdk query commit "docs(roadmap): add gap closure phases {N}-{M}" .planning/ROADMAP.md .planning/REQUIREMENTS.md
+gsd-remix-sdk query commit "docs(roadmap): add gap closure phases {N}-{M}" .planning/ROADMAP.md .planning/REQUIREMENTS.md
 ```
 
 ## 10. Offer Next Steps

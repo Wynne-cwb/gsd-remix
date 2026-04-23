@@ -1,6 +1,6 @@
 /**
  * E2E integration test — proves InitRunner.run() drives real Agent SDK
- * sessions for the gsd-sdk init workflow.
+ * sessions for the gsd-remix-sdk init workflow.
  *
  * Requires Claude Code CLI (`claude`) installed and authenticated.
  * Skips gracefully if CLI is unavailable.
@@ -46,7 +46,7 @@ describe.skipIf(!cliAvailable || !gsdToolsAvailable)('E2E: InitRunner.run() full
   let events: GSDEvent[];
 
   beforeAll(async () => {
-    tmpDir = await mkdtemp(join(tmpdir(), 'gsd-sdk-init-e2e-'));
+    tmpDir = await mkdtemp(join(tmpdir(), 'gsd-remix-sdk-init-e2e-'));
 
     // Initialize git in the temp dir (required by InitRunner)
     execSync('git init', { cwd: tmpDir, stdio: 'ignore' });

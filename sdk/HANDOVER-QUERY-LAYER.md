@@ -28,9 +28,9 @@ Paste this document (or `@sdk/HANDOVER-QUERY-LAYER.md`) at the start of a new se
 - `docs/CLI-TOOLS.md` — Short “Parity & registry” pointer into those sections.
 - `HANDOVER-GOLDEN-PARITY.md` — One paragraph linking to the same sections.
 
-### 2. `gsd-sdk query` tokenization (`normalizeQueryCommand`)
+### 2. `gsd-remix-sdk query` tokenization (`normalizeQueryCommand`)
 
-- **Problem:** `gsd-sdk query` used only argv[0] as the registry key, so `query state json` dispatched `state` (unregistered) instead of `state.json`.
+- **Problem:** `gsd-remix-sdk query` used only argv[0] as the registry key, so `query state json` dispatched `state` (unregistered) instead of `state.json`.
 - **Fix:** `sdk/src/query/normalize-query-command.ts` merges the same **command + subcommand** patterns as `gsd-tools` `runCommand()` (e.g. `state json` → `state.json`, `init execute-phase 9` → `init.execute-phase`, `scaffold …` → `phase.scaffold`, `progress bar` → `progress.bar`). Wired in `sdk/src/cli.ts` before `registry.dispatch()`.
 - **Tests:** `sdk/src/query/normalize-query-command.test.ts`.
 
@@ -47,7 +47,7 @@ Previously `state.json` and `state.load` were easy to confuse: CJS has two diffe
 
 - `stateJson` — `sdk/src/query/state.ts`; registry key `state.json`.
 - `stateProjectLoad` — `sdk/src/query/state-project-load.ts`; registry key `state.load`. Uses `createRequire` to call `core.cjs` `loadConfig(projectDir)` from the same resolution paths as a normal install (bundled monorepo path, `projectDir/.claude/get-shit-done/...`, `~/.claude/get-shit-done/...`). `GSDTools.stateLoad()` and `formatRegistryRawStdout` for `--raw` no longer force a subprocess solely for this command.
-- **Risk:** If `core.cjs` is absent (e.g. some `@gsd-build/sdk`-only layouts), `state.load` throws `GSDError` — document; future option is a TS `loadConfig` port or bundling.
+- **Risk:** If `core.cjs` is absent (e.g. some `@gsd-remix/sdk`-only layouts), `state.load` throws `GSDError` — document; future option is a TS `loadConfig` port or bundling.
 - **Goldens:** `read-only-parity.integration.test.ts` — one block compares `state.json` to `state json` (strip `last_updated`); another compares `state.load` to `state load` (full `toEqual`). `read-only-golden-rows.ts` `readOnlyGoldenCanonicals()` includes both `state.json` and `state.load`.
 
 ---
@@ -64,7 +64,7 @@ Previously `state.json` and `state.load` were easy to confuse: CJS has two diffe
 
 **Programmatic API:** `createRegistry()` / `registry.dispatch('dotted.name', args, projectDir)`.
 
-**CLI:** `gsd-sdk query …` — apply `normalizeQueryCommand` semantics (or pass dotted names explicitly).
+**CLI:** `gsd-remix-sdk query …` — apply `normalizeQueryCommand` semantics (or pass dotted names explicitly).
 
 **Still not unified:** `GSDTools` (`sdk/src/gsd-tools.ts`) shells out to `gsd-tools.cjs` for plan/session flows; migrating callers to the registry is separate #2302 / runner work. `state load` is **not** among the subprocess-only exceptions anymore (it uses the registry like other native query handlers when native query is active).
 
@@ -78,7 +78,7 @@ Previously `state.json` and `state.load` were easy to confuse: CJS has two diffe
 | `sdk/src/query/index.ts`                    | `createRegistry()`, `QUERY_MUTATION_COMMANDS`, handler wiring.                         |
 | `sdk/src/query/state-project-load.ts`       | `state.load` — CJS `cmdStateLoad` parity (`loadConfig` + `state_raw` + flags). |
 | `sdk/src/query/normalize-query-command.ts`  | CLI argv → registry command string.                                                    |
-| `sdk/src/cli.ts`                            | `gsd-sdk query` path (uses `normalizeQueryCommand`).                                   |
+| `sdk/src/cli.ts`                            | `gsd-remix-sdk query` path (uses `normalizeQueryCommand`).                                   |
 | `sdk/src/query/QUERY-HANDLERS.md`           | Registry contracts, parity tiers, CJS matrix, mutation notes.                          |
 | `sdk/src/golden/golden.integration.test.ts` | Golden parity vs `captureGsdToolsOutput()`.                                            |
 | `docs/CLI-TOOLS.md`                         | User-facing CLI; links to parity sections.                                             |
@@ -95,7 +95,7 @@ Work that moves **deterministic** orchestration out of AI/bash and into **SDK qu
 
 | Layer                    | Goal                                                                                                                                                                         | What “done” looks like                                                                  |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **Parity / migration**   | Existing CLI behavior is **stable and testable** in the registry so callers can use `gsd-sdk query` instead of `node …/gsd-tools.cjs` without silent drift.                  | Goldens + `QUERY-HANDLERS.md`; same JSON/`--raw` contracts as CJS.                      |
+| **Parity / migration**   | Existing CLI behavior is **stable and testable** in the registry so callers can use `gsd-remix-sdk query` instead of `node …/gsd-tools.cjs` without silent drift.                  | Goldens + `QUERY-HANDLERS.md`; same JSON/`--raw` contracts as CJS.                      |
 | **Offloading decisions** | **New or consolidated** queries replace repeated `grep`, `ls` piped to `wc -l`, many `config-get`s, and inline `node -e` in workflows — so the model does less parsing and branching. | Fewer inline shell blocks; measurable token/step reduction on representative workflows. |
 
 
@@ -124,7 +124,7 @@ Source: `.planning/research/decision-routing-audit.md` §3. **Tier** = priority 
 
 **Simple roadmap (execute in order):**
 
-1. **Harden parity** for surfaces workflows already depend on (registry dispatch, goldens, docs) so swaps from CJS to `gsd-sdk query` stay safe.
+1. **Harden parity** for surfaces workflows already depend on (registry dispatch, goldens, docs) so swaps from CJS to `gsd-remix-sdk query` stay safe.
 2. **Ship 1–2 high-leverage consolidation handlers** from the audit (pick based on impact and risk; examples: `check auto-mode`, `phase-artifact-counts`, `route next-action` — with **display/routing fields** required by `review-and-risks.md` if applicable). Each needs handlers, tests, and `QUERY-HANDLERS.md` notes. **Progress:** `check.auto-mode` shipped (`sdk/src/query/check-auto-mode.ts`); Tier 1 `route.next-action` already registered.
 3. **Rewrite one heavy workflow** (e.g. `next.md` or a focused slice of `autonomous.md`) to consume those queries and **measure** before/after (steps, tokens, or both). **Progress:** `execute-phase.md`, `discuss-phase.md`, `discuss-phase-assumptions.md`, and `plan-phase.md` (UI gate) now use `check auto-mode` instead of paired `config-get`s where applicable.
 4. **Maintain a living boundary** between SDK (**data, deterministic checks**) and workflows (**judgment, sequencing, user-facing messages**). Extend `decision-routing-audit.md` §6 (decisions that stay with the AI) and `review-and-risks.md` “Do not implement” (e.g. no pre-computed `route workflow-steps`) as you add primitives. **Progress:** audit §3.5 / Tier 2 #4 updated to reference SDK implementation.
@@ -140,7 +140,7 @@ Source: `.planning/research/decision-routing-audit.md` §3. **Tier** = priority 
 (Strategic ordering of **parity vs decision offloading** is in **Roadmap** above.)
 
 1. ~~**Golden test for `phase.add-batch`**~~ — Done: `sdk/src/golden/mutation-subprocess.integration.test.ts` (`phase.add-batch` JSON parity vs CJS).
-2. ~~**Re-export `normalizeQueryCommand`**~~ — Done: exported from `sdk/src/query/index.ts` and `sdk/src/index.ts` (`@gsd-build/sdk`).
+2. ~~**Re-export `normalizeQueryCommand`**~~ — Done: exported from `sdk/src/query/index.ts` and `sdk/src/index.ts` (`@gsd-remix/sdk`).
 3. **Issue #2302 follow-ups** — Runner alignment (`GSDTools` → registry where appropriate). **`configGet`** now uses `dispatchNativeJson` with canonical `config-get` (fixes subprocess argv vs real `gsd-tools.cjs`, which has no `config` + `get` top-level). Keep `graphify` / `from-gsd2` out of scope unless product reopens.
 4. **Drift check** — When adding CJS commands, update `QUERY-HANDLERS.md` matrix and golden docs in the same PR.
 
@@ -162,7 +162,7 @@ npx vitest run src/golden/golden.integration.test.ts --project integration
 ## Success criteria (query-layer slice)
 
 - Parity expectations and CJS↔SDK matrix documented in one place (`QUERY-HANDLERS.md`).
-- `gsd-sdk query` understands two-token command patterns like `gsd-tools`.
+- `gsd-remix-sdk query` understands two-token command patterns like `gsd-tools`.
 - `phase add-batch` implemented and registered; **only** intentional CLI-only gaps remain (**graphify**, **from-gsd2**).
 
 ---

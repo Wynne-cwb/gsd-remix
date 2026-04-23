@@ -73,6 +73,7 @@ All remix-specific changes are tracked in [docs/REMIX-DIFFERENCES.md](docs/REMIX
 
 Current highlights:
 - Published independently on npm as `gsd-remix`, while keeping the `/gsd-*` command surface and core planning layout compatible
+- Isolates the SDK namespace as `@gsd-remix/sdk` / `gsd-remix-sdk`, so remix installs no longer collide with upstream `@gsd-build/sdk`
 - Token-efficiency changes in the main workflow path, including summary-first discuss history loading and low-complexity inline execution routing
 - Failure-memory event capture and promotion via `.planning/failure-memory/`, turning repeated execution mistakes into project-local memory and deterministic execute preflight checks
 - Runtime health diagnostics via automatic workflow preflight checks and `/gsd-health --runtime`, so broken installs and unsupported Node versions fail fast instead of silently degrading
@@ -113,6 +114,7 @@ Built-in quality gates catch real problems: schema drift detection flags ORM cha
 - **Agent size-budget enforcement** — Tiered line-count limits (XL: 1 600, Large: 1 000, Default: 500) keep agent prompts lean; violations surface in CI
 - **Shared boilerplate extraction** — Mandatory-initial-read and project-skills-discovery logic extracted to reference files, reducing duplication across a dozen agents
 - **Runtime health checks** — `discuss-phase`, `plan-phase`, and `execute-phase` now run deterministic runtime preflight checks up front, and `/gsd-health --runtime` exposes the same install/runtime diagnostics on demand
+- **Isolated SDK package/binary** — the remix now ships its SDK as `@gsd-remix/sdk` with the `gsd-remix-sdk` binary, avoiding PATH/package collisions with upstream installs
 
 ---
 
@@ -212,7 +214,7 @@ npx gsd-remix --all --global      # Install to all directories
 
 Use `--global` (`-g`) or `--local` (`-l`) to skip the location prompt.
 Use `--claude`, `--opencode`, `--gemini`, `--kilo`, `--codex`, `--copilot`, `--cursor`, `--windsurf`, `--antigravity`, `--augment`, `--trae`, `--qwen`, `--codebuddy`, `--cline`, or `--all` to skip the runtime prompt.
-The GSD SDK CLI (`gsd-sdk`) is installed automatically (required by `/gsd-*` commands). Pass `--no-sdk` to skip the SDK install, or `--sdk` to force a reinstall.
+The GSD Remix SDK CLI (`gsd-remix-sdk`) is installed automatically (required by `/gsd-*` commands). Pass `--no-sdk` to skip the SDK install, or `--sdk` to force a reinstall.
 
 </details>
 

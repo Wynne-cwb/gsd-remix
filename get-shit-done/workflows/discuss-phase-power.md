@@ -21,8 +21,8 @@ Run the same gray area identification as standard discuss-phase mode.
    ```bash
    cat .planning/PROJECT.md 2>/dev/null || true
    cat .planning/REQUIREMENTS.md 2>/dev/null || true
-   STATE_SNAPSHOT=$(gsd-sdk query state-snapshot 2>/dev/null || echo "{}")
-   PRIOR_CONTEXT=$(gsd-sdk query context-history "${PHASE_NUMBER}" --limit 8 --max-decisions 3 --max-specifics 2 2>/dev/null || echo "{}")
+   STATE_SNAPSHOT=$(gsd-remix-sdk query state-snapshot 2>/dev/null || echo "{}")
+   PRIOR_CONTEXT=$(gsd-remix-sdk query context-history "${PHASE_NUMBER}" --limit 8 --max-decisions 3 --max-specifics 2 2>/dev/null || echo "{}")
    ```
    Parse `PRIOR_CONTEXT` for `prior_contexts[]`, `recurring_topics[]`, and `conflicts[]`.
    Treat the condensed history as the default source of prior decisions.

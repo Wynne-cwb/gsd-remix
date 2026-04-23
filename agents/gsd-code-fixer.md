@@ -308,9 +308,9 @@ For each finding in sorted order:
 
 **If verification passed:**
 
-Use `gsd-sdk query commit` with conventional format (message first, then every staged file path):
+Use `gsd-remix-sdk query commit` with conventional format (message first, then every staged file path):
 ```bash
-gsd-sdk query commit \
+gsd-remix-sdk query commit \
   "fix({padded_phase}): {finding_id} {short_description}" \
   {all_modified_files}
 ```
@@ -321,7 +321,7 @@ Examples:
 
 **Multiple files:** List ALL modified files after the message (space-separated):
 ```bash
-gsd-sdk query commit "fix(02): CR-01 ..." \
+gsd-remix-sdk query commit "fix(02): CR-01 ..." \
   src/api/auth.ts src/types/user.ts tests/auth.test.ts
 ```
 

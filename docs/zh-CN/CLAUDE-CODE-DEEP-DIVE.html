@@ -463,7 +463,7 @@
 
                 <rect x="130" y="194" width="340" height="92" rx="24" fill="#f5f8ff" stroke="#3b5cc9" stroke-width="2"></rect>
                 <text x="300" y="226" text-anchor="middle" font-size="24" font-weight="700" fill="#26418f">查询 / 工具层</text>
-                <text x="300" y="254" text-anchor="middle" font-size="18" fill="#26418f">gsd-sdk query + gsd-tools.cjs</text>
+                <text x="300" y="254" text-anchor="middle" font-size="18" fill="#26418f">gsd-remix-sdk query + gsd-tools.cjs</text>
                 <text x="300" y="278" text-anchor="middle" font-size="16" fill="#5b678f">提供 init、state、phase、commit 等结构化接口</text>
 
                 <rect x="520" y="184" width="300" height="112" rx="24" fill="#fffaf2" stroke="#bcae95" stroke-width="2"></rect>
@@ -877,7 +877,7 @@
                 <div class="num">2</div>
                 <div>
                   <strong>workflow 先拉状态，不先拍脑袋</strong><br>
-                  通过 <span class="mono">gsd-sdk query init.plan-phase</span> 一次拿齐 phase 目录、模型、开关、现有工件、文件路径，再决定接下来分支。
+                  通过 <span class="mono">gsd-remix-sdk query init.plan-phase</span> 一次拿齐 phase 目录、模型、开关、现有工件、文件路径，再决定接下来分支。
                 </div>
               </div>
               <div class="step">
@@ -967,7 +967,7 @@
             <pre>/gsd-plan-phase 1
   → commands/gsd/plan-phase.md
   → workflows/plan-phase.md
-  → gsd-sdk query init.plan-phase 1
+  → gsd-remix-sdk query init.plan-phase 1
   → Task(subagent_type="gsd-planner", ...)
   → Task(subagent_type="gsd-plan-checker", ...)
   → .planning/phases/01-*/01-01-PLAN.md</pre>
@@ -1166,7 +1166,7 @@
             <span class="eyebrow">9. Programmatic Core</span>
             <h2>SDK / Query / Runner 这一层在干什么</h2>
             <p class="lede">
-              当你看到 workflow 里反复出现 <span class="mono">gsd-sdk query ...</span>，本质上是在调用一层面向 orchestration 的 API，而不是直接读文件。
+              当你看到 workflow 里反复出现 <span class="mono">gsd-remix-sdk query ...</span>，本质上是在调用一层面向 orchestration 的 API，而不是直接读文件。
             </p>
 
             <div class="stack">

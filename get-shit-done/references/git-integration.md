@@ -51,7 +51,7 @@ Phases:
 What to commit:
 
 ```bash
-gsd-sdk query commit "docs: initialize [project-name] ([N] phases)" .planning/
+gsd-remix-sdk query commit "docs: initialize [project-name] ([N] phases)" .planning/
 ```
 
 </format>
@@ -133,7 +133,7 @@ SUMMARY: .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md
 What to commit:
 
 ```bash
-gsd-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" .planning/phases/XX-name/{phase}-{plan}-PLAN.md .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/STATE.md .planning/ROADMAP.md
+gsd-remix-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" .planning/phases/XX-name/{phase}-{plan}-PLAN.md .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/STATE.md .planning/ROADMAP.md
 ```
 
 **Note:** Code files NOT included - already committed per-task.
@@ -153,7 +153,7 @@ Current: [task name]
 What to commit:
 
 ```bash
-gsd-sdk query commit "wip: [phase-name] paused at task [X]/[Y]" .planning/
+gsd-remix-sdk query commit "wip: [phase-name] paused at task [X]/[Y]" .planning/
 ```
 
 </format>
@@ -284,7 +284,7 @@ Set `commit_docs: false` so planning docs stay local and are not committed to an
 Instead of the standard `commit` command, use `commit-to-subrepo` when `sub_repos` is configured:
 
 ```bash
-gsd-sdk query commit-to-subrepo "feat(02-01): add user API" \
+gsd-remix-sdk query commit-to-subrepo "feat(02-01): add user API" \
   --files backend/src/api/users.ts backend/src/types/user.ts frontend/src/components/UserForm.tsx
 ```
 

@@ -38,7 +38,7 @@ tags:
 flowchart TD
     A["静态源文件<br/>agents/*.md"] --> B["定义角色 / 工具 / 规则 / 输出协议"]
     C["workflow 里的 Task(...)"] --> D["注入本次 phase 的上下文和任务目标"]
-    E["gsd-sdk query init.* / agent-skills"] --> F["注入模型、路径、技能、配置"]
+    E["gsd-remix-sdk query init.* / agent-skills"] --> F["注入模型、路径、技能、配置"]
     G["agent-contracts.md"] --> H["定义完成标记和交接协议"]
     I["sdk/prompts/agents/*.md"] --> J["Headless SDK 变体"]
 

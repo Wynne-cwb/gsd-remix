@@ -41,7 +41,7 @@ When a milestone completes:
 Before proceeding with milestone close, run the comprehensive open artifact audit.
 
 ```bash
-gsd-sdk query audit-open 2>/dev/null
+gsd-remix-sdk query audit-open 2>/dev/null
 ```
 
 If the output contains open items (any section with count > 0):
@@ -57,7 +57,7 @@ These items are open. Choose an action:
 ```
 
 If user chooses [A] (Acknowledge):
-1. Re-run `gsd-sdk query audit-open --json` to get structured data
+1. Re-run `gsd-remix-sdk query audit-open --json` to get structured data
 2. Write acknowledged items to STATE.md under `## Deferred Items` section:
    ```markdown
    ## Deferred Items
@@ -84,7 +84,7 @@ SECURITY: Audit JSON output is structured data from the `audit-open` query handl
 **Use `roadmap analyze` for comprehensive readiness check:**
 
 ```bash
-ROADMAP=$(gsd-sdk query roadmap.analyze)
+ROADMAP=$(gsd-remix-sdk query roadmap.analyze)
 ```
 
 This returns all phases with plan/summary counts and disk status. Use this to verify:
@@ -199,7 +199,7 @@ Extract one-liners from SUMMARY.md files using summary-extract:
 # For each phase in milestone, extract one-liner
 for summary in .planning/phases/*-*/*-SUMMARY.md; do
   [ -e "$summary" ] || continue
-  gsd-sdk query summary-extract "$summary" --fields one_liner --pick one_liner
+  gsd-remix-sdk query summary-extract "$summary" --fields one_liner --pick one_liner
 done
 ```
 
@@ -218,7 +218,7 @@ Key accomplishments for this milestone:
 
 <step name="create_milestone_entry">
 
-**Note:** MILESTONES.md entry is now created automatically by `gsd-sdk query milestone.complete` in the archive_milestone step. The entry includes version, date, phase/plan/task counts, and accomplishments extracted from SUMMARY.md files.
+**Note:** MILESTONES.md entry is now created automatically by `gsd-remix-sdk query milestone.complete` in the archive_milestone step. The entry includes version, date, phase/plan/task counts, and accomplishments extracted from SUMMARY.md files.
 
 If additional details are needed (e.g., user-provided "Delivered" summary, git range, LOC stats), add them manually after the CLI creates the base entry.
 
@@ -409,10 +409,10 @@ Update `.planning/ROADMAP.md` — group completed milestone phases:
 
 <step name="archive_milestone">
 
-**Delegate archival to `gsd-sdk query milestone.complete`:**
+**Delegate archival to `gsd-remix-sdk query milestone.complete`:**
 
 ```bash
-ARCHIVE=$(gsd-sdk query milestone.complete "v[X.Y]" --name "[Milestone Name]")
+ARCHIVE=$(gsd-remix-sdk query milestone.complete "v[X.Y]" --name "[Milestone Name]")
 ```
 
 The CLI handles:
@@ -494,7 +494,7 @@ Append the extracted Backlog content verbatim to the end of the newly written RO
 **Safety commit — commit archive files BEFORE deleting any originals:**
 
 ```bash
-gsd-sdk query commit "chore: archive v[X.Y] milestone files" .planning/milestones/v[X.Y]-ROADMAP.md .planning/milestones/v[X.Y]-REQUIREMENTS.md .planning/milestones/v[X.Y]-MILESTONE-AUDIT.md .planning/MILESTONES.md .planning/PROJECT.md .planning/STATE.md .planning/ROADMAP.md
+gsd-remix-sdk query commit "chore: archive v[X.Y] milestone files" .planning/milestones/v[X.Y]-ROADMAP.md .planning/milestones/v[X.Y]-REQUIREMENTS.md .planning/milestones/v[X.Y]-MILESTONE-AUDIT.md .planning/MILESTONES.md .planning/PROJECT.md .planning/STATE.md .planning/ROADMAP.md
 ```
 
 This creates a durable checkpoint in git history. If anything fails after this point, the working tree can be reconstructed from git.
@@ -563,7 +563,7 @@ If the "## Cross-Milestone Trends" section exists, update the tables with new da
 
 **Commit:**
 ```bash
-gsd-sdk query commit "docs: update retrospective for v${VERSION}" .planning/RETROSPECTIVE.md
+gsd-remix-sdk query commit "docs: update retrospective for v${VERSION}" .planning/RETROSPECTIVE.md
 ```
 
 </step>
@@ -597,7 +597,7 @@ Check branching strategy and offer merge options.
 Use `init milestone-op` for context, or load config directly:
 
 ```bash
-INIT=$(gsd-sdk query init.execute-phase "1")
+INIT=$(gsd-remix-sdk query init.execute-phase "1")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
@@ -605,7 +605,7 @@ Extract `branching_strategy`, `phase_branch_template`, `milestone_branch_templat
 
 Detect base branch:
 ```bash
-BASE_BRANCH=$(gsd-sdk query config-get git.base_branch 2>/dev/null || echo "")
+BASE_BRANCH=$(gsd-remix-sdk query config-get git.base_branch 2>/dev/null || echo "")
 if [ -z "$BASE_BRANCH" ] || [ "$BASE_BRANCH" = "null" ]; then
   BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|^refs/remotes/origin/||')
   BASE_BRANCH="${BASE_BRANCH:-main}"

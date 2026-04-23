@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { GSD } from '@gsd-build/sdk';
+ * import { GSD } from '@gsd-remix/sdk';
  *
  * const gsd = new GSD({ projectDir: '/path/to/project' });
  * const result = await gsd.executePlan('.planning/phases/01-auth/01-auth-01-PLAN.md');
@@ -321,7 +321,7 @@ export { CLITransport } from './cli-transport.js';
 export { WSTransport } from './ws-transport.js';
 export type { WSTransportOptions } from './ws-transport.js';
 
-// Query registry argv normalization (matches `gsd-sdk query` and `GSDTools` hot path)
+// Query registry argv normalization (matches `gsd-remix-sdk query` and `GSDTools` hot path)
 export { createRegistry, normalizeQueryCommand } from './query/index.js';
 
 // Workstream utilities

@@ -1,6 +1,6 @@
 # Query handler conventions (`sdk/src/query/`)
 
-This document records contracts for the typed query layer consumed by `gsd-sdk query` and programmatic `createRegistry()` callers.
+This document records contracts for the typed query layer consumed by `gsd-remix-sdk query` and programmatic `createRegistry()` callers.
 
 ## Registry coverage vs `gsd-tools.cjs`
 
@@ -10,9 +10,9 @@ This document records contracts for the typed query layer consumed by `gsd-sdk q
   - CJS `**summary-extract**` → SDK `**summary.extract**` / `**summary extract**` / `**history-digest**` (see `index.ts`).
   - CJS top-level `**scaffold <type> ...**` → SDK `**phase.scaffold**` / `**phase scaffold**` with the scaffold type as the first argument (no separate `scaffold` alias on the registry).
 
-## `gsd-sdk query` routing
+## `gsd-remix-sdk query` routing
 
-1. **`normalizeQueryCommand()`** (`normalize-query-command.ts`) — maps the first argv tokens to the same **command + subcommand** patterns as `gsd-tools` `runCommand()` where needed (e.g. `state json` → `state.json`, `init execute-phase 9` → `init.execute-phase` with args `['9']`, `scaffold …` → `phase.scaffold`). Re-exported from **`@gsd-build/sdk`** and **`createRegistry`’s module** (`sdk/src/query/index.ts`) so programmatic callers can mirror CLI tokenization without importing a deep path.
+1. **`normalizeQueryCommand()`** (`normalize-query-command.ts`) — maps the first argv tokens to the same **command + subcommand** patterns as `gsd-tools` `runCommand()` where needed (e.g. `state json` → `state.json`, `init execute-phase 9` → `init.execute-phase` with args `['9']`, `scaffold …` → `phase.scaffold`). Re-exported from **`@gsd-remix/sdk`** and **`createRegistry`’s module** (`sdk/src/query/index.ts`) so programmatic callers can mirror CLI tokenization without importing a deep path.
 2. **`resolveQueryArgv()`** (`registry.ts`) — **longest-prefix match** on the normalized argv: tries joined keys `a.b.c` then `a b c` for each prefix length, longest first. Example: `state update status X` → handler `state.update` with args `[status, X]`.
 3. **Dotted single token**: one token like `init.new-project` matches the registry; if the first pass finds no handler, a single dotted token is split and matching runs again.
 4. **CJS fallback (CLI)**: if nothing matches a registered handler and `GSD_QUERY_FALLBACK` is not `off`/`never`/`false`/`0`, the CLI shells out to `gsd-tools.cjs` with argv derived from the normalized tokens (dotted commands are split into CJS-style segments). stderr receives a short bridge warning. Set `GSD_QUERY_FALLBACK=off` for strict mode (parity tests). CLI-only commands such as `graphify` rely on this path until native handlers exist.
@@ -66,7 +66,7 @@ Handlers for `**state.signal-waiting`**, `**state.signal-resume**`, `**state.val
 **`state.json` vs `state.load` (different CJS commands):**
 
 - **`state.json`** / `state json` — port of **`cmdStateJson`** (`state.ts` `stateJson`): rebuilt STATE.md frontmatter JSON. Read-only golden: `read-only-parity.integration.test.ts` compares to CJS `state json` with **`last_updated`** stripped.
-- **`state.load`** / `state load` — port of **`cmdStateLoad`** (`state-project-load.ts` `stateProjectLoad`): `{ config, state_raw, state_exists, roadmap_exists, config_exists }`; **`config`** comes from **`get-shit-done/bin/lib/core.cjs`** `loadConfig` (resolved via the same candidate paths as a normal GSD install). Read-only golden: full `toEqual` vs `state load`. If `core.cjs` cannot be resolved, dispatch throws **`GSDError`** (document for minimal `@gsd-build/sdk`-only installs).
+- **`state.load`** / `state load` — port of **`cmdStateLoad`** (`state-project-load.ts` `stateProjectLoad`): `{ config, state_raw, state_exists, roadmap_exists, config_exists }`; **`config`** comes from **`get-shit-done/bin/lib/core.cjs`** `loadConfig` (resolved via the same candidate paths as a normal GSD install). Read-only golden: full `toEqual` vs `state load`. If `core.cjs` cannot be resolved, dispatch throws **`GSDError`** (document for minimal `@gsd-remix/sdk`-only installs).
 
 `stateExtractField` in `helpers.ts` uses **horizontal whitespace only** after `Field:` so YAML keys such as lowercase `progress:` in frontmatter are not mistaken for the body `Progress:` line (see `get-shit-done/bin/lib/state.cjs` — same rule).
 
@@ -190,7 +190,7 @@ Handlers in `createRegistry()` that are **not** covered by `golden.integration.t
 
 ## Decision routing (SDK-only)
 
-These handlers implement `.planning/research/decision-routing-audit.md` — **no `gsd-tools.cjs` mirror yet** (orchestration JSON only). Invoke via `gsd-sdk query` / `registry.dispatch()` after `normalizeQueryCommand()` where argv uses `check …` / `detect …` / `route …` prefixes.
+These handlers implement `.planning/research/decision-routing-audit.md` — **no `gsd-tools.cjs` mirror yet** (orchestration JSON only). Invoke via `gsd-remix-sdk query` / `registry.dispatch()` after `normalizeQueryCommand()` where argv uses `check …` / `detect …` / `route …` prefixes.
 
 ### Tier 1
 

@@ -1,5 +1,5 @@
 /**
- * Normalize `gsd-sdk query <argv...>` command tokens to match `createRegistry()` keys.
+ * Normalize `gsd-remix-sdk query <argv...>` command tokens to match `createRegistry()` keys.
  *
  * `gsd-tools` takes a top-level command plus a subcommand (`state json`, `init execute-phase 9`).
  * The SDK CLI originally passed only argv[0] as the registry key, so `query state json` dispatched

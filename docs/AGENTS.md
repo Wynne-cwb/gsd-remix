@@ -666,11 +666,11 @@ Ten additional agents ship under `agents/gsd-*.md` and are used by specialty wor
 | **Tools** | Read, Write, Bash, Glob, Grep |
 | **Model (balanced)** | Sonnet |
 | **Color** | Cyan |
-| **Produces** | `.planning/intel/*.json` (and companion Markdown) consumed by `gsd-sdk query intel` |
+| **Produces** | `.planning/intel/*.json` (and companion Markdown) consumed by `gsd-remix-sdk query intel` |
 
 **Key behaviors:**
 - Writes current state only — no temporal language, every claim references an actual file path
-- Uses Glob / Read / Grep for cross-platform correctness; Bash is reserved for `gsd-sdk query intel` CLI calls
+- Uses Glob / Read / Grep for cross-platform correctness; Bash is reserved for `gsd-remix-sdk query intel` CLI calls
 
 ---
 

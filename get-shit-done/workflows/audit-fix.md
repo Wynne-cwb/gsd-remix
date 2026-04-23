@@ -32,7 +32,7 @@ Invoke the source audit command and capture output.
 
 For `audit-uat` source:
 ```bash
-INIT=$(gsd-sdk query audit-uat 2>/dev/null || echo "{}")
+INIT=$(gsd-remix-sdk query audit-uat 2>/dev/null || echo "{}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
@@ -103,7 +103,7 @@ Task(
 
 **b. Run tests:**
 ```bash
-AUDIT_TEST_CMD=$(gsd-sdk query config-get workflow.test_command --default "" 2>/dev/null || true)
+AUDIT_TEST_CMD=$(gsd-remix-sdk query config-get workflow.test_command --default "" 2>/dev/null || true)
 if [ -z "$AUDIT_TEST_CMD" ]; then
   if [ -f "Makefile" ] && grep -q "^test:" Makefile; then
     AUDIT_TEST_CMD="make test"

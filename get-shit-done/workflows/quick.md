@@ -125,11 +125,11 @@ If `$VALIDATE_MODE` only:
 **Step 2: Initialize**
 
 ```bash
-if ! command -v gsd-sdk &>/dev/null; then
-  echo "⚠ gsd-sdk not found in PATH — /gsd-quick requires it."
+if ! command -v gsd-remix-sdk &>/dev/null; then
+  echo "⚠ gsd-remix-sdk not found in PATH — /gsd-quick requires it."
   echo ""
   echo "Install the GSD SDK:"
-  echo "  npm install -g @gsd-build/sdk"
+  echo "  npm install -g @gsd-remix/sdk"
   echo ""
   echo "Or update GSD to get the latest packages:"
   echo "  /gsd-update"
@@ -138,18 +138,18 @@ fi
 ```
 
 ```bash
-INIT=$(gsd-sdk query init.quick "$DESCRIPTION")
+INIT=$(gsd-remix-sdk query init.quick "$DESCRIPTION")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
-AGENT_SKILLS_PLANNER=$(gsd-sdk query agent-skills gsd-planner 2>/dev/null)
-AGENT_SKILLS_EXECUTOR=$(gsd-sdk query agent-skills gsd-executor 2>/dev/null)
-AGENT_SKILLS_CHECKER=$(gsd-sdk query agent-skills gsd-checker 2>/dev/null)
-AGENT_SKILLS_VERIFIER=$(gsd-sdk query agent-skills gsd-verifier 2>/dev/null)
+AGENT_SKILLS_PLANNER=$(gsd-remix-sdk query agent-skills gsd-planner 2>/dev/null)
+AGENT_SKILLS_EXECUTOR=$(gsd-remix-sdk query agent-skills gsd-executor 2>/dev/null)
+AGENT_SKILLS_CHECKER=$(gsd-remix-sdk query agent-skills gsd-checker 2>/dev/null)
+AGENT_SKILLS_VERIFIER=$(gsd-remix-sdk query agent-skills gsd-verifier 2>/dev/null)
 ```
 
 Parse JSON for: `planner_model`, `executor_model`, `checker_model`, `verifier_model`, `commit_docs`, `branch_name`, `quick_id`, `slug`, `date`, `timestamp`, `quick_dir`, `task_dir`, `roadmap_exists`, `planning_exists`.
 
 ```bash
-USE_WORKTREES=$(gsd-sdk query config-get workflow.use_worktrees 2>/dev/null || echo "true")
+USE_WORKTREES=$(gsd-remix-sdk query config-get workflow.use_worktrees 2>/dev/null || echo "true")
 ```
 
 If the project uses git submodules, worktree isolation is skipped:
@@ -575,7 +575,7 @@ Skip this step entirely if `USE_WORKTREES === "false"` (non-worktree mode: PLAN.
 
 ```bash
 if [ "${USE_WORKTREES}" != "false" ]; then
-  COMMIT_DOCS=$(gsd-sdk query config-get commit_docs 2>/dev/null || echo "true")
+  COMMIT_DOCS=$(gsd-remix-sdk query config-get commit_docs 2>/dev/null || echo "true")
   if [ "$COMMIT_DOCS" != "false" ]; then
     git add "${QUICK_DIR}/${quick_id}-PLAN.md"
     git commit --no-verify -m "docs(${quick_id}): pre-dispatch plan for ${DESCRIPTION}" -- "${QUICK_DIR}/${quick_id}-PLAN.md" || true
@@ -684,7 +684,7 @@ After executor returns:
 
        if ! git diff --quiet .planning/STATE.md .planning/ROADMAP.md 2>/dev/null || \
           [ -n "$DELETED_FILES" ]; then
-         COMMIT_DOCS=$(gsd-sdk query config-get commit_docs 2>/dev/null || echo "true")
+         COMMIT_DOCS=$(gsd-remix-sdk query config-get commit_docs 2>/dev/null || echo "true")
          if [ "$COMMIT_DOCS" != "false" ]; then
            git add .planning/STATE.md .planning/ROADMAP.md 2>/dev/null || true
            git commit --amend --no-edit 2>/dev/null || true
@@ -736,7 +736,7 @@ Skip this step entirely if `$FULL_MODE` is false.
 
 **Config gate:**
 ```bash
-CODE_REVIEW_ENABLED=$(gsd-sdk query config-get workflow.code_review 2>/dev/null || echo "true")
+CODE_REVIEW_ENABLED=$(gsd-remix-sdk query config-get workflow.code_review 2>/dev/null || echo "true")
 ```
 If `"false"`, skip with message "Code review skipped (workflow.code_review=false)".
 
@@ -883,7 +883,7 @@ Use Edit tool to make these changes atomically
 
 **Step 8: Final commit and completion**
 
-Stage and commit quick task artifacts. This step MUST always run — even if the executor already committed some files (e.g. when running without worktree isolation). The `gsd-sdk query commit` command (or legacy `gsd-tools.cjs` commit) handles already-committed files gracefully.
+Stage and commit quick task artifacts. This step MUST always run — even if the executor already committed some files (e.g. when running without worktree isolation). The `gsd-remix-sdk query commit` command (or legacy `gsd-tools.cjs` commit) handles already-committed files gracefully.
 
 Build file list:
 - `${QUICK_DIR}/${quick_id}-PLAN.md`
@@ -897,14 +897,14 @@ Build file list:
 # Explicitly stage all artifacts before commit — PLAN.md may be untracked
 # if the executor ran without worktree isolation and committed docs early
 # Filter .planning/ files from staging if commit_docs is disabled (#1783)
-COMMIT_DOCS=$(gsd-sdk query config-get commit_docs 2>/dev/null || echo "true")
+COMMIT_DOCS=$(gsd-remix-sdk query config-get commit_docs 2>/dev/null || echo "true")
 if [ "$COMMIT_DOCS" = "false" ]; then
   file_list_filtered=$(echo "${file_list}" | tr ' ' '\n' | grep -v '^\.planning/' | tr '\n' ' ')
   git add ${file_list_filtered} 2>/dev/null
 else
   git add ${file_list} 2>/dev/null
 fi
-gsd-sdk query commit "docs(quick-${quick_id}): ${DESCRIPTION}" ${file_list}
+gsd-remix-sdk query commit "docs(quick-${quick_id}): ${DESCRIPTION}" ${file_list}
 ```
 
 Get final commit hash:

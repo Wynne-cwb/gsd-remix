@@ -19,10 +19,10 @@ Valid GSD subagent types (use exact names — do not fall back to 'general-purpo
 ## 1. Initialize
 
 ```bash
-INIT=$(gsd-sdk query init.plan-phase "$PHASE")
+INIT=$(gsd-remix-sdk query init.plan-phase "$PHASE")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
-AGENT_SKILLS_UI=$(gsd-sdk query agent-skills gsd-ui-researcher 2>/dev/null)
-AGENT_SKILLS_UI_CHECKER=$(gsd-sdk query agent-skills gsd-ui-checker 2>/dev/null)
+AGENT_SKILLS_UI=$(gsd-remix-sdk query agent-skills gsd-ui-researcher 2>/dev/null)
+AGENT_SKILLS_UI_CHECKER=$(gsd-remix-sdk query agent-skills gsd-ui-checker 2>/dev/null)
 ```
 
 Parse JSON for: `phase_dir`, `phase_number`, `phase_name`, `phase_slug`, `padded_phase`, `has_context`, `has_research`, `commit_docs`.
@@ -37,14 +37,14 @@ SKETCH_FINDINGS_PATH=$(ls ./.claude/skills/sketch-findings-*/SKILL.md 2>/dev/nul
 Resolve UI agent models:
 
 ```bash
-UI_RESEARCHER_MODEL=$(gsd-sdk query resolve-model gsd-ui-researcher --raw)
-UI_CHECKER_MODEL=$(gsd-sdk query resolve-model gsd-ui-checker --raw)
+UI_RESEARCHER_MODEL=$(gsd-remix-sdk query resolve-model gsd-ui-researcher --raw)
+UI_CHECKER_MODEL=$(gsd-remix-sdk query resolve-model gsd-ui-checker --raw)
 ```
 
 Check config:
 
 ```bash
-UI_ENABLED=$(gsd-sdk query config-get workflow.ui_phase 2>/dev/null || echo "true")
+UI_ENABLED=$(gsd-remix-sdk query config-get workflow.ui_phase 2>/dev/null || echo "true")
 ```
 
 **If `UI_ENABLED` is `false`:**
@@ -60,7 +60,7 @@ Exit workflow.
 Extract phase number from $ARGUMENTS. If not provided, detect next unplanned phase.
 
 ```bash
-PHASE_INFO=$(gsd-sdk query roadmap.get-phase "${PHASE}")
+PHASE_INFO=$(gsd-remix-sdk query roadmap.get-phase "${PHASE}")
 ```
 
 **If `found` is false:** Error with available phases.
@@ -294,13 +294,13 @@ Dimensions: 6/6 passed
 ## 11. Commit (if configured)
 
 ```bash
-gsd-sdk query commit "docs(${padded_phase}): UI design contract" "${PHASE_DIR}/${PADDED_PHASE}-UI-SPEC.md"
+gsd-remix-sdk query commit "docs(${padded_phase}): UI design contract" "${PHASE_DIR}/${PADDED_PHASE}-UI-SPEC.md"
 ```
 
 ## 12. Update State
 
 ```bash
-gsd-sdk query state.record-session \
+gsd-remix-sdk query state.record-session \
   --stopped-at "Phase ${PHASE} UI-SPEC approved" \
   --resume-file "${PHASE_DIR}/${PADDED_PHASE}-UI-SPEC.md"
 ```

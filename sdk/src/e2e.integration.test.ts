@@ -35,7 +35,7 @@ describe.skipIf(!cliAvailable)('E2E: Single plan execution', () => {
   let tmpDir: string;
 
   beforeAll(async () => {
-    tmpDir = await mkdtemp(join(tmpdir(), 'gsd-sdk-e2e-'));
+    tmpDir = await mkdtemp(join(tmpdir(), 'gsd-remix-sdk-e2e-'));
     // Copy fixture files to temp directory
     await cp(fixturesDir, tmpDir, { recursive: true });
   });
@@ -60,12 +60,12 @@ describe.skipIf(!cliAvailable)('E2E: Single plan execution', () => {
     // Verify the plan's task was executed — output.txt should exist
     const outputPath = join(tmpDir, 'output.txt');
     const outputContent = await readFile(outputPath, 'utf-8');
-    expect(outputContent).toContain('hello from gsd-sdk');
+    expect(outputContent).toContain('hello from gsd-remix-sdk');
   }, 120_000); // 2 minute timeout for real CLI execution
 
   it('proves session isolation (R014) — different session IDs for sequential runs', async () => {
     // Create a second temp dir for isolation proof
-    const tmpDir2 = await mkdtemp(join(tmpdir(), 'gsd-sdk-e2e-'));
+    const tmpDir2 = await mkdtemp(join(tmpdir(), 'gsd-remix-sdk-e2e-'));
     await cp(fixturesDir, tmpDir2, { recursive: true });
 
     try {
@@ -113,7 +113,7 @@ describe.skipIf(!cliAvailable)('E2E: Event stream during plan execution (R007)',
   let tmpDir: string;
 
   beforeAll(async () => {
-    tmpDir = await mkdtemp(join(tmpdir(), 'gsd-sdk-e2e-stream-'));
+    tmpDir = await mkdtemp(join(tmpdir(), 'gsd-remix-sdk-e2e-stream-'));
     await cp(fixturesDir, tmpDir, { recursive: true });
   });
 
@@ -166,7 +166,7 @@ describe.skipIf(!cliAvailable)('E2E: Event stream during plan execution (R007)',
 
 describe('E2E: Error handling', () => {
   it('returns failure for nonexistent plan path', async () => {
-    const tmpDir = await mkdtemp(join(tmpdir(), 'gsd-sdk-e2e-err-'));
+    const tmpDir = await mkdtemp(join(tmpdir(), 'gsd-remix-sdk-e2e-err-'));
 
     try {
       const gsd = new GSD({ projectDir: tmpDir });

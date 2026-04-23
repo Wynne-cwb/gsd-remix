@@ -191,21 +191,21 @@ Delete MILESTONE-CONTEXT.md if exists (consumed).
 Clear leftover phase directories from the previous milestone:
 
 ```bash
-gsd-sdk query phases.clear --confirm
+gsd-remix-sdk query phases.clear --confirm
 ```
 
 ```bash
-gsd-sdk query commit "docs: start milestone v[X.Y] [Name]" .planning/PROJECT.md .planning/STATE.md
+gsd-remix-sdk query commit "docs: start milestone v[X.Y] [Name]" .planning/PROJECT.md .planning/STATE.md
 ```
 
 ## 7. Load Context and Resolve Models
 
 ```bash
-INIT=$(gsd-sdk query init.new-milestone)
+INIT=$(gsd-remix-sdk query init.new-milestone)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
-AGENT_SKILLS_RESEARCHER=$(gsd-sdk query agent-skills gsd-project-researcher 2>/dev/null)
-AGENT_SKILLS_SYNTHESIZER=$(gsd-sdk query agent-skills gsd-synthesizer 2>/dev/null)
-AGENT_SKILLS_ROADMAPPER=$(gsd-sdk query agent-skills gsd-roadmapper 2>/dev/null)
+AGENT_SKILLS_RESEARCHER=$(gsd-remix-sdk query agent-skills gsd-project-researcher 2>/dev/null)
+AGENT_SKILLS_SYNTHESIZER=$(gsd-remix-sdk query agent-skills gsd-synthesizer 2>/dev/null)
+AGENT_SKILLS_ROADMAPPER=$(gsd-remix-sdk query agent-skills gsd-roadmapper 2>/dev/null)
 ```
 
 Extract from init JSON: `researcher_model`, `synthesizer_model`, `roadmapper_model`, `commit_docs`, `research_enabled`, `current_milestone`, `project_exists`, `roadmap_exists`, `latest_completed_milestone`, `phase_dir_count`, `phase_archive_path`, `agents_installed`, `missing_agents`.
@@ -423,7 +423,7 @@ If "adjust": Return to scoping.
 
 **Commit requirements:**
 ```bash
-gsd-sdk query commit "docs: define milestone v[X.Y] requirements" .planning/REQUIREMENTS.md
+gsd-remix-sdk query commit "docs: define milestone v[X.Y] requirements" .planning/REQUIREMENTS.md
 ```
 
 ## 10. Create Roadmap
@@ -507,7 +507,7 @@ Success criteria:
 
 **Commit roadmap** (after approval):
 ```bash
-gsd-sdk query commit "docs: create milestone v[X.Y] roadmap ([N] phases)" .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md
+gsd-remix-sdk query commit "docs: create milestone v[X.Y] roadmap ([N] phases)" .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md
 ```
 
 ## 10.5. Link Pending Todos to Roadmap Phases
@@ -550,7 +550,7 @@ files: [existing]
 
 **If any todos were linked:**
 ```bash
-gsd-sdk query commit "docs: tag [count] pending todos with resolves_phase after milestone v[X.Y] roadmap" .planning/todos/pending/*.md
+gsd-remix-sdk query commit "docs: tag [count] pending todos with resolves_phase after milestone v[X.Y] roadmap" .planning/todos/pending/*.md
 ```
 
 Print a summary:

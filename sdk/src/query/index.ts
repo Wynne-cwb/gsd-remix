@@ -113,7 +113,7 @@ import type { QueryHandler, QueryResult } from './utils.js';
 
 export type { QueryResult, QueryHandler } from './utils.js';
 export { extractField } from './registry.js';
-/** Same argv normalization as `gsd-sdk query` — use when calling `registry.dispatch()` with CLI-style `command` + `args`. */
+/** Same argv normalization as `gsd-remix-sdk query` — use when calling `registry.dispatch()` with CLI-style `command` + `args`. */
 export { normalizeQueryCommand } from './normalize-query-command.js';
 
 // ─── Mutation commands set ────────────────────────────────────────────────

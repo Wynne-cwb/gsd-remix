@@ -50,6 +50,14 @@ This lets the remix stay close to upstream usage patterns while still making opi
 - **Key files:** [package.json](../package.json), [README.md](../README.md)
 - **Compatibility impact:** Low. Runtime commands and repo structure stay aligned with upstream; npm install/publish identity changes.
 
+### 2026-04-23 — SDK Namespace Isolation
+
+- **Area:** SDK packaging / installer behavior
+- **Change:** Rename the bundled SDK package and binary from `@gsd-build/sdk` / `gsd-sdk` to `@gsd-remix/sdk` / `gsd-remix-sdk`, and migrate workflows plus runtime preflights to the new binary
+- **Rationale:** Prevent the remix SDK from colliding with upstream global installs while keeping the `/gsd-*` command surface unchanged
+- **Key files:** [sdk/package.json](../sdk/package.json), [sdk/package-lock.json](../sdk/package-lock.json), [bin/install.js](../bin/install.js), [get-shit-done/workflows/health.md](../get-shit-done/workflows/health.md), [README.md](../README.md)
+- **Compatibility impact:** Medium. Fresh `gsd-remix` installs now rely on `gsd-remix-sdk`; users with tooling that shells out to `gsd-sdk` must switch to the remix binary.
+
 ### 2026-04-23 — Discuss History Token Optimization
 
 - **Area:** Workflow behavior / token budget

@@ -21,20 +21,20 @@ describe('/gsd-health runtime mode', () => {
   test('workflow parses --runtime and calls runtime.health', () => {
     const content = fs.readFileSync(WORKFLOW_PATH, 'utf-8');
     assert.ok(content.includes('RUNTIME_FLAG'), 'health workflow should parse a runtime flag');
-    assert.ok(content.includes('gsd-sdk query runtime.health'), 'health workflow should invoke runtime.health');
+    assert.ok(content.includes('gsd-remix-sdk query runtime.health'), 'health workflow should invoke runtime.health');
   });
 
-  test('workflow guards gsd-sdk before its first query', () => {
+  test('workflow guards gsd-remix-sdk before its first query', () => {
     const content = fs.readFileSync(WORKFLOW_PATH, 'utf-8');
-    const runtimeCall = content.indexOf('gsd-sdk query runtime.health');
+    const runtimeCall = content.indexOf('gsd-remix-sdk query runtime.health');
     assert.ok(runtimeCall !== -1, 'health workflow should invoke runtime.health');
 
-    const checkIndex = content.lastIndexOf('command -v gsd-sdk', runtimeCall);
-    assert.ok(checkIndex !== -1, 'health workflow should guard gsd-sdk before runtime.health');
+    const checkIndex = content.lastIndexOf('command -v gsd-remix-sdk', runtimeCall);
+    assert.ok(checkIndex !== -1, 'health workflow should guard gsd-remix-sdk before runtime.health');
 
     const preamble = content.slice(checkIndex, runtimeCall);
     const hasInstallHint =
-      preamble.includes('@gsd-build/sdk') ||
+      preamble.includes('@gsd-remix/sdk') ||
       preamble.includes('gsd-update') ||
       preamble.includes('/gsd-update');
     assert.ok(hasInstallHint, 'health workflow preflight should include install/update guidance');

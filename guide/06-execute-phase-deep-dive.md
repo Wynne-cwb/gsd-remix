@@ -50,7 +50,7 @@ tags:
 flowchart LR
     A["用户调用 /gsd-execute-phase"] --> B["commands/gsd/execute-phase.md"]
     B --> C["workflows/execute-phase.md"]
-    C --> D["gsd-sdk query init.execute-phase"]
+    C --> D["gsd-remix-sdk query init.execute-phase"]
     D --> E["phase-plan-index"]
     E --> F["按 wave 分组"]
     F --> G["spawn gsd-executor"]
@@ -89,7 +89,7 @@ flowchart LR
 和 `plan-phase` 一样，真正开始前先做：
 
 ```bash
-gsd-sdk query init.execute-phase "${PHASE_ARG}"
+gsd-remix-sdk query init.execute-phase "${PHASE_ARG}"
 ```
 
 这一步会拿到本轮执行的关键控制信息，比如：
@@ -122,7 +122,7 @@ gsd-sdk query init.execute-phase "${PHASE_ARG}"
 
 真正让 `execute-phase` 能“按 wave 执行”的关键，不是 prompt 文案，而是：
 
-- `gsd-sdk query phase-plan-index "${PHASE_NUMBER}"`
+- `gsd-remix-sdk query phase-plan-index "${PHASE_NUMBER}"`
 
 [`../sdk/src/query/phase.ts`](../sdk/src/query/phase.ts) 里的这个 handler 会：
 
@@ -408,7 +408,7 @@ workflow 会根据 verifier 结果走三条分支：
 
 真正把 phase 标记为完成、推进 `ROADMAP.md` / `STATE.md` / `REQUIREMENTS.md` 的，不是 executor，也不是 verifier，而是：
 
-- `gsd-sdk query phase.complete "${PHASE_NUMBER}"`
+- `gsd-remix-sdk query phase.complete "${PHASE_NUMBER}"`
 
 [`../sdk/src/query/phase-lifecycle.ts`](../sdk/src/query/phase-lifecycle.ts) 里的 `phaseComplete` 会做很多事：
 

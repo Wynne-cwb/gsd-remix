@@ -28,7 +28,7 @@ const GSD_TOOLS_PATH = resolveGsdToolsPath(process.cwd());
 const gsdToolsAvailable = existsSync(GSD_TOOLS_PATH);
 
 async function createTempPlanningDir(): Promise<string> {
-  const tmpDir = await mkdtemp(join(tmpdir(), 'gsd-sdk-phase-int-'));
+  const tmpDir = await mkdtemp(join(tmpdir(), 'gsd-remix-sdk-phase-int-'));
 
   // Create .planning structure
   const planningDir = join(tmpDir, '.planning');
@@ -232,7 +232,7 @@ describe.skipIf(!gsdToolsAvailable)('Integration: PhaseRunner against real gsd-t
  * - Plan 01 has a SUMMARY.md (marks it as completed)
  */
 async function createMultiWavePlanningDir(): Promise<string> {
-  const tmpDir = await mkdtemp(join(tmpdir(), 'gsd-sdk-wave-int-'));
+  const tmpDir = await mkdtemp(join(tmpdir(), 'gsd-remix-sdk-wave-int-'));
 
   const planningDir = join(tmpDir, '.planning');
   const phaseDir = join(planningDir, 'phases', '01-wave-test');

@@ -31,18 +31,18 @@ Valid GSD subagent types (use exact names — do not fall back to 'general-purpo
 **MANDATORY — Check runtime health before any GSD SDK query.**
 
 ```bash
-if ! command -v gsd-sdk &>/dev/null; then
-  echo "⚠ gsd-sdk not found in PATH — /gsd-plan-phase requires it."
+if ! command -v gsd-remix-sdk &>/dev/null; then
+  echo "⚠ gsd-remix-sdk not found in PATH — /gsd-plan-phase requires it."
   echo ""
   echo "Install the GSD SDK:"
-  echo "  npm install -g @gsd-build/sdk"
+  echo "  npm install -g @gsd-remix/sdk"
   echo ""
   echo "Or update GSD to get the latest packages:"
   echo "  /gsd-update"
   exit 1
 fi
 
-RUNTIME_HEALTH=$(gsd-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","level":"block","message":"Installed gsd-sdk does not expose runtime.health.","fix":"Run /gsd-update to sync gsd-remix and @gsd-build/sdk."}],"warnings":[],"checks":[]}')
+RUNTIME_HEALTH=$(gsd-remix-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","level":"block","message":"Installed gsd-remix-sdk does not expose runtime.health.","fix":"Run /gsd-update to sync gsd-remix and @gsd-remix/sdk."}],"warnings":[],"checks":[]}')
 ```
 
 Parse JSON for: `passed`, `blockers[]`, `warnings[]`, `checks[]`, `node_version`, `required_node_range`, `gsd_tools_source`, `gsd_tools_path`, `legacy_bridge_available`.
@@ -57,13 +57,13 @@ Rules:
 Load all context in one call (paths only to minimize orchestrator context):
 
 ```bash
-INIT=$(gsd-sdk query init.plan-phase "$PHASE")
+INIT=$(gsd-remix-sdk query init.plan-phase "$PHASE")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
-AGENT_SKILLS_RESEARCHER=$(gsd-sdk query agent-skills gsd-researcher 2>/dev/null)
-AGENT_SKILLS_PLANNER=$(gsd-sdk query agent-skills gsd-planner 2>/dev/null)
-AGENT_SKILLS_CHECKER=$(gsd-sdk query agent-skills gsd-checker 2>/dev/null)
-CONTEXT_WINDOW=$(gsd-sdk query config-get context_window 2>/dev/null || echo "200000")
-TDD_MODE=$(gsd-sdk query config-get workflow.tdd_mode 2>/dev/null || echo "false")
+AGENT_SKILLS_RESEARCHER=$(gsd-remix-sdk query agent-skills gsd-researcher 2>/dev/null)
+AGENT_SKILLS_PLANNER=$(gsd-remix-sdk query agent-skills gsd-planner 2>/dev/null)
+AGENT_SKILLS_CHECKER=$(gsd-remix-sdk query agent-skills gsd-checker 2>/dev/null)
+CONTEXT_WINDOW=$(gsd-remix-sdk query config-get context_window 2>/dev/null || echo "200000")
+TDD_MODE=$(gsd-remix-sdk query config-get workflow.tdd_mode 2>/dev/null || echo "false")
 ```
 
 When `TDD_MODE` is `true`, the planner agent is instructed to apply `type: tdd` to eligible tasks using heuristics from `references/tdd.md`. The planner's `<required_reading>` is extended to include `@~/.claude/get-shit-done/references/tdd.md` so gate enforcement rules are available during planning.
@@ -116,7 +116,7 @@ Exit workflow.
 ## 3. Validate Phase
 
 ```bash
-PHASE_INFO=$(gsd-sdk query roadmap.get-phase "${PHASE}")
+PHASE_INFO=$(gsd-remix-sdk query roadmap.get-phase "${PHASE}")
 ```
 
 **If `found` is false:** Error with available phases. **If `found` is true:** Extract `phase_number`, `phase_name`, `goal` from JSON.
@@ -218,7 +218,7 @@ Use full relative paths. Group by topic area.]
 
 5. Commit:
 ```bash
-gsd-sdk query commit "docs(${padded_phase}): generate context from PRD" "${phase_dir}/${padded_phase}-CONTEXT.md"
+gsd-remix-sdk query commit "docs(${padded_phase}): generate context from PRD" "${phase_dir}/${padded_phase}-CONTEXT.md"
 ```
 
 6. Set `context_content` to the generated CONTEXT.md content and continue to step 5 (Handle Research).
@@ -237,7 +237,7 @@ If `context_path` is not null, display: `Using phase context from: ${context_pat
 
 Read discuss mode for context gate label:
 ```bash
-DISCUSS_MODE=$(gsd-sdk query config-get workflow.discuss_mode 2>/dev/null || echo "discuss")
+DISCUSS_MODE=$(gsd-remix-sdk query config-get workflow.discuss_mode 2>/dev/null || echo "discuss")
 ```
 
 If `TEXT_MODE` is true, present as a plain-text numbered list:
@@ -281,7 +281,7 @@ If "Run discuss-phase first":
 
 ```bash
 AI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-AI-SPEC.md 2>/dev/null | head -1)
-AI_PHASE_CFG=$(gsd-sdk query config-get workflow.ai_integration_phase 2>/dev/null || echo "true")
+AI_PHASE_CFG=$(gsd-remix-sdk query config-get workflow.ai_integration_phase 2>/dev/null || echo "true")
 ```
 
 **Skip if `AI_PHASE_CFG` is `false`.**
@@ -367,7 +367,7 @@ Display banner:
 ### Spawn gsd-phase-researcher
 
 ```bash
-PHASE_DESC=$(gsd-sdk query roadmap.get-phase "${PHASE}" --pick section)
+PHASE_DESC=$(gsd-remix-sdk query roadmap.get-phase "${PHASE}" --pick section)
 ```
 
 Research prompt:
@@ -448,9 +448,9 @@ test -f "${PHASE_DIR}/${PADDED_PHASE}-VALIDATION.md" && echo "VALIDATION_CREATED
 > Skip if `workflow.security_enforcement` is explicitly `false`. Absent = enabled.
 
 ```bash
-SECURITY_CFG=$(gsd-sdk query config-get workflow.security_enforcement --raw 2>/dev/null || echo "true")
-SECURITY_ASVS=$(gsd-sdk query config-get workflow.security_asvs_level --raw 2>/dev/null || echo "1")
-SECURITY_BLOCK=$(gsd-sdk query config-get workflow.security_block_on --raw 2>/dev/null || echo "high")
+SECURITY_CFG=$(gsd-remix-sdk query config-get workflow.security_enforcement --raw 2>/dev/null || echo "true")
+SECURITY_ASVS=$(gsd-remix-sdk query config-get workflow.security_asvs_level --raw 2>/dev/null || echo "1")
+SECURITY_BLOCK=$(gsd-remix-sdk query config-get workflow.security_block_on --raw 2>/dev/null || echo "high")
 ```
 
 **If `SECURITY_CFG` is `false`:** Skip to step 5.6.
@@ -474,8 +474,8 @@ Continue to step 5.6. Security config is passed to the planner in step 8.
 > Skip if `workflow.ui_phase` is explicitly `false` AND `workflow.ui_safety_gate` is explicitly `false` in `.planning/config.json`. If keys are absent, treat as enabled.
 
 ```bash
-UI_PHASE_CFG=$(gsd-sdk query config-get workflow.ui_phase 2>/dev/null || echo "true")
-UI_GATE_CFG=$(gsd-sdk query config-get workflow.ui_safety_gate 2>/dev/null || echo "true")
+UI_PHASE_CFG=$(gsd-remix-sdk query config-get workflow.ui_phase 2>/dev/null || echo "true")
+UI_GATE_CFG=$(gsd-remix-sdk query config-get workflow.ui_safety_gate 2>/dev/null || echo "true")
 ```
 
 **If both are `false`:** Skip to step 6.
@@ -483,7 +483,7 @@ UI_GATE_CFG=$(gsd-sdk query config-get workflow.ui_safety_gate 2>/dev/null || ec
 Check if phase has frontend indicators:
 
 ```bash
-PHASE_SECTION=$(gsd-sdk query roadmap.get-phase "${PHASE}" 2>/dev/null)
+PHASE_SECTION=$(gsd-remix-sdk query roadmap.get-phase "${PHASE}" 2>/dev/null)
 echo "$PHASE_SECTION" | grep -iE "UI|interface|frontend|component|layout|page|screen|view|form|dashboard|widget" > /dev/null 2>&1
 HAS_UI=$?
 ```
@@ -503,7 +503,7 @@ UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
 
 Read ephemeral chain flag (same field as `check.auto-mode` → `auto_chain_active`):
 ```bash
-AUTO_CHAIN=$(gsd-sdk query check auto-mode --pick auto_chain_active 2>/dev/null || echo "false")
+AUTO_CHAIN=$(gsd-remix-sdk query check auto-mode --pick auto_chain_active 2>/dev/null || echo "false")
 ```
 
 **If `AUTO_CHAIN` is `true` (running inside a `--chain` or `--auto` pipeline):**
@@ -543,7 +543,7 @@ Also available:
 Check if any files in the phase scope match schema patterns:
 
 ```bash
-PHASE_SECTION=$(gsd-sdk query roadmap.get-phase "${PHASE}" --pick section 2>/dev/null)
+PHASE_SECTION=$(gsd-remix-sdk query roadmap.get-phase "${PHASE}" --pick section 2>/dev/null)
 ```
 
 Scan `PHASE_SECTION`, `CONTEXT.md` (if loaded), and `RESEARCH.md` (if exists) for file paths matching these ORM patterns:
@@ -647,7 +647,7 @@ VALIDATION_EXISTS=$(ls "${PHASE_DIR}"/*-VALIDATION.md 2>/dev/null | head -1)
 If missing and Nyquist is still enabled/applicable — ask user:
 1. Re-run: `/gsd-plan-phase {PHASE} --research ${GSD_WS}`
 2. Disable Nyquist with the exact command:
-   `gsd-sdk query config-set workflow.nyquist_validation false`
+   `gsd-remix-sdk query config-set workflow.nyquist_validation false`
 3. Continue anyway (plans fail Dimension 8)
 
 Proceed to Step 7.8 (or Step 8 if pattern mapper is disabled) only if user selects 2 or 3.
@@ -658,7 +658,7 @@ Proceed to Step 7.8 (or Step 8 if pattern mapper is disabled) only if user selec
 
 Check config:
 ```bash
-PATTERN_MAPPER_CFG=$(gsd-sdk query config-get workflow.pattern_mapper 2>/dev/null || echo "true")
+PATTERN_MAPPER_CFG=$(gsd-remix-sdk query config-get workflow.pattern_mapper 2>/dev/null || echo "true")
 ```
 
 **If `PATTERN_MAPPER_CFG` is `false`:** Skip to step 8.
@@ -1059,8 +1059,8 @@ Skipping bounce step.
 
 **Read pass count:**
 ```bash
-BOUNCE_PASSES=$(gsd-sdk query config-get workflow.plan_bounce_passes 2>/dev/null || echo "2")
-BOUNCE_SCRIPT=$(gsd-sdk query config-get workflow.plan_bounce_script 2>/dev/null | jq -r '.' 2>/dev/null || true)
+BOUNCE_PASSES=$(gsd-remix-sdk query config-get workflow.plan_bounce_passes 2>/dev/null || echo "2")
+BOUNCE_SCRIPT=$(gsd-remix-sdk query config-get workflow.plan_bounce_script 2>/dev/null | jq -r '.' 2>/dev/null || true)
 ```
 
 Display banner:
@@ -1105,7 +1105,7 @@ After the script returns, check that the bounced file still has valid YAML front
 
 6. **Commit surviving bounced plans:** If at least one plan survived both the frontmatter validation and the checker re-run, commit the changes:
 ```bash
-gsd-sdk query commit "refactor(${padded_phase}): bounce plans through external refinement" "${PHASE_DIR}/*-PLAN.md"
+gsd-remix-sdk query commit "refactor(${padded_phase}): bounce plans through external refinement" "${PHASE_DIR}/*-PLAN.md"
 ```
 
 Display summary:
@@ -1171,7 +1171,7 @@ If `TEXT_MODE` is true, present as a plain-text numbered list (options already s
 After plans pass all gates, record that planning is complete so STATE.md reflects the new phase status:
 
 ```bash
-gsd-sdk query state.planned-phase --phase "${PHASE_NUMBER}" --name "${PHASE_NAME}" --plans "${PLAN_COUNT}"
+gsd-remix-sdk query state.planned-phase --phase "${PHASE_NUMBER}" --name "${PHASE_NAME}" --plans "${PLAN_COUNT}"
 ```
 
 This updates STATUS to "Ready to execute", sets the correct plan count, and timestamps Last Activity.
@@ -1185,7 +1185,7 @@ After plans are finalized, annotate the ROADMAP.md plan list for this phase with
 This step is derived entirely from existing PLAN frontmatter — no extra LLM pass is required.
 
 ```bash
-gsd-sdk query roadmap.annotate-dependencies "${PHASE_NUMBER}"
+gsd-remix-sdk query roadmap.annotate-dependencies "${PHASE_NUMBER}"
 ```
 
 This operation is idempotent: if wave headers or cross-cutting constraints already exist in the ROADMAP phase section, the command returns without modifying the file. Skip this step if `plan_count` is 0.
@@ -1195,7 +1195,7 @@ This operation is idempotent: if wave headers or cross-cutting constraints alrea
 If `commit_docs` is true (from the init JSON parsed in step 1), commit the generated plan artifacts (including any ROADMAP.md annotations from step 13c):
 
 ```bash
-gsd-sdk query commit "docs(${PADDED_PHASE}): create phase plan" --files "${PHASE_DIR}"/*-PLAN.md .planning/STATE.md .planning/ROADMAP.md
+gsd-remix-sdk query commit "docs(${PADDED_PHASE}): create phase plan" --files "${PHASE_DIR}"/*-PLAN.md .planning/STATE.md .planning/ROADMAP.md
 ```
 
 This commits all PLAN.md files for the phase plus the updated STATE.md and ROADMAP.md to version-control the planning artifacts. Skip this step if `commit_docs` is false.
@@ -1213,7 +1213,7 @@ Check for auto-advance trigger using values already loaded in step 1:
 3. **Sync chain flag with intent** — if user invoked manually (no `--auto` and no `--chain`), clear the ephemeral chain flag from any previous interrupted `--auto` chain. This does NOT touch `workflow.auto_advance` (the user's persistent settings preference):
    ```bash
    if [[ ! "$ARGUMENTS" =~ --auto ]] && [[ ! "$ARGUMENTS" =~ --chain ]]; then
-     gsd-sdk query config-set workflow._auto_chain_active false 2>/dev/null
+     gsd-remix-sdk query config-set workflow._auto_chain_active false 2>/dev/null
    fi
    ```
 
@@ -1224,7 +1224,7 @@ Set local variables from INIT (parsed once in step 1):
 **If `--auto` or `--chain` flag present AND `AUTO_CHAIN` is not true:** Persist chain flag to config (handles direct invocation without prior discuss-phase):
 ```bash
 if ([[ "$ARGUMENTS" =~ --auto ]] || [[ "$ARGUMENTS" =~ --chain ]]) && [[ "$AUTO_CHAIN" != "true" ]]; then
-  gsd-sdk query config-set workflow._auto_chain_active true
+  gsd-remix-sdk query config-set workflow._auto_chain_active true
 fi
 ```
 

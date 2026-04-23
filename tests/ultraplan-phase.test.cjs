@@ -98,8 +98,8 @@ describe('ultraplan-phase workflow runtime gate', () => {
 describe('ultraplan-phase workflow initialization', () => {
   const content = fs.readFileSync(WF_PATH, 'utf-8');
 
-  test('loads GSD phase context via gsd-sdk query init.plan-phase', () => {
-    assert.ok(content.includes('gsd-sdk query init.plan-phase'), 'workflow must load phase context via gsd-sdk query init.plan-phase');
+  test('loads GSD phase context via gsd-remix-sdk query init.plan-phase', () => {
+    assert.ok(content.includes('gsd-remix-sdk query init.plan-phase'), 'workflow must load phase context via gsd-remix-sdk query init.plan-phase');
   });
 
   test('handles missing .planning directory', () => {

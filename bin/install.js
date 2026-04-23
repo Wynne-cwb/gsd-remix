@@ -6648,11 +6648,11 @@ function promptLocation(runtimes) {
 }
 
 /**
- * Build `@gsd-build/sdk` from the in-repo `sdk/` source tree and install the
- * resulting `gsd-sdk` binary globally so workflow commands that shell out to
- * `gsd-sdk query …` succeed.
+ * Build `@gsd-remix/sdk` from the in-repo `sdk/` source tree and install the
+ * resulting `gsd-remix-sdk` binary globally so workflow commands that shell out to
+ * `gsd-remix-sdk query …` succeed.
  *
- * We build from source rather than `npm install -g @gsd-build/sdk` because the
+ * We build from source rather than `npm install -g @gsd-remix/sdk` because the
  * npm-published package lags the source tree and shipping a stale SDK breaks
  * every /gsd-* command that depends on newer query handlers.
  *
@@ -6664,19 +6664,19 @@ function promptLocation(runtimes) {
  */
 
 /**
- * Resolve `gsd-sdk` on PATH. Uses `command -v` via `sh -c` on POSIX (portable
+ * Resolve `gsd-remix-sdk` on PATH. Uses `command -v` via `sh -c` on POSIX (portable
  * across sh/bash/zsh) and `where` on Windows. Returns trimmed path or null.
  */
-function resolveGsdSdk() {
+function resolveGsdRemixSdk() {
   const { spawnSync } = require('child_process');
   if (process.platform === 'win32') {
-    const r = spawnSync('where', ['gsd-sdk'], { encoding: 'utf-8' });
+    const r = spawnSync('where', ['gsd-remix-sdk'], { encoding: 'utf-8' });
     if (r.status === 0 && r.stdout && r.stdout.trim()) {
       return r.stdout.trim().split('\n')[0].trim();
     }
     return null;
   }
-  const r = spawnSync('sh', ['-c', 'command -v gsd-sdk'], { encoding: 'utf-8' });
+  const r = spawnSync('sh', ['-c', 'command -v gsd-remix-sdk'], { encoding: 'utf-8' });
   if (r.status === 0 && r.stdout && r.stdout.trim()) {
     return r.stdout.trim();
   }
@@ -6710,13 +6710,13 @@ function emitSdkFatal(reason, { globalBin, exitCode }) {
 
   console.error('');
   console.error(`${redBold}${bar}${reset}`);
-  console.error(`${redBold}  ✗ GSD SDK install failed — /gsd-* commands will not work${reset}`);
+  console.error(`${redBold}  ✗ GSD Remix SDK install failed — /gsd-* commands will not work${reset}`);
   console.error(`${redBold}${bar}${reset}`);
   console.error(`  ${red}Reason:${reset} ${reason}`);
 
   if (globalBin) {
     console.error('');
-    console.error(`  ${yellow}gsd-sdk was installed to:${reset}`);
+    console.error(`  ${yellow}gsd-remix-sdk was installed to:${reset}`);
     console.error(`    ${cyan}${globalBin}${reset}`);
     console.error('');
     console.error(`  ${yellow}Your shell's PATH does not include this directory.${reset}`);
@@ -6729,7 +6729,7 @@ function emitSdkFatal(reason, { globalBin, exitCode }) {
       console.error(`    ${cyan}source ${rc}${reset}`);
     }
     console.error('');
-    console.error(`  Then verify: ${cyan}command -v gsd-sdk${reset}`);
+    console.error(`  Then verify: ${cyan}command -v gsd-remix-sdk${reset}`);
     if (exitCode === 2) {
       console.error('');
       console.error(`  ${dim}(GSD_ALLOW_OFF_PATH=1 set → exit ${exitCode} instead of hard failure)${reset}`);
@@ -6747,7 +6747,7 @@ function emitSdkFatal(reason, { globalBin, exitCode }) {
 
 function installSdkIfNeeded() {
   if (hasNoSdk) {
-    console.log(`\n  ${dim}Skipping GSD SDK install (--no-sdk)${reset}`);
+    console.log(`\n  ${dim}Skipping GSD Remix SDK install (--no-sdk)${reset}`);
     return;
   }
 
@@ -6756,9 +6756,9 @@ function installSdkIfNeeded() {
   const fs = require('fs');
 
   if (!hasSdk) {
-    const resolved = resolveGsdSdk();
+    const resolved = resolveGsdRemixSdk();
     if (resolved) {
-      console.log(`  ${green}✓${reset} GSD SDK already installed (gsd-sdk on PATH at ${resolved})`);
+      console.log(`  ${green}✓${reset} GSD Remix SDK already installed (gsd-remix-sdk on PATH at ${resolved})`);
       return;
     }
   }
@@ -6775,7 +6775,7 @@ function installSdkIfNeeded() {
     emitSdkFatal(`SDK source tree not found at ${sdkDir}.`, { globalBin: null, exitCode: 1 });
   }
 
-  console.log(`\n  ${cyan}Building GSD SDK from source (${sdkDir})…${reset}`);
+  console.log(`\n  ${cyan}Building GSD Remix SDK from source (${sdkDir})…${reset}`);
   const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
   // 1. Install sdk build-time dependencies (tsc, etc.)
@@ -6790,7 +6790,7 @@ function installSdkIfNeeded() {
     emitSdkFatal('Failed to `npm run build` in sdk/.', { globalBin: null, exitCode: 1 });
   }
 
-  // 3. Install the built package globally so `gsd-sdk` lands on PATH.
+  // 3. Install the built package globally so `gsd-remix-sdk` lands on PATH.
   const globalResult = spawnSync(npmCmd, ['install', '-g', '.'], { cwd: sdkDir, stdio: 'inherit' });
   if (globalResult.status !== 0) {
     emitSdkFatal('Failed to `npm install -g .` from sdk/.', { globalBin: null, exitCode: 1 });
@@ -6799,15 +6799,15 @@ function installSdkIfNeeded() {
   // 3a. Explicitly chmod dist/cli.js to 0o755 in the global install location.
   // `tsc` emits files at process umask (typically 0o644 — non-executable), and
   // `npm install -g` from a local directory does NOT chmod bin-script targets the
-  // way tarball extraction does. Without this, the `gsd-sdk` bin symlink points at
-  // a non-executable file and `command -v gsd-sdk` fails on every first install
+  // way tarball extraction does. Without this, the `gsd-remix-sdk` bin symlink points at
+  // a non-executable file and `command -v gsd-remix-sdk` fails on every first install
   // (root cause of #2453). Mirrors the pattern used for hook files in this installer.
   try {
     const prefixRes = spawnSync(npmCmd, ['config', 'get', 'prefix'], { encoding: 'utf-8' });
     if (prefixRes.status === 0) {
       const npmPrefix = (prefixRes.stdout || '').trim();
       const sdkPkg = JSON.parse(fs.readFileSync(path.join(sdkDir, 'package.json'), 'utf-8'));
-      const sdkName = sdkPkg.name; // '@gsd-build/sdk'
+      const sdkName = sdkPkg.name; // '@gsd-remix/sdk'
       const globalModulesDir = process.platform === 'win32'
         ? path.join(npmPrefix, 'node_modules')
         : path.join(npmPrefix, 'lib', 'node_modules');
@@ -6816,13 +6816,13 @@ function installSdkIfNeeded() {
     }
   } catch (e) { /* Non-fatal: PATH verification in step 4 will catch any real failure */ }
 
-  // 4. Verify gsd-sdk is actually resolvable on PATH. npm's global bin dir is
+  // 4. Verify gsd-remix-sdk is actually resolvable on PATH. npm's global bin dir is
   //    not always on the current shell's PATH (Homebrew prefixes, nvm setups,
   //    unconfigured npm prefix), so a zero exit status from `npm install -g`
   //    alone is not proof of a working binary (issue #2439 root cause).
-  const resolved = resolveGsdSdk();
+  const resolved = resolveGsdRemixSdk();
   if (resolved) {
-    console.log(`  ${green}✓${reset} Built and installed GSD SDK from source (gsd-sdk resolved at ${resolved})`);
+    console.log(`  ${green}✓${reset} Built and installed GSD Remix SDK from source (gsd-remix-sdk resolved at ${resolved})`);
     return;
   }
 
@@ -6835,7 +6835,7 @@ function installSdkIfNeeded() {
 
   const allowOffPath = process.env.GSD_ALLOW_OFF_PATH === '1';
   emitSdkFatal(
-    'Built and installed GSD SDK, but `gsd-sdk` is not on your PATH.',
+    'Built and installed GSD Remix SDK, but `gsd-remix-sdk` is not on your PATH.',
     { globalBin, exitCode: allowOffPath ? 2 : 1 },
   );
 }
@@ -6855,10 +6855,10 @@ function installAllRuntimes(runtimes, isGlobal, isInteractive) {
   const primaryStatuslineResult = results.find(r => statuslineRuntimes.includes(r.runtime));
 
   const finalize = (shouldInstallStatusline) => {
-    // Build @gsd-build/sdk from the in-repo sdk/ source and install it globally
-    // so `gsd-sdk` lands on PATH. Every /gsd-* command shells out to
-    // `gsd-sdk query …`; without this, commands fail with "command not found:
-    // gsd-sdk". The npm-published @gsd-build/sdk is kept intentionally frozen
+    // Build @gsd-remix/sdk from the in-repo sdk/ source and install it globally
+    // so `gsd-remix-sdk` lands on PATH. Every /gsd-* command shells out to
+    // `gsd-remix-sdk query …`; without this, commands fail with "command not found:
+    // gsd-remix-sdk". The npm-published @gsd-remix/sdk is kept intentionally frozen
     // at an older version; we always build from source so users get the SDK
     // that matches the installed GSD version.
     // Runs by default; skip with --no-sdk. Idempotent when already present.

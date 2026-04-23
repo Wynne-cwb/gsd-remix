@@ -16,15 +16,15 @@ Valid GSD subagent types (use exact names — do not fall back to 'general-purpo
 ## 0. Initialize
 
 ```bash
-INIT=$(gsd-sdk query init.phase-op "${PHASE_ARG}")
+INIT=$(gsd-remix-sdk query init.phase-op "${PHASE_ARG}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
-AGENT_SKILLS_UI_REVIEWER=$(gsd-sdk query agent-skills gsd-ui-reviewer 2>/dev/null)
+AGENT_SKILLS_UI_REVIEWER=$(gsd-remix-sdk query agent-skills gsd-ui-reviewer 2>/dev/null)
 ```
 
 Parse: `phase_dir`, `phase_number`, `phase_name`, `phase_slug`, `padded_phase`, `commit_docs`.
 
 ```bash
-UI_AUDITOR_MODEL=$(gsd-sdk query resolve-model gsd-ui-auditor --raw)
+UI_AUDITOR_MODEL=$(gsd-remix-sdk query resolve-model gsd-ui-auditor --raw)
 ```
 
 Display banner:
@@ -174,7 +174,7 @@ tools is detected at runtime.
 ## 5. Commit (if configured)
 
 ```bash
-gsd-sdk query commit "docs(${padded_phase}): UI audit review" "${PHASE_DIR}/${PADDED_PHASE}-UI-REVIEW.md"
+gsd-remix-sdk query commit "docs(${padded_phase}): UI audit review" "${PHASE_DIR}/${PADDED_PHASE}-UI-REVIEW.md"
 ```
 
 </process>

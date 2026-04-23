@@ -49,7 +49,7 @@ tags:
 flowchart LR
     A["用户调用 /gsd-plan-phase"] --> B["commands/gsd/plan-phase.md"]
     B --> C["workflows/plan-phase.md"]
-    C --> D["gsd-sdk query init.plan-phase"]
+    C --> D["gsd-remix-sdk query init.plan-phase"]
     C --> E["可选: gsd-phase-researcher"]
     C --> F["可选: gsd-pattern-mapper"]
     C --> G["gsd-planner"]
@@ -65,7 +65,7 @@ flowchart LR
 - command 文件几乎只是入口壳
 - 真正的流程编排在 workflow 里
 - 真正负责“思考”和“写计划”的不是 workflow 本身，而是 planner/checker/researcher 这些角色 agent
-- 真正负责确定性状态读写的是 `gsd-sdk query`
+- 真正负责确定性状态读写的是 `gsd-remix-sdk query`
 
 ## 1. 命令入口其实很薄
 
@@ -91,7 +91,7 @@ flowchart LR
 `plan-phase` 的第一步不是立刻 spawn planner，而是先跑：
 
 ```bash
-gsd-sdk query init.plan-phase "$PHASE"
+gsd-remix-sdk query init.plan-phase "$PHASE"
 ```
 
 这一步非常关键。

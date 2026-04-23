@@ -74,7 +74,7 @@
   - [Windsurf Runtime Support](#56-windsurf-runtime-support)
   - [Internationalized Documentation](#57-internationalized-documentation)
 - [v1.30 Features](#v130-features)
-  - [GSD SDK](#58-gsd-sdk)
+  - [GSD SDK](#58-gsd-remix-sdk)
 - [v1.31 Features](#v131-features)
   - [Schema Drift Detection](#59-schema-drift-detection)
   - [Security Enforcement](#60-security-enforcement)
@@ -2412,7 +2412,7 @@ Users who run a memory / knowledge-base MCP server (for example, ExoCortex-style
 
 ### 113. SDK Workstream Support
 
-**Command:** `gsd-sdk init @prd.md --ws my-workstream`
+**Command:** `gsd-remix-sdk init @prd.md --ws my-workstream`
 
 **Purpose:** Route all SDK `.planning/` paths to `.planning/workstreams/<name>/`, enabling multi-workstream projects without "Project already exists" errors. The `--ws` flag validates the workstream name and propagates to all subsystems (tools, config, context engine).
 
@@ -2556,7 +2556,7 @@ Users who run a memory / knowledge-base MCP server (for example, ExoCortex-style
 - REQ-GRAPH-02: Slash-command `/gsd-graphify` exposes subcommands `build`, `query <term>`, `status`, `diff`. The programmatic CLI `node gsd-tools.cjs graphify …` additionally exposes `snapshot`, which is also invoked automatically as the final step of `graphify build`.
 - REQ-GRAPH-03: Build runs within the configurable `graphify.build_timeout` (seconds); exceeding the timeout aborts cleanly without leaving a partial graph.
 - REQ-GRAPH-04: `graphify.cjs` falls back to `graph.links` when `graph.edges` is absent so older graph artifacts keep rendering.
-- REQ-GRAPH-05: CJS-only surface; `gsd-sdk query` does not yet register graphify handlers.
+- REQ-GRAPH-05: CJS-only surface; `gsd-remix-sdk query` does not yet register graphify handlers.
 
 **Configuration:** `graphify.enabled`, `graphify.build_timeout`
 **Reference files:** `commands/gsd/graphify.md`, `bin/lib/graphify.cjs`

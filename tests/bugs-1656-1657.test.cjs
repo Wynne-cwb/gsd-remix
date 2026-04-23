@@ -50,9 +50,9 @@ describe('#1656: community .sh hooks must be present in hooks/dist', () => {
 // ─── #1657 ───────────────────────────────────────────────────────────────────
 //
 // Historical context: #1657 originally guarded against a broken `promptSdk()`
-// flow that shipped when `@gsd-build/sdk` did not yet exist on npm. The
+// flow that shipped when `@gsd-remix/sdk` did not yet exist on npm. The
 // package was published at v0.1.0 and is now a hard runtime requirement for
-// every /gsd-* command (they all shell out to `gsd-sdk query …`).
+// every /gsd-* command (they all shell out to `gsd-remix-sdk query …`).
 //
 // #2385 restored the `--sdk` flag and made SDK install the default path in
 // bin/install.js. These guards are inverted: we now assert that SDK install
@@ -80,11 +80,11 @@ describe('#1657 / #2385: SDK install must be wired into installer source', () =>
     );
   });
 
-  test('install.js builds gsd-sdk from in-repo sdk/ source (#2385)', () => {
+  test('install.js builds gsd-remix-sdk from in-repo sdk/ source (#2385)', () => {
     src = src || fs.readFileSync(INSTALL_SRC, 'utf-8');
     // The installer must locate the in-repo sdk/ directory, run the build,
     // and install it globally. We intentionally do NOT install
-    // @gsd-build/sdk from npm because that published version lags the source
+    // @gsd-remix/sdk from npm because that published version lags the source
     // tree and shipping it breaks query handlers added since the last
     // publish.
     assert.ok(
@@ -108,7 +108,7 @@ describe('#1657 / #2385: SDK install must be wired into installer source', () =>
     const files = rootPkg.files || [];
     assert.ok(
       files.some((f) => f === 'sdk' || f.startsWith('sdk/')),
-      'root package.json `files` must include sdk source so npm-registry installs can build gsd-sdk from source'
+      'root package.json `files` must include sdk source so npm-registry installs can build gsd-remix-sdk from source'
     );
   });
 });

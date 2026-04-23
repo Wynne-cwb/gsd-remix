@@ -5,8 +5,8 @@
  * `npm install -g .`. TypeScript emits files at process umask (0o644) and
  * npm install from a local directory does NOT chmod bin-script targets the
  * way tarball extraction does. The result: the globally-installed
- * dist/cli.js lands with mode 644 (non-executable), the `gsd-sdk` symlink
- * points at a non-executable file, and `command -v gsd-sdk` fails on every
+ * dist/cli.js lands with mode 644 (non-executable), the `gsd-remix-sdk` symlink
+ * points at a non-executable file, and `command -v gsd-remix-sdk` fails on every
  * new install.
  *
  * Fix: after `npm install -g .`, the installer must explicitly
@@ -48,7 +48,7 @@ describe('bug #2453: installSdkIfNeeded chmods sdk dist/cli.js to 0o755', () => 
       hasChmod,
       'installSdkIfNeeded must call chmodSync on dist/cli.js after npm install -g . ' +
       '(tsc emits 644; npm does not chmod bin targets from local dir installs — ' +
-      'root cause of #2453: gsd-sdk symlink target is non-executable on first install)'
+      'root cause of #2453: gsd-remix-sdk symlink target is non-executable on first install)'
     );
   });
 

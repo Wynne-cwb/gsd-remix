@@ -28,14 +28,14 @@ if arguments contain "--backfill"; then
 fi
 ```
 
-**Guard `gsd-sdk` before any query:**
+**Guard `gsd-remix-sdk` before any query:**
 
 ```bash
-if ! command -v gsd-sdk &>/dev/null; then
-  echo "⚠ gsd-sdk not found in PATH — /gsd-health requires it."
+if ! command -v gsd-remix-sdk &>/dev/null; then
+  echo "⚠ gsd-remix-sdk not found in PATH — /gsd-health requires it."
   echo ""
-  echo "Install the GSD SDK:"
-  echo "  npm install -g @gsd-build/sdk"
+  echo "Install the GSD Remix SDK:"
+  echo "  npm install -g @gsd-remix/sdk"
   echo ""
   echo "Or update GSD to get the latest packages:"
   echo "  /gsd-update"
@@ -54,7 +54,7 @@ If `RUNTIME_FLAG` is set, ignore `REPAIR_FLAG` and `BACKFILL_FLAG` for this run.
 **If `RUNTIME_FLAG` is set:**
 
 ```bash
-HEALTH=$(gsd-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","message":"Installed gsd-sdk does not expose runtime.health.","fix":"Run /gsd-update to sync gsd-remix and @gsd-build/sdk."}],"warnings":[],"checks":[]}')
+HEALTH=$(gsd-remix-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","message":"Installed gsd-remix-sdk does not expose runtime.health.","fix":"Run /gsd-update to sync gsd-remix and @gsd-remix/sdk."}],"warnings":[],"checks":[]}')
 ```
 
 Parse JSON output:
@@ -71,7 +71,7 @@ Parse JSON output:
 **If `RUNTIME_FLAG` is NOT set:** Run planning health validation:
 
 ```bash
-HEALTH=$(gsd-sdk query validate.health $REPAIR_FLAG $BACKFILL_FLAG)
+HEALTH=$(gsd-remix-sdk query validate.health $REPAIR_FLAG $BACKFILL_FLAG)
 ```
 
 Parse JSON output:
@@ -119,7 +119,7 @@ Warnings: N
 ## Warnings
 
 - [legacy_bridge_missing] No gsd-tools.cjs bridge could be found for CJS fallback commands.
-  Fix: Run /gsd-update to restore the bundled bridge, or reinstall gsd-remix and @gsd-build/sdk together.
+  Fix: Run /gsd-update to restore the bundled bridge, or reinstall gsd-remix and @gsd-remix/sdk together.
 ```
 
 **Footer:**
@@ -208,7 +208,7 @@ If yes, re-run with --repair flag and display results.
 Re-run health check without --repair to confirm issues are resolved:
 
 ```bash
-gsd-sdk query validate.health
+gsd-remix-sdk query validate.health
 ```
 
 Report final status.

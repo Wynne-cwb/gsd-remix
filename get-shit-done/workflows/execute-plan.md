@@ -20,7 +20,7 @@ Valid GSD subagent types (use exact names — do not fall back to 'general-purpo
 Load execution context (paths only to minimize orchestrator context):
 
 ```bash
-INIT=$(gsd-sdk query init.execute-phase "${PHASE}")
+INIT=$(gsd-remix-sdk query init.execute-phase "${PHASE}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
@@ -33,7 +33,7 @@ If `.planning/` missing: error.
 Run deterministic preflight checks compiled from promoted failure memories:
 
 ```bash
-FAILURE_PREFLIGHT=$(gsd-sdk query failure.preflight 2>/dev/null || echo '{}')
+FAILURE_PREFLIGHT=$(gsd-remix-sdk query failure.preflight 2>/dev/null || echo '{}')
 ```
 
 Parse JSON for: `passed`, `checks[]`, `blockers[]`, `warnings[]`, `recommended_package_manager`, `expected_node_version`, `related_memory_ids[]`.
@@ -58,7 +58,7 @@ Find first PLAN without matching SUMMARY. Decimal phases supported (`01.1-hotfix
 
 ```bash
 PHASE=$(echo "$PLAN_PATH" | grep -oE '[0-9]+(\.[0-9]+)?-[0-9]+')
-# config settings can be fetched via gsd-sdk query config-get if needed
+# config settings can be fetched via gsd-remix-sdk query config-get if needed
 ```
 
 <if mode="yolo">
@@ -80,8 +80,8 @@ PLAN_START_EPOCH=$(date +%s)
 <step name="parse_segments">
 ```bash
 PLAN_FILE=".planning/phases/XX-name/{phase}-{plan}-PLAN.md"
-INLINE_THRESHOLD=$(gsd-sdk query config-get workflow.inline_plan_threshold 2>/dev/null || echo "2")
-EXECUTION_ROUTE=$(gsd-sdk query plan.execution-route "$PLAN_FILE" --inline-threshold "${INLINE_THRESHOLD}" 2>/dev/null || echo "{}")
+INLINE_THRESHOLD=$(gsd-remix-sdk query config-get workflow.inline_plan_threshold 2>/dev/null || echo "2")
+EXECUTION_ROUTE=$(gsd-remix-sdk query plan.execution-route "$PLAN_FILE" --inline-threshold "${INLINE_THRESHOLD}" 2>/dev/null || echo "{}")
 ```
 
 Parse JSON for: `task_count`, `inline_threshold`, `checkpoint_mode`, `threshold_inline`, `dynamic_inline_band`, `low_complexity_inline`, `low_complexity_reasons[]`, `low_complexity_blockers[]`, `complexity_score`, `complexity_signals[]`, `recommended_pattern`, `recommended_execution`, `reason`.
@@ -184,7 +184,7 @@ This IS the execution instructions. Follow exactly. If plan references CONTEXT.m
 
 <step name="previous_phase_check">
 ```bash
-gsd-sdk query phases.list --type summaries --raw
+gsd-remix-sdk query phases.list --type summaries --raw
 # Extract the second-to-last summary from the JSON result
 ```
 
@@ -333,7 +333,7 @@ If verification fails:
 
 **Check if node repair is enabled** (default: on):
 ```bash
-NODE_REPAIR=$(gsd-sdk query config-get workflow.node_repair 2>/dev/null || echo "true")
+NODE_REPAIR=$(gsd-remix-sdk query config-get workflow.node_repair 2>/dev/null || echo "true")
 ```
 
 If `NODE_REPAIR` is `true`: invoke `@./.claude/get-shit-done/workflows/node-repair.md` with:
@@ -392,7 +392,7 @@ Next: more plans → "Ready for {next-plan}" | last → "Phase complete, ready f
 handles STATE.md/ROADMAP.md updates centrally after merging worktrees to avoid
 merge conflicts).
 
-Update STATE.md using gsd-sdk query (or legacy gsd-tools) state mutations:
+Update STATE.md using gsd-remix-sdk query (or legacy gsd-tools) state mutations:
 
 ```bash
 # Auto-detect parallel mode: .git is a file in worktrees, a directory in main repo
@@ -401,13 +401,13 @@ IS_WORKTREE=$([ -f .git ] && echo "true" || echo "false")
 # Skip in parallel mode — orchestrator handles STATE.md centrally
 if [ "$IS_WORKTREE" != "true" ]; then
   # Advance plan counter (handles last-plan edge case)
-  gsd-sdk query state.advance-plan
+  gsd-remix-sdk query state.advance-plan
 
   # Recalculate progress bar from disk state
-  gsd-sdk query state.update-progress
+  gsd-remix-sdk query state.update-progress
 
   # Record execution metrics
-  gsd-sdk query state.record-metric \
+  gsd-remix-sdk query state.record-metric \
     --phase "${PHASE}" --plan "${PLAN}" --duration "${DURATION}" \
     --tasks "${TASK_COUNT}" --files "${FILE_COUNT}"
 fi
@@ -420,19 +420,19 @@ From SUMMARY: Extract decisions and add to STATE.md:
 ```bash
 # Add each decision from SUMMARY key-decisions
 # Prefer file inputs for shell-safe text (preserves `$`, `*`, etc. exactly)
-gsd-sdk query state.add-decision \
+gsd-remix-sdk query state.add-decision \
   --phase "${PHASE}" --summary-file "${DECISION_TEXT_FILE}" --rationale-file "${RATIONALE_FILE}"
 
 # Add blockers if any found
-gsd-sdk query state.add-blocker --text-file "${BLOCKER_TEXT_FILE}"
+gsd-remix-sdk query state.add-blocker --text-file "${BLOCKER_TEXT_FILE}"
 ```
 </step>
 
 <step name="update_session_continuity">
-Update session info using gsd-sdk query (or legacy gsd-tools):
+Update session info using gsd-remix-sdk query (or legacy gsd-tools):
 
 ```bash
-gsd-sdk query state.record-session \
+gsd-remix-sdk query state.record-session \
   --stopped-at "Completed ${PHASE}-${PLAN}-PLAN.md" \
   --resume-file "None"
 ```
@@ -454,7 +454,7 @@ IS_WORKTREE=$([ -f .git ] && echo "true" || echo "false")
 
 # Skip in parallel mode — orchestrator handles ROADMAP.md centrally
 if [ "$IS_WORKTREE" != "true" ]; then
-  gsd-sdk query roadmap.update-plan-progress "${PHASE}"
+  gsd-remix-sdk query roadmap.update-plan-progress "${PHASE}"
 fi
 ```
 Counts PLAN vs SUMMARY files on disk. Updates progress table row with correct count and status (`In Progress` or `Complete` with date).
@@ -464,7 +464,7 @@ Counts PLAN vs SUMMARY files on disk. Updates progress table row with correct co
 Mark completed requirements from the PLAN.md frontmatter `requirements:` field:
 
 ```bash
-gsd-sdk query requirements.mark-complete ${REQ_IDS}
+gsd-remix-sdk query requirements.mark-complete ${REQ_IDS}
 ```
 
 Extract requirement IDs from the plan's frontmatter (e.g., `requirements: [AUTH-01, AUTH-02]`). If no requirements field, skip.
@@ -479,9 +479,9 @@ IS_WORKTREE=$([ -f .git ] && echo "true" || echo "false")
 
 # In parallel mode: exclude STATE.md and ROADMAP.md (orchestrator commits these)
 if [ "$IS_WORKTREE" = "true" ]; then
-  gsd-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/REQUIREMENTS.md
+  gsd-remix-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/REQUIREMENTS.md
 else
-  gsd-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/STATE.md .planning/ROADMAP.md .planning/REQUIREMENTS.md
+  gsd-remix-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/STATE.md .planning/ROADMAP.md .planning/REQUIREMENTS.md
 fi
 ```
 </step>
@@ -497,7 +497,7 @@ git diff --name-only ${FIRST_TASK}^..HEAD 2>/dev/null || true
 Update only structural changes: new src/ dir → STRUCTURE.md | deps → STACK.md | file pattern → CONVENTIONS.md | API client → INTEGRATIONS.md | config → STACK.md | renamed → update paths. Skip code-only/bugfix/content changes.
 
 ```bash
-gsd-sdk query commit "" .planning/codebase/*.md --amend
+gsd-remix-sdk query commit "" .planning/codebase/*.md --amend
 ```
 </step>
 

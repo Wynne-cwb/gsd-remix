@@ -80,7 +80,7 @@ flowchart TD
    把 `.planning/` 讲成外部记忆层，解释核心文件、phase 工件、query handlers 和 workstream 命名空间是怎么连起来的。
 9. [09-query-registry-and-cjs-bridge.md](./09-query-registry-and-cjs-bridge.md)
    Obsidian: [[09-query-registry-and-cjs-bridge]]
-   拆开 `gsd-sdk query`、`createRegistry()`、`GSDTools` 和旧 `gsd-tools.cjs` 的共存关系，讲清楚双轨迁移是怎么做的。
+   拆开 `gsd-remix-sdk query`、`createRegistry()`、`GSDTools` 和旧 `gsd-tools.cjs` 的共存关系，讲清楚双轨迁移是怎么做的。
 10. [10-hooks-and-guards.md](./10-hooks-and-guards.md)
    Obsidian: [[10-hooks-and-guards]]
    把 `statusLine`、`SessionStart`、`PreToolUse`、`PostToolUse` 这一层拆开，讲清楚 hook 如何被构造、如何挂到 runtime 事件上，以及它们如何承担上下文预警、注入扫描和流程守卫。

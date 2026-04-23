@@ -21,7 +21,7 @@ tags:
 
 看到这个仓库的人，很容易有一个疑问：
 
-- 既然已经有 `gsd-sdk query` 了，为什么还保留 `get-shit-done/bin/gsd-tools.cjs`？
+- 既然已经有 `gsd-remix-sdk query` 了，为什么还保留 `get-shit-done/bin/gsd-tools.cjs`？
 
 这章就专门回答这个问题。
 
@@ -39,7 +39,7 @@ tags:
 
 ```mermaid
 flowchart TD
-    A["workflow / runner / SDK caller"] --> B["GSDTools / gsd-sdk query"]
+    A["workflow / runner / SDK caller"] --> B["GSDTools / gsd-remix-sdk query"]
     B --> C{"native registry 有 handler 吗?"}
     C -->|有| D["createRegistry() -> handler"]
     C -->|没有| E["fallback 到 gsd-tools.cjs"]
@@ -63,7 +63,7 @@ flowchart TD
 它开头就写得很直白：
 
 - 这是兼容实现
-- 推荐的新程序化接口是 `gsd-sdk query`
+- 推荐的新程序化接口是 `gsd-remix-sdk query`
 - 但它仍然服务于 shell scripts 和 older workflows
 
 ### 1.1 它的结构本质上是“总开关 + 嵌套 subcommand”
@@ -229,13 +229,13 @@ flowchart LR
 
 所以新 registry 的命令分发，其实比旧 CLI 更灵活，不是更死。
 
-## 5. CLI 层的真实分流：`gsd-sdk query`
+## 5. CLI 层的真实分流：`gsd-remix-sdk query`
 
 这一层最值得看的文件是：
 
 - [`../sdk/src/cli.ts`](../sdk/src/cli.ts)
 
-它把 `gsd-sdk query` 这条链路写得很明确：
+它把 `gsd-remix-sdk query` 这条链路写得很明确：
 
 1. 先 parse CLI args
 2. 抽出 `--pick`
@@ -278,12 +278,12 @@ flowchart LR
 
 也就是说：
 
-- `gsd-sdk query` 这个 CLI 表面上是统一入口
+- `gsd-remix-sdk query` 这个 CLI 表面上是统一入口
 - 但底下可以透明桥接到旧 `gsd-tools.cjs`
 
 ```mermaid
 flowchart TD
-    A["gsd-sdk query route next-action"] --> B["normalize + resolve"]
+    A["gsd-remix-sdk query route next-action"] --> B["normalize + resolve"]
     B --> C{"registry 有吗?"}
     C -->|有| D["native dispatch"]
     C -->|没有| E["stderr: fallback warning"]
@@ -549,7 +549,7 @@ flowchart LR
 
 - 旧世界的核心是 `gsd-tools.cjs` 大 CLI router，新世界的核心是 `createRegistry()`。
 - `normalizeQueryCommand()` 和 `resolveQueryArgv()` 是新旧命令风格之间的关键适配层。
-- `gsd-sdk query` 默认优先 native handler，没命中时才 fallback 到 `gsd-tools.cjs`。
+- `gsd-remix-sdk query` 默认优先 native handler，没命中时才 fallback 到 `gsd-tools.cjs`。
 - `GSDTools` 是程序化 bridge；它偏向 native query，但 workstream 仍会把它拉回 CJS。
 - native handler 一旦命中却执行失败，不会静默 fallback，这一点非常关键。
 - 这套双轨不是临时混乱，而是一种显式、可测试、可逐步迁移的架构策略。

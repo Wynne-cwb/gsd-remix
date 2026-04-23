@@ -3,7 +3,7 @@
  * the full phase lifecycle: discuss → research → plan → execute → verify → advance
  * after bootstrapping a real project via InitRunner.
  *
- * This is the capstone proof that `gsd-sdk auto` works end-to-end
+ * This is the capstone proof that `gsd-remix-sdk auto` works end-to-end
  * without human intervention. InitRunner bootstraps the project,
  * then GSD.runPhase() drives Phase 1 through the complete lifecycle.
  *
@@ -63,7 +63,7 @@ describe.skipIf(!cliAvailable || !gsdToolsAvailable)('E2E Lifecycle: InitRunner 
 
   // ── Bootstrap: create temp dir, git init, run InitRunner ──────────────
   beforeAll(async () => {
-    tmpDir = await mkdtemp(join(tmpdir(), 'gsd-sdk-lifecycle-e2e-'));
+    tmpDir = await mkdtemp(join(tmpdir(), 'gsd-remix-sdk-lifecycle-e2e-'));
 
     // Git init (required by InitRunner and phase lifecycle)
     execSync('git init', { cwd: tmpDir, stdio: 'ignore' });

@@ -34,7 +34,7 @@ Validate first argument is an integer.
 Load phase operation context:
 
 ```bash
-INIT=$(gsd-sdk query init.phase-op "${after_phase}")
+INIT=$(gsd-remix-sdk query init.phase-op "${after_phase}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
@@ -46,10 +46,10 @@ Exit.
 </step>
 
 <step name="insert_phase">
-**Delegate the phase insertion to `gsd-sdk query phase.insert`:**
+**Delegate the phase insertion to `gsd-remix-sdk query phase.insert`:**
 
 ```bash
-RESULT=$(gsd-sdk query phase.insert "${after_phase}" "${description}")
+RESULT=$(gsd-remix-sdk query phase.insert "${after_phase}" "${description}")
 ```
 
 The CLI handles:
@@ -122,7 +122,7 @@ Project state updated: .planning/STATE.md
 <success_criteria>
 Phase insertion is complete when:
 
-- [ ] `gsd-sdk query phase.insert` executed successfully
+- [ ] `gsd-remix-sdk query phase.insert` executed successfully
 - [ ] Phase directory created
 - [ ] Roadmap updated with new phase entry (includes "(INSERTED)" marker)
 - [ ] STATE.md updated with roadmap evolution note

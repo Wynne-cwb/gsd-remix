@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * CLI entry point for gsd-sdk.
+ * CLI entry point for gsd-remix-sdk.
  *
- * Usage: gsd-sdk run "<prompt>" [--project-dir <dir>] [--ws-port <port>]
+ * Usage: gsd-remix-sdk run "<prompt>" [--project-dir <dir>] [--ws-port <port>]
  *                                [--model <model>] [--max-budget <n>]
  */
 
@@ -43,7 +43,7 @@ export interface ParsedCliArgs {
 }
 
 /**
- * Parse `gsd-sdk query …` without rejecting unknown flags (query argv is forwarded to the registry).
+ * Parse `gsd-remix-sdk query …` without rejecting unknown flags (query argv is forwarded to the registry).
  */
 function parseCliArgsQueryPermissive(argv: string[]): ParsedCliArgs {
   let projectDir = process.cwd();
@@ -163,7 +163,7 @@ export function parseCliArgs(argv: string[]): ParsedCliArgs {
 // ─── Usage ───────────────────────────────────────────────────────────────────
 
 export const USAGE = `
-Usage: gsd-sdk <command> [args] [options]
+Usage: gsd-remix-sdk <command> [args] [options]
 
 Commands:
   run <prompt>          Run a full milestone from a text prompt
@@ -244,9 +244,9 @@ async function readStdin(): Promise<string> {
   if (stdin.isTTY) {
     throw new Error(
       'No input provided. Usage:\n' +
-      '  gsd-sdk init @path/to/prd.md\n' +
-      '  gsd-sdk init "build a todo app"\n' +
-      '  cat prd.md | gsd-sdk init'
+      '  gsd-remix-sdk init @path/to/prd.md\n' +
+      '  gsd-remix-sdk init "build a todo app"\n' +
+      '  cat prd.md | gsd-remix-sdk init'
     );
   }
 
@@ -258,7 +258,7 @@ async function readStdin(): Promise<string> {
   });
 }
 
-/** When false, unknown `gsd-sdk query` commands error instead of shelling out to gsd-tools.cjs. */
+/** When false, unknown `gsd-remix-sdk query` commands error instead of shelling out to gsd-tools.cjs. */
 function queryFallbackToCjsEnabled(): boolean {
   const v = process.env.GSD_QUERY_FALLBACK?.toLowerCase();
   if (v === 'off' || v === 'never' || v === 'false' || v === '0') return false;
@@ -330,7 +330,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
 
   if (args.version) {
     const ver = await getVersion();
-    console.log(`gsd-sdk v${ver}`);
+    console.log(`gsd-remix-sdk v${ver}`);
     return;
   }
 
@@ -364,7 +364,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
     }
 
     if (queryArgs.length === 0 || !queryArgs[0]) {
-      console.error('Error: "gsd-sdk query" requires a command');
+      console.error('Error: "gsd-remix-sdk query" requires a command');
       process.exitCode = 10;
       return;
     }
@@ -374,7 +374,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
       const { normalizeQueryCommand } = await import('./query/normalize-query-command.js');
       const [normCmd, normArgs] = normalizeQueryCommand(queryCommand, queryArgs.slice(1));
       if (!normCmd || !String(normCmd).trim()) {
-        console.error('Error: "gsd-sdk query" requires a command');
+        console.error('Error: "gsd-remix-sdk query" requires a command');
         process.exitCode = 10;
         return;
       }
@@ -384,16 +384,16 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
       if (!matched) {
         if (!queryFallbackToCjsEnabled()) {
           throw new GSDError(
-            `Unknown command: "${tokens.join(' ')}". Use a registered \`gsd-sdk query\` subcommand (see sdk/src/query/QUERY-HANDLERS.md) or invoke \`node …/gsd-tools.cjs\` for CJS-only operations. Set GSD_QUERY_FALLBACK=registered (default) to allow automatic fallback.`,
+            `Unknown command: "${tokens.join(' ')}". Use a registered \`gsd-remix-sdk query\` subcommand (see sdk/src/query/QUERY-HANDLERS.md) or invoke \`node …/gsd-tools.cjs\` for CJS-only operations. Set GSD_QUERY_FALLBACK=registered (default) to allow automatic fallback.`,
             ErrorClassification.Validation,
           );
         }
         const { resolveGsdToolsPath } = await import('./gsd-tools.js');
         const gsdPath = resolveGsdToolsPath(args.projectDir);
         console.error(
-          `[gsd-sdk] '${tokens.join(' ')}' not in native registry; falling back to gsd-tools.cjs.`,
+          `[gsd-remix-sdk] '${tokens.join(' ')}' not in native registry; falling back to gsd-tools.cjs.`,
         );
-        console.error('[gsd-sdk] Transparent bridge — prefer adding a native handler when parity matters.');
+        console.error('[gsd-remix-sdk] Transparent bridge — prefer adding a native handler when parity matters.');
         const { stdout, stderr } = await execGsdToolsCjsQuery(
           args.projectDir,
           gsdPath,
@@ -433,14 +433,14 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
   }
 
   if (args.command !== 'run' && args.command !== 'init' && args.command !== 'auto') {
-    console.error('Error: Expected "gsd-sdk run <prompt>", "gsd-sdk auto", "gsd-sdk init [input]", or "gsd-sdk query <command>"');
+    console.error('Error: Expected "gsd-remix-sdk run <prompt>", "gsd-remix-sdk auto", "gsd-remix-sdk init [input]", or "gsd-remix-sdk query <command>"');
     console.error(USAGE);
     process.exitCode = 1;
     return;
   }
 
   if (args.command === 'run' && !args.prompt) {
-    console.error('Error: "gsd-sdk run" requires a prompt');
+    console.error('Error: "gsd-remix-sdk run" requires a prompt');
     console.error(USAGE);
     process.exitCode = 1;
     return;

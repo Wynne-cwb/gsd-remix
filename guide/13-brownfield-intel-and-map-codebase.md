@@ -68,7 +68,7 @@ flowchart TD
 
     B --> G["/gsd-intel refresh"]
     G --> H[".planning/intel/*.json + arch.md"]
-    H --> I["gsd-sdk query intel.*"]
+    H --> I["gsd-remix-sdk query intel.*"]
 ```
 
 这张图里要记住的是：
