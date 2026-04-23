@@ -75,6 +75,7 @@ npx gsd-remix@latest
 - 独立以 `gsd-remix` 的 npm 包名发布，但保留 `/gsd-*` 命令面和核心 planning 布局兼容
 - 主流程的 token 优化，包括 discuss 历史摘要优先加载，以及小型 plan 的低复杂度 inline 路由
 - 通过 `.planning/failure-memory/` 增加 failure-memory 采集与晋升，把重复执行错误沉淀成项目内记忆，并编译成执行前的确定性守卫
+- 通过主 workflow 的自动预检和 `/gsd-health --runtime` 提供 runtime health 诊断，让安装损坏或不受支持的 Node 版本更早失败，而不是静默退化
 
 ---
 
@@ -109,6 +110,7 @@ GSD 解决的就是这个问题。它是让 Claude Code 变得可靠的上下文
 - **Spiking 与 sketching** — `/gsd-spike` 可运行 2–5 个聚焦实验并给出 Given/When/Then 结论；`/gsd-sketch` 可围绕设计问题产出 2–3 个交互式 HTML 方案，这两类产物都会落到 `.planning/`，并可配合 wrap-up 命令整理成项目本地 skills
 - **Agent 大小预算约束** — 分级行数上限（XL: 1600、Large: 1000、Default: 500）用于压缩 agent prompt，超限会在 CI 中暴露
 - **共享 boilerplate 抽取** — 将 mandatory-initial-read 和 project-skills-discovery 等逻辑提取到 reference 文件，减少多个 agent 之间的重复内容
+- **Runtime health 检查** — `discuss-phase`、`plan-phase` 和 `execute-phase` 现在都会先运行确定性的 runtime 预检；同时可以用 `/gsd-health --runtime` 手动查看安装/runtime 诊断
 
 ---
 
@@ -662,7 +664,7 @@ lmn012o feat(08-02): create registration endpoint
 | `/gsd-do <text>` | 将自由文本自动路由到正确的 GSD 命令 |
 | `/gsd-note <text>` | 零摩擦想法捕捉——追加、列出或提升为待办 |
 | `/gsd-quick [--full] [--discuss] [--research]` | 以 GSD 保障执行临时任务（`--full` 增加计划检查和验证，`--discuss` 先补上下文，`--research` 在规划前先调研） |
-| `/gsd-health [--repair]` | 校验 `.planning/` 目录完整性，带 `--repair` 时自动修复 |
+| `/gsd-health [--runtime] [--repair]` | 校验 `.planning/` 目录完整性，带 `--repair` 时自动修复，或用 `--runtime` 做运行时/安装诊断 |
 | `/gsd-stats` | 显示项目统计——阶段、计划、需求、git 指标 |
 | `/gsd-profile-user [--questionnaire] [--refresh]` | 从会话分析生成开发者行为档案，用于个性化响应 |
 

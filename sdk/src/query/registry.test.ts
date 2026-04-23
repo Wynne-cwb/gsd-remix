@@ -150,6 +150,16 @@ describe('createRegistry', () => {
     expect(registry.has('failure.capture-phase')).toBe(true);
   });
 
+  it('has runtime.health registered', () => {
+    const registry = createRegistry();
+    expect(registry.has('runtime.health')).toBe(true);
+  });
+
+  it('has sdk.health alias registered', () => {
+    const registry = createRegistry();
+    expect(registry.has('sdk.health')).toBe(true);
+  });
+
   it('has failure.preflight registered', () => {
     const registry = createRegistry();
     expect(registry.has('failure.preflight')).toBe(true);

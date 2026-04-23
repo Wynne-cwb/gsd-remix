@@ -63,6 +63,32 @@ Parse `$ARGUMENTS` before loading any context:
 If `--wave` is absent, preserve the current behavior of executing all incomplete waves in the phase.
 </step>
 
+<step name="runtime_health_preflight" priority="first">
+**MANDATORY — Check runtime health before any GSD SDK query.**
+
+```bash
+if ! command -v gsd-sdk &>/dev/null; then
+  echo "⚠ gsd-sdk not found in PATH — /gsd-execute-phase requires it."
+  echo ""
+  echo "Install the GSD SDK:"
+  echo "  npm install -g @gsd-build/sdk"
+  echo ""
+  echo "Or update GSD to get the latest packages:"
+  echo "  /gsd-update"
+  exit 1
+fi
+
+RUNTIME_HEALTH=$(gsd-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","level":"block","message":"Installed gsd-sdk does not expose runtime.health.","fix":"Run /gsd-update to sync gsd-remix and @gsd-build/sdk."}],"warnings":[],"checks":[]}')
+```
+
+Parse JSON for: `passed`, `blockers[]`, `warnings[]`, `checks[]`, `node_version`, `required_node_range`, `gsd_tools_source`, `gsd_tools_path`, `legacy_bridge_available`.
+
+Rules:
+- If `blockers[]` is non-empty: stop immediately, show each blocker and fix, and do not continue to `initialize`.
+- If `warnings[]` is non-empty: show them once as runtime advisories, then continue.
+- This step is deterministic. Do not infer extra runtime problems beyond the query result.
+</step>
+
 <step name="initialize" priority="first">
 Load all context in one call:
 

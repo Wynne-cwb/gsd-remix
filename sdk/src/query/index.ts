@@ -96,6 +96,7 @@ import { checkGates } from './check-gates.js';
 import { checkVerificationStatus } from './check-verification-status.js';
 import { checkShipReady } from './check-ship-ready.js';
 import { failureCapturePhase, failurePreflight, failurePromotePhase } from './failure-capture.js';
+import { runtimeHealth } from './runtime-health.js';
 import { GSDEventStream } from '../event-stream.js';
 import {
   GSDEventType,
@@ -390,6 +391,10 @@ export function createRegistry(
   registry.register('check verification-status', checkVerificationStatus);
   registry.register('check.ship-ready', checkShipReady);
   registry.register('check ship-ready', checkShipReady);
+  registry.register('runtime.health', runtimeHealth);
+  registry.register('runtime health', runtimeHealth);
+  registry.register('sdk.health', runtimeHealth);
+  registry.register('sdk health', runtimeHealth);
   registry.register('failure.capture-phase', failureCapturePhase);
   registry.register('failure capture-phase', failureCapturePhase);
   registry.register('failure.preflight', failurePreflight);

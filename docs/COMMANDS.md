@@ -853,15 +853,18 @@ Generate a developer behavioral profile from Claude Code session analysis across
 
 ### `/gsd-health`
 
-Validate `.planning/` directory integrity.
+Validate `.planning/` directory integrity or check runtime/install health.
 
 | Flag | Description |
 |------|-------------|
+| `--runtime` | Run runtime/install diagnostics (Node version + legacy bridge health) |
 | `--repair` | Auto-fix recoverable issues |
+| `--backfill` | Backfill milestone snapshots into `MILESTONES.md` during planning health repair |
 
 ```bash
 /gsd-health                         # Check integrity
 /gsd-health --repair                # Check and fix
+/gsd-health --runtime               # Check runtime/install health
 ```
 
 ### `/gsd-cleanup`

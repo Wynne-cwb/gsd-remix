@@ -11,11 +11,15 @@ Read all files referenced by the invoking prompt's execution_context before star
 <step name="parse_args">
 **Parse arguments:**
 
-Check if `--repair` or `--backfill` flags are present in the command arguments.
+Check if `--runtime`, `--repair`, or `--backfill` flags are present in the command arguments.
 
 ```
+RUNTIME_FLAG=""
 REPAIR_FLAG=""
 BACKFILL_FLAG=""
+if arguments contain "--runtime"; then
+  RUNTIME_FLAG="--runtime"
+fi
 if arguments contain "--repair"; then
   REPAIR_FLAG="--repair"
 fi
@@ -23,13 +27,51 @@ if arguments contain "--backfill"; then
   BACKFILL_FLAG="--backfill"
 fi
 ```
+
+**Guard `gsd-sdk` before any query:**
+
+```bash
+if ! command -v gsd-sdk &>/dev/null; then
+  echo "⚠ gsd-sdk not found in PATH — /gsd-health requires it."
+  echo ""
+  echo "Install the GSD SDK:"
+  echo "  npm install -g @gsd-build/sdk"
+  echo ""
+  echo "Or update GSD to get the latest packages:"
+  echo "  /gsd-update"
+  exit 1
+fi
+```
+
+**Runtime mode constraints:**
+
+If `RUNTIME_FLAG` is set, ignore `REPAIR_FLAG` and `BACKFILL_FLAG` for this run. Runtime checks are read-only; they do not modify project artifacts.
 </step>
 
 <step name="run_health_check">
 **Run health validation:**
 
+**If `RUNTIME_FLAG` is set:**
+
 ```bash
-gsd-sdk query validate.health $REPAIR_FLAG $BACKFILL_FLAG
+HEALTH=$(gsd-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","message":"Installed gsd-sdk does not expose runtime.health.","fix":"Run /gsd-update to sync gsd-remix and @gsd-build/sdk."}],"warnings":[],"checks":[]}')
+```
+
+Parse JSON output:
+- `passed`: boolean
+- `node_version`: Current Node version
+- `required_node_range`: Required Node range from package metadata
+- `gsd_tools_source`: `bundled` | `project` | `user` | `custom` | `missing`
+- `gsd_tools_path`: Resolved `gsd-tools.cjs` path if found
+- `legacy_bridge_available`: boolean
+- `blockers[]`: Critical runtime issues
+- `warnings[]`: Non-blocking runtime issues
+- `checks[]`: Full deterministic runtime check results
+
+**If `RUNTIME_FLAG` is NOT set:** Run planning health validation:
+
+```bash
+HEALTH=$(gsd-sdk query validate.health $REPAIR_FLAG $BACKFILL_FLAG)
 ```
 
 Parse JSON output:
@@ -43,6 +85,52 @@ Parse JSON output:
 
 <step name="format_output">
 **Format and display results:**
+
+**If `RUNTIME_FLAG` is set:**
+
+Determine status:
+- `BROKEN` when `blockers[]` is non-empty
+- `DEGRADED` when `blockers[]` is empty and `warnings[]` is non-empty
+- `HEALTHY` otherwise
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD Runtime Health Check
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Status: HEALTHY | DEGRADED | BROKEN
+Node: {node_version} (required: {required_node_range or "unknown"})
+Legacy bridge: READY | DEGRADED | MISSING
+Source: {gsd_tools_source}
+Path: {gsd_tools_path or "not found"}
+Warnings: N
+```
+
+**If blockers exist:**
+```
+## Blockers
+
+- [node_version_unsupported] Current Node v20.11.1 does not satisfy >=22.0.0
+  Fix: Use Node >=22.0.0 or newer, then rerun the workflow.
+```
+
+**If warnings exist:**
+```
+## Warnings
+
+- [legacy_bridge_missing] No gsd-tools.cjs bridge could be found for CJS fallback commands.
+  Fix: Run /gsd-update to restore the bundled bridge, or reinstall gsd-remix and @gsd-build/sdk together.
+```
+
+**Footer:**
+```
+---
+Runtime mode is read-only. Use /gsd-update to repair install/runtime drift.
+```
+
+Then STOP. Do not proceed to repair prompts.
+
+**If `RUNTIME_FLAG` is NOT set:** Use the existing planning health output:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -99,6 +187,8 @@ N issues can be auto-repaired. Run: /gsd-health --repair
 </step>
 
 <step name="offer_repair">
+**Skip if:** `RUNTIME_FLAG` is set.
+
 **If repairable issues exist and --repair was NOT used:**
 
 Ask user if they want to run repairs:
@@ -111,6 +201,8 @@ If yes, re-run with --repair flag and display results.
 </step>
 
 <step name="verify_repairs">
+**Skip if:** `RUNTIME_FLAG` is set.
+
 **If repairs were performed:**
 
 Re-run health check without --repair to confirm issues are resolved:

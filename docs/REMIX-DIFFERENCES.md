@@ -89,3 +89,11 @@ This lets the remix stay close to upstream usage patterns while still making opi
 - **Rationale:** Use past failures to prevent repeated execution mistakes without inflating prompt context or requiring the model to read long historical memory entries
 - **Key files:** [sdk/src/failure-memory.ts](../sdk/src/failure-memory.ts), [sdk/src/query/failure-capture.ts](../sdk/src/query/failure-capture.ts), [get-shit-done/workflows/execute-plan.md](../get-shit-done/workflows/execute-plan.md)
 - **Compatibility impact:** Medium. Execution may now stop earlier for strong environment mismatches that upstream would only discover during task execution.
+
+### 2026-04-23 — Runtime Health Preflight
+
+- **Area:** Runtime diagnostics / workflow guardrails
+- **Change:** Add deterministic `runtime.health` / `sdk.health` checks in the SDK, run them automatically at the start of `discuss-phase`, `plan-phase`, and `execute-phase`, and expose them explicitly via `/gsd-health --runtime`
+- **Rationale:** Catch broken installs, unsupported Node runtimes, and missing `gsd-tools.cjs` bridge assets before workflows degrade into manual fallback or opaque shell failures
+- **Key files:** [sdk/src/runtime-health.ts](../sdk/src/runtime-health.ts), [sdk/src/query/runtime-health.ts](../sdk/src/query/runtime-health.ts), [get-shit-done/workflows/discuss-phase.md](../get-shit-done/workflows/discuss-phase.md), [get-shit-done/workflows/plan-phase.md](../get-shit-done/workflows/plan-phase.md), [get-shit-done/workflows/execute-phase.md](../get-shit-done/workflows/execute-phase.md)
+- **Compatibility impact:** Medium. The remix now fails fast on unsupported Node versions or mismatched runtime installs instead of continuing into degraded execution paths.

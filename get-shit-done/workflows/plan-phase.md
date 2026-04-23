@@ -26,6 +26,32 @@ Valid GSD subagent types (use exact names — do not fall back to 'general-purpo
 
 **Do not create, rename, or switch git branches during plan-phase.** Branch identity is established at discuss-phase and is owned by the user's git workflow. A phase rename in ROADMAP.md is a plan-level change only — it does not mutate git branch names. If `phase_slug` in the init JSON differs from the current branch name, that is expected and correct; leave the branch unchanged.
 
+## 0.5. Runtime Health Preflight
+
+**MANDATORY — Check runtime health before any GSD SDK query.**
+
+```bash
+if ! command -v gsd-sdk &>/dev/null; then
+  echo "⚠ gsd-sdk not found in PATH — /gsd-plan-phase requires it."
+  echo ""
+  echo "Install the GSD SDK:"
+  echo "  npm install -g @gsd-build/sdk"
+  echo ""
+  echo "Or update GSD to get the latest packages:"
+  echo "  /gsd-update"
+  exit 1
+fi
+
+RUNTIME_HEALTH=$(gsd-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","level":"block","message":"Installed gsd-sdk does not expose runtime.health.","fix":"Run /gsd-update to sync gsd-remix and @gsd-build/sdk."}],"warnings":[],"checks":[]}')
+```
+
+Parse JSON for: `passed`, `blockers[]`, `warnings[]`, `checks[]`, `node_version`, `required_node_range`, `gsd_tools_source`, `gsd_tools_path`, `legacy_bridge_available`.
+
+Rules:
+- If `blockers[]` is non-empty: stop immediately, show each blocker and fix, and do not continue to `Initialize`.
+- If `warnings[]` is non-empty: show them once as runtime advisories, then continue.
+- This step is deterministic. Do not infer extra runtime problems beyond the query result.
+
 ## 1. Initialize
 
 Load all context in one call (paths only to minimize orchestrator context):

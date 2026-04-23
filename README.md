@@ -75,6 +75,7 @@ Current highlights:
 - Published independently on npm as `gsd-remix`, while keeping the `/gsd-*` command surface and core planning layout compatible
 - Token-efficiency changes in the main workflow path, including summary-first discuss history loading and low-complexity inline execution routing
 - Failure-memory event capture and promotion via `.planning/failure-memory/`, turning repeated execution mistakes into project-local memory and deterministic execute preflight checks
+- Runtime health diagnostics via automatic workflow preflight checks and `/gsd-health --runtime`, so broken installs and unsupported Node versions fail fast instead of silently degrading
 
 ---
 
@@ -111,6 +112,7 @@ Built-in quality gates catch real problems: schema drift detection flags ORM cha
 - **Spiking & sketching** — `/gsd-spike` runs 2–5 focused experiments with Given/When/Then verdicts; `/gsd-sketch` produces 2–3 interactive HTML mockup variants per design question — both store artifacts in `.planning/` and pair with wrap-up commands to package findings into project-local skills
 - **Agent size-budget enforcement** — Tiered line-count limits (XL: 1 600, Large: 1 000, Default: 500) keep agent prompts lean; violations surface in CI
 - **Shared boilerplate extraction** — Mandatory-initial-read and project-skills-discovery logic extracted to reference files, reducing duplication across a dozen agents
+- **Runtime health checks** — `discuss-phase`, `plan-phase`, and `execute-phase` now run deterministic runtime preflight checks up front, and `/gsd-health --runtime` exposes the same install/runtime diagnostics on demand
 
 ---
 
@@ -698,7 +700,7 @@ You're never locked in. The system adapts.
 | `/gsd-do <text>` | Route freeform text to the right GSD command automatically |
 | `/gsd-note <text>` | Zero-friction idea capture — append, list, or promote notes to todos |
 | `/gsd-quick [--full] [--validate] [--discuss] [--research]` | Execute ad-hoc task with GSD guarantees (`--full` enables all phases, `--validate` adds plan-checking and verification, `--discuss` gathers context first, `--research` investigates approaches before planning) |
-| `/gsd-health [--repair]` | Validate `.planning/` directory integrity, auto-repair with `--repair` |
+| `/gsd-health [--runtime] [--repair]` | Validate `.planning/` directory integrity, auto-repair with `--repair`, or run runtime/install diagnostics with `--runtime` |
 | `/gsd-stats` | Display project statistics — phases, plans, requirements, git metrics |
 | `/gsd-profile-user [--questionnaire] [--refresh]` | Generate developer behavioral profile from session analysis for personalized responses |
 
