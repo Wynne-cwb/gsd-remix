@@ -66,3 +66,5 @@ vendor/
 .cache/
 tmp/
 .worktrees
+
+.obsidian
