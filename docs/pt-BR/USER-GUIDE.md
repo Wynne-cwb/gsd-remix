@@ -1,6 +1,6 @@
 # Guia do Usuário do GSD
 
-Referência detalhada de workflows, troubleshooting e configuração. Para setup rápido, veja o [README](../../README.pt-BR.md).
+Referência detalhada de workflows, troubleshooting e configuração. Para setup rápido, veja o [README](../../README.md).
 
 ---
 

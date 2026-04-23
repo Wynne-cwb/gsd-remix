@@ -24,7 +24,7 @@ STATE.md consistency gates, `--to N` para execução autônoma parcial, research
 
 ## Links rápidos
 
-- **Começar rápido:** [README principal](../../README.pt-BR.md) -> instalação -> `/gsd-new-project`
+- **Começar rápido:** [README principal](../../README.md) -> instalação -> `/gsd-new-project`
 - **Fluxo completo:** [Guia do usuário](USER-GUIDE.md)
 - **Comandos:** [Referência de comandos](COMMANDS.md)
 - **Configuração:** [Referência de configuração](CONFIGURATION.md)

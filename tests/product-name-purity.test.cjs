@@ -23,10 +23,7 @@ const PRODUCTS = [
 // README files to scan (root + i18n variants + docs)
 const README_FILES = [
   'README.md',
-  'README.ko-KR.md',
-  'README.ja-JP.md',
   'README.zh-CN.md',
-  'README.pt-BR.md',
   'docs/zh-CN/README.md',
   'docs/ko-KR/README.md',
   'docs/ja-JP/README.md',

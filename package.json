@@ -1,9 +1,9 @@
 {
-  "name": "get-shit-done-cc",
+  "name": "gsd-remix",
   "version": "1.37.1",
-  "description": "A meta-prompting, context engineering and spec-driven development system for Claude Code, OpenCode, Gemini and Codex by TÂCHES.",
+  "description": "An unofficial, opinionated remix of GSD for Claude Code, OpenCode, Gemini and Codex.",
   "bin": {
-    "get-shit-done-cc": "bin/install.js"
+    "gsd-remix": "bin/install.js"
   },
   "files": [
     "bin",
@@ -21,6 +21,8 @@
   "keywords": [
     "claude",
     "claude-code",
+    "gsd",
+    "remix",
     "ai",
     "meta-prompting",
     "context-engineering",

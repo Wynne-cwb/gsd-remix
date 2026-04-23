@@ -1,33 +1,34 @@
 <div align="center">
 
-# GET SHIT DONE
+# GSD REMIX
 
-**English** · [Português](README.pt-BR.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja-JP.md) · [한국어](README.ko-KR.md)
+**English** · [简体中文](README.zh-CN.md)
 
-**A light-weight and powerful meta-prompting, context engineering and spec-driven development system for Claude Code, OpenCode, Gemini CLI, Kilo, Codex, Copilot, Cursor, Windsurf, Antigravity, Augment, Trae, Qwen Code, Cline, and CodeBuddy.**
+**An unofficial, opinionated remix of GSD for Claude Code, OpenCode, Gemini CLI, Kilo, Codex, Copilot, Cursor, Windsurf, Antigravity, Augment, Trae, Qwen Code, Cline, and CodeBuddy.**
 
 **Solves context rot — the quality degradation that happens as Claude fills its context window.**
 
-[![npm version](https://img.shields.io/npm/v/get-shit-done-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/get-shit-done-cc)
-[![npm downloads](https://img.shields.io/npm/dm/get-shit-done-cc?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/get-shit-done-cc)
+[![npm version](https://img.shields.io/npm/v/gsd-remix?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/gsd-remix)
+[![npm downloads](https://img.shields.io/npm/dm/gsd-remix?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/gsd-remix)
 [![Tests](https://img.shields.io/github/actions/workflow/status/gsd-build/get-shit-done/test.yml?branch=main&style=for-the-badge&logo=github&label=Tests)](https://github.com/gsd-build/get-shit-done/actions/workflows/test.yml)
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mYgfVNfA2r)
 [![X (Twitter)](https://img.shields.io/badge/X-@gsd__foundation-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/gsd_foundation)
 [![$GSD Token](https://img.shields.io/badge/$GSD-Dexscreener-1C1C1C?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0iIzAwRkYwMCIvPjwvc3ZnPg==&logoColor=00FF00)](https://dexscreener.com/solana/dwudwjvan7bzkw9zwlbyv6kspdlvhwzrqy6ebk8xzxkv)
-[![GitHub stars](https://img.shields.io/github/stars/gsd-build/get-shit-done?style=for-the-badge&logo=github&color=181717)](https://github.com/gsd-build/get-shit-done)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 
 <br>
 
 ```bash
-npx get-shit-done-cc@latest
+npx gsd-remix@latest
 ```
+
+**Keeps the same `/gsd-*` commands, planning file layout, and core workflow surface as GSD.**
 
 **Works on Mac, Windows, and Linux.**
 
 <br>
 
-![GSD Install](assets/terminal.svg)
+![GSD Remix Install](assets/terminal.svg)
 
 <br>
 
@@ -41,23 +42,38 @@ npx get-shit-done-cc@latest
 
 **Trusted by engineers at Amazon, Google, Shopify, and Webflow.**
 
-[Why I Built This](#why-i-built-this) · [How It Works](#how-it-works) · [Commands](#commands) · [Why It Works](#why-it-works) · [User Guide](docs/USER-GUIDE.md)
+[Why I Built This](#why-i-built-this) · [How It Works](#how-it-works) · [Remix Differences](#remix-differences) · [Commands](#commands) · [Why It Works](#why-it-works) · [User Guide](docs/USER-GUIDE.md)
 
 </div>
 
 ---
 
+> [!NOTE]
+> `gsd-remix` is published independently on npm. It is not affiliated with the official GSD project, but it intentionally keeps the same `/gsd-*` command surface and internal planning layout for compatibility.
+
 > [!IMPORTANT]
-> ### Welcome Back to GSD
+> ### Migrating From Upstream GSD
 >
-> If you're returning to GSD after the recent Anthropic Terms of Service changes — welcome back. We kept building while you were gone.
+> If you're coming from upstream GSD, the core project structure and `/gsd-*` command surface remain intentionally familiar here.
 >
-> **To re-import an existing project into GSD:**
+> **To re-import an existing project into `gsd-remix`:**
 > 1. Run `/gsd-map-codebase` to scan and index your current codebase state
-> 2. Run `/gsd-new-project` to initialize a fresh GSD planning structure using the codebase map as context
+> 2. Run `/gsd-new-project` to initialize a fresh planning structure using the codebase map as context
 > 3. Review [docs/USER-GUIDE.md](docs/USER-GUIDE.md) and the [CHANGELOG](CHANGELOG.md) for updates — a lot has changed since you were last here
 >
-> Your code is fine. GSD just needs its planning context rebuilt. The two commands above handle that.
+> Your code is fine. The planning context just needs to be rebuilt. The two commands above handle that.
+
+---
+
+## Remix Differences
+
+`gsd-remix` is intentionally close to upstream GSD at the command and file-layout level, but it includes opinionated changes in behavior and packaging.
+
+All remix-specific changes are tracked in [docs/REMIX-DIFFERENCES.md](docs/REMIX-DIFFERENCES.md). If this fork changes upstream behavior, installation, prompts, queries, or workflow defaults, it should be recorded there.
+
+Current highlights:
+- Published independently on npm as `gsd-remix`, while keeping the `/gsd-*` command surface and core planning layout compatible
+- Token-efficiency changes in the main workflow path, including summary-first discuss history loading and low-complexity inline execution routing
 
 ---
 
@@ -100,7 +116,7 @@ Built-in quality gates catch real problems: schema drift detection flags ORM cha
 ## Getting Started
 
 ```bash
-npx get-shit-done-cc@latest
+npx gsd-remix@latest
 ```
 
 The installer prompts you to choose:
@@ -114,7 +130,7 @@ Verify with:
 - Cline: GSD installs via `.clinerules` — verify by checking `.clinerules` exists
 
 > [!NOTE]
-> Claude Code 2.1.88+, Qwen Code, and Codex install as skills (`.claude/skills/`, `./.codex/skills/`, or the matching global `~/.claude/skills/` / `~/.codex/skills/` roots). Older Claude Code versions use `commands/gsd/`. `~/.claude/get-shit-done/skills/` is import-only for legacy migration. The installer handles all formats automatically.
+> Claude Code 2.1.88+, Qwen Code, and Codex install as skills (`.claude/skills/`, `./.codex/skills/`, or the matching global `~/.claude/skills/` / `~/.codex/skills/` roots). Older Claude Code versions use `commands/gsd/`. `~/.claude/get-shit-done/skills/` is retained only as a legacy upstream import path. The installer handles all formats automatically.
 
 The canonical discovery contract is documented in [docs/skills/discovery-contract.md](docs/skills/discovery-contract.md).
 
@@ -126,7 +142,7 @@ The canonical discovery contract is documented in [docs/skills/discovery-contrac
 GSD evolves fast. Update periodically:
 
 ```bash
-npx get-shit-done-cc@latest
+npx gsd-remix@latest
 ```
 
 <details>
@@ -134,61 +150,61 @@ npx get-shit-done-cc@latest
 
 ```bash
 # Claude Code
-npx get-shit-done-cc --claude --global   # Install to ~/.claude/
-npx get-shit-done-cc --claude --local    # Install to ./.claude/
+npx gsd-remix --claude --global   # Install to ~/.claude/
+npx gsd-remix --claude --local    # Install to ./.claude/
 
 # OpenCode
-npx get-shit-done-cc --opencode --global # Install to ~/.config/opencode/
+npx gsd-remix --opencode --global # Install to ~/.config/opencode/
 
 # Gemini CLI
-npx get-shit-done-cc --gemini --global   # Install to ~/.gemini/
+npx gsd-remix --gemini --global   # Install to ~/.gemini/
 
 # Kilo
-npx get-shit-done-cc --kilo --global     # Install to ~/.config/kilo/
-npx get-shit-done-cc --kilo --local      # Install to ./.kilo/
+npx gsd-remix --kilo --global     # Install to ~/.config/kilo/
+npx gsd-remix --kilo --local      # Install to ./.kilo/
 
 # Codex
-npx get-shit-done-cc --codex --global    # Install to ~/.codex/
-npx get-shit-done-cc --codex --local     # Install to ./.codex/
+npx gsd-remix --codex --global    # Install to ~/.codex/
+npx gsd-remix --codex --local     # Install to ./.codex/
 
 # Copilot
-npx get-shit-done-cc --copilot --global  # Install to ~/.github/
-npx get-shit-done-cc --copilot --local   # Install to ./.github/
+npx gsd-remix --copilot --global  # Install to ~/.github/
+npx gsd-remix --copilot --local   # Install to ./.github/
 
 # Cursor CLI
-npx get-shit-done-cc --cursor --global      # Install to ~/.cursor/
-npx get-shit-done-cc --cursor --local       # Install to ./.cursor/
+npx gsd-remix --cursor --global      # Install to ~/.cursor/
+npx gsd-remix --cursor --local       # Install to ./.cursor/
 
 # Windsurf
-npx get-shit-done-cc --windsurf --global    # Install to ~/.codeium/windsurf/
-npx get-shit-done-cc --windsurf --local     # Install to ./.windsurf/
+npx gsd-remix --windsurf --global    # Install to ~/.codeium/windsurf/
+npx gsd-remix --windsurf --local     # Install to ./.windsurf/
 
 # Antigravity
-npx get-shit-done-cc --antigravity --global # Install to ~/.gemini/antigravity/
-npx get-shit-done-cc --antigravity --local  # Install to ./.agent/
+npx gsd-remix --antigravity --global # Install to ~/.gemini/antigravity/
+npx gsd-remix --antigravity --local  # Install to ./.agent/
 
 # Augment
-npx get-shit-done-cc --augment --global     # Install to ~/.augment/
-npx get-shit-done-cc --augment --local      # Install to ./.augment/
+npx gsd-remix --augment --global     # Install to ~/.augment/
+npx gsd-remix --augment --local      # Install to ./.augment/
 
 # Trae
-npx get-shit-done-cc --trae --global        # Install to ~/.trae/
-npx get-shit-done-cc --trae --local         # Install to ./.trae/
+npx gsd-remix --trae --global        # Install to ~/.trae/
+npx gsd-remix --trae --local         # Install to ./.trae/
 
 # Qwen Code
-npx get-shit-done-cc --qwen --global        # Install to ~/.qwen/
-npx get-shit-done-cc --qwen --local         # Install to ./.qwen/
+npx gsd-remix --qwen --global        # Install to ~/.qwen/
+npx gsd-remix --qwen --local         # Install to ./.qwen/
 
 # CodeBuddy
-npx get-shit-done-cc --codebuddy --global   # Install to ~/.codebuddy/
-npx get-shit-done-cc --codebuddy --local    # Install to ./.codebuddy/
+npx gsd-remix --codebuddy --global   # Install to ~/.codebuddy/
+npx gsd-remix --codebuddy --local    # Install to ./.codebuddy/
 
 # Cline
-npx get-shit-done-cc --cline --global       # Install to ~/.cline/
-npx get-shit-done-cc --cline --local        # Install to ./.clinerules
+npx gsd-remix --cline --global       # Install to ~/.cline/
+npx gsd-remix --cline --local        # Install to ./.clinerules
 
 # All runtimes
-npx get-shit-done-cc --all --global      # Install to all directories
+npx gsd-remix --all --global      # Install to all directories
 ```
 
 Use `--global` (`-g`) or `--local` (`-l`) to skip the location prompt.
@@ -833,18 +849,18 @@ This prevents Claude from reading these files entirely, regardless of what comma
 
 **Commands not working as expected?**
 - Run `/gsd-help` to verify installation
-- Re-run `npx get-shit-done-cc` to reinstall
+- Re-run `npx gsd-remix` to reinstall
 
 **Updating to the latest version?**
 ```bash
-npx get-shit-done-cc@latest
+npx gsd-remix@latest
 ```
 
 **Using Docker or containerized environments?**
 
 If file reads fail with tilde paths (`~/.claude/...`), set `CLAUDE_CONFIG_DIR` before installing:
 ```bash
-CLAUDE_CONFIG_DIR=/home/youruser/.claude npx get-shit-done-cc --global
+CLAUDE_CONFIG_DIR=/home/youruser/.claude npx gsd-remix --global
 ```
 This ensures absolute paths are used instead of `~` which may not expand correctly in containers.
 
@@ -854,36 +870,36 @@ To remove GSD completely:
 
 ```bash
 # Global installs
-npx get-shit-done-cc --claude --global --uninstall
-npx get-shit-done-cc --opencode --global --uninstall
-npx get-shit-done-cc --gemini --global --uninstall
-npx get-shit-done-cc --kilo --global --uninstall
-npx get-shit-done-cc --codex --global --uninstall
-npx get-shit-done-cc --copilot --global --uninstall
-npx get-shit-done-cc --cursor --global --uninstall
-npx get-shit-done-cc --windsurf --global --uninstall
-npx get-shit-done-cc --antigravity --global --uninstall
-npx get-shit-done-cc --augment --global --uninstall
-npx get-shit-done-cc --trae --global --uninstall
-npx get-shit-done-cc --qwen --global --uninstall
-npx get-shit-done-cc --codebuddy --global --uninstall
-npx get-shit-done-cc --cline --global --uninstall
+npx gsd-remix --claude --global --uninstall
+npx gsd-remix --opencode --global --uninstall
+npx gsd-remix --gemini --global --uninstall
+npx gsd-remix --kilo --global --uninstall
+npx gsd-remix --codex --global --uninstall
+npx gsd-remix --copilot --global --uninstall
+npx gsd-remix --cursor --global --uninstall
+npx gsd-remix --windsurf --global --uninstall
+npx gsd-remix --antigravity --global --uninstall
+npx gsd-remix --augment --global --uninstall
+npx gsd-remix --trae --global --uninstall
+npx gsd-remix --qwen --global --uninstall
+npx gsd-remix --codebuddy --global --uninstall
+npx gsd-remix --cline --global --uninstall
 
 # Local installs (current project)
-npx get-shit-done-cc --claude --local --uninstall
-npx get-shit-done-cc --opencode --local --uninstall
-npx get-shit-done-cc --gemini --local --uninstall
-npx get-shit-done-cc --kilo --local --uninstall
-npx get-shit-done-cc --codex --local --uninstall
-npx get-shit-done-cc --copilot --local --uninstall
-npx get-shit-done-cc --cursor --local --uninstall
-npx get-shit-done-cc --windsurf --local --uninstall
-npx get-shit-done-cc --antigravity --local --uninstall
-npx get-shit-done-cc --augment --local --uninstall
-npx get-shit-done-cc --trae --local --uninstall
-npx get-shit-done-cc --qwen --local --uninstall
-npx get-shit-done-cc --codebuddy --local --uninstall
-npx get-shit-done-cc --cline --local --uninstall
+npx gsd-remix --claude --local --uninstall
+npx gsd-remix --opencode --local --uninstall
+npx gsd-remix --gemini --local --uninstall
+npx gsd-remix --kilo --local --uninstall
+npx gsd-remix --codex --local --uninstall
+npx gsd-remix --copilot --local --uninstall
+npx gsd-remix --cursor --local --uninstall
+npx gsd-remix --windsurf --local --uninstall
+npx gsd-remix --antigravity --local --uninstall
+npx gsd-remix --augment --local --uninstall
+npx gsd-remix --trae --local --uninstall
+npx gsd-remix --qwen --local --uninstall
+npx gsd-remix --codebuddy --local --uninstall
+npx gsd-remix --cline --local --uninstall
 ```
 
 This removes all GSD commands, agents, hooks, and settings while preserving your other configurations.
@@ -892,7 +908,7 @@ This removes all GSD commands, agents, hooks, and settings while preserving your
 
 ## Community Ports
 
-OpenCode, Gemini CLI, Kilo, and Codex are now natively supported via `npx get-shit-done-cc`.
+OpenCode, Gemini CLI, Kilo, and Codex are now natively supported via `npx gsd-remix`.
 
 These community ports pioneered multi-runtime support:
 
@@ -900,18 +916,6 @@ These community ports pioneered multi-runtime support:
 |---------|----------|-------------|
 | [gsd-opencode](https://github.com/rokicool/gsd-opencode) | OpenCode | Original OpenCode adaptation |
 | gsd-gemini (archived) | Gemini CLI | Original Gemini adaptation by uberfuzzy |
-
----
-
-## Star History
-
-<a href="https://star-history.com/#gsd-build/get-shit-done&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=gsd-build/get-shit-done&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=gsd-build/get-shit-done&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=gsd-build/get-shit-done&type=Date" />
- </picture>
-</a>
 
 ---
 
