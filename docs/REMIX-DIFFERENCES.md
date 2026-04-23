@@ -97,3 +97,11 @@ This lets the remix stay close to upstream usage patterns while still making opi
 - **Rationale:** Catch broken installs, unsupported Node runtimes, and missing `gsd-tools.cjs` bridge assets before workflows degrade into manual fallback or opaque shell failures
 - **Key files:** [sdk/src/runtime-health.ts](../sdk/src/runtime-health.ts), [sdk/src/query/runtime-health.ts](../sdk/src/query/runtime-health.ts), [get-shit-done/workflows/discuss-phase.md](../get-shit-done/workflows/discuss-phase.md), [get-shit-done/workflows/plan-phase.md](../get-shit-done/workflows/plan-phase.md), [get-shit-done/workflows/execute-phase.md](../get-shit-done/workflows/execute-phase.md)
 - **Compatibility impact:** Medium. The remix now fails fast on unsupported Node versions or mismatched runtime installs instead of continuing into degraded execution paths.
+
+### 2026-04-23 — Statusline Compact Phase + Rate Limits
+
+- **Area:** Hook behavior / developer UX
+- **Change:** Update `gsd-statusline.js` to render compact phase progress as `ph N/M` and append colored `5h / 7d` rate-limit indicators when the runtime provides them
+- **Rationale:** Keep the statusline readable in narrow terminals while surfacing rate-budget pressure directly in the user-facing status bar
+- **Key files:** [hooks/gsd-statusline.js](../hooks/gsd-statusline.js)
+- **Compatibility impact:** Low. The hook remains backward compatible; it only changes the rendered statusline text when phase or rate-limit data is available.

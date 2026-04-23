@@ -94,12 +94,9 @@ function formatGsdState(s) {
   // Status
   if (s.status) parts.push(s.status);
 
-  // Phase
+  // Phase (name intentionally omitted to keep the middle slot compact)
   if (s.phaseNum && s.phaseTotal) {
-    const phase = s.phaseName
-      ? `${s.phaseName} (${s.phaseNum}/${s.phaseTotal})`
-      : `ph ${s.phaseNum}/${s.phaseTotal}`;
-    parts.push(phase);
+    parts.push(`ph ${s.phaseNum}/${s.phaseTotal}`);
   }
 
   return parts.join(' · ');
@@ -240,6 +237,37 @@ function runStatusline() {
       } catch (e) {}
     }
 
+    // Rate limits (5h / 7d remaining)
+    function rlColor(remain) {
+      if (remain > 50) return '\x1b[32m';
+      if (remain >= 20) return '\x1b[33m';
+      return '\x1b[31m';
+    }
+
+    let rateLimits = '';
+    const rl = data.rate_limits;
+    if (rl) {
+      const parts = [];
+      if (rl.five_hour != null) {
+        const fiveRemain = Math.round(100 - rl.five_hour.used_percentage);
+        let resetStr = '';
+        if (rl.five_hour.resets_at) {
+          const resetDate = new Date(rl.five_hour.resets_at * 1000);
+          const hh = String(resetDate.getHours()).padStart(2, '0');
+          const mm = String(resetDate.getMinutes()).padStart(2, '0');
+          resetStr = `@${hh}:${mm}`;
+        }
+        parts.push(`${rlColor(fiveRemain)}5h:${fiveRemain}%${resetStr}\x1b[0m`);
+      }
+      if (rl.seven_day != null) {
+        const weekRemain = Math.round(100 - rl.seven_day.used_percentage);
+        parts.push(`${rlColor(weekRemain)}7d:${weekRemain}%\x1b[0m`);
+      }
+      if (parts.length > 0) {
+        rateLimits = ` ${parts.join(' ')}`;
+      }
+    }
+
     // Output
     const dirname = path.basename(dir);
     const middle = task
@@ -249,9 +277,9 @@ function runStatusline() {
         : null;
 
     if (middle) {
-      process.stdout.write(`${gsdUpdate}\x1b[2m${model}\x1b[0m │ ${middle} │ \x1b[2m${dirname}\x1b[0m${ctx}`);
+      process.stdout.write(`${gsdUpdate}\x1b[2m${model}\x1b[0m │ ${middle} │ \x1b[2m${dirname}\x1b[0m${ctx}${rateLimits}`);
     } else {
-      process.stdout.write(`${gsdUpdate}\x1b[2m${model}\x1b[0m │ \x1b[2m${dirname}\x1b[0m${ctx}`);
+      process.stdout.write(`${gsdUpdate}\x1b[2m${model}\x1b[0m │ \x1b[2m${dirname}\x1b[0m${ctx}${rateLimits}`);
     }
   } catch (e) {
     // Silent fail - don't break statusline on parse errors
