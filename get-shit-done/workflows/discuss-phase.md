@@ -303,31 +303,40 @@ If "Cancel": Exit workflow.
 </step>
 
 <step name="load_prior_context">
-Read project-level and prior phase context to avoid re-asking decided questions and maintain consistency.
+Read project-level context first, then load prior phase history through a condensed brief so discuss-phase does not eagerly hydrate every historical CONTEXT.md.
 
 **Step 1: Read project-level files**
 ```bash
 # Core project files
 cat .planning/PROJECT.md 2>/dev/null || true
 cat .planning/REQUIREMENTS.md 2>/dev/null || true
-cat .planning/STATE.md 2>/dev/null || true
+STATE_SNAPSHOT=$(gsd-sdk query state-snapshot 2>/dev/null || echo "{}")
 ```
 
 Extract from these:
 - **PROJECT.md** — Vision, principles, non-negotiables, user preferences
 - **REQUIREMENTS.md** — Acceptance criteria, constraints, must-haves vs nice-to-haves
-- **STATE.md** — Current progress, any flags or session notes
+- **STATE_SNAPSHOT** — Current progress, decisions, blockers, and session notes without loading full STATE.md body
 
-**Step 2: Read all prior CONTEXT.md files**
+**Step 2: Load condensed prior CONTEXT.md history**
 ```bash
-# Find all CONTEXT.md files from phases before current
-(find .planning/phases -name "*-CONTEXT.md" 2>/dev/null || true) | sort
+PRIOR_CONTEXT=$(gsd-sdk query context-history "${PHASE_NUMBER}" --limit 8 --max-decisions 3 --max-specifics 2 2>/dev/null || echo "{}")
 ```
 
-For each CONTEXT.md where phase number < current phase:
-- Read the `<decisions>` section — these are locked preferences
-- Read `<specifics>` — particular references or "I want it like X" moments
-- Note any patterns (e.g., "user consistently prefers minimal UI", "user rejected single-key shortcuts")
+Parse JSON for: `prior_contexts[]` (each with `phase`, `phase_name`, `path`, `decisions[]`, `specifics[]`, `topics[]`, `decision_count`, `specific_count`, `has_more_decisions`, `has_more_specifics`, `relevance_score`, `relevance_reasons[]`), `recurring_topics[]`, `conflicts[]`, and `counts`.
+
+Treat `counts.omitted_phases` as a signal that the brief is intentionally trimmed. The default brief is "most relevant plus most recent enough to stay on budget", not exhaustive history.
+
+For each `prior_context` entry:
+- Treat `decisions[]` as condensed locked preferences from earlier phases
+- Treat `specifics[]` as condensed "I want it like X" references from earlier phases
+- Use `path` as the escalation target if you later need deeper detail from that phase
+- Use `relevance_score` and `relevance_reasons[]` to decide which prior phases matter most for the current discussion
+
+If `conflicts[]` is non-empty:
+- Treat them as **possible** contradictions, not final truth
+- Before reusing a prior decision in that topic area, inspect the cited source `path`
+- Prefer source inspection over guessing which historical choice still applies
 
 **Step 3: Build internal `<prior_decisions>` context**
 
@@ -337,6 +346,7 @@ Structure the extracted information:
 ## Project-Level
 - [Key principle or constraint from PROJECT.md]
 - [Requirement that affects this phase from REQUIREMENTS.md]
+- [Relevant blocker or decision from STATE_SNAPSHOT]
 
 ## From Prior Phases
 ### Phase N: [Name]
@@ -347,6 +357,18 @@ Structure the extracted information:
 - [Another relevant decision]
 </prior_decisions>
 ```
+
+**Default behavior:** The condensed brief above is the default source of historical context. Do NOT read full prior CONTEXT.md files by default.
+
+**Escalate to a full prior CONTEXT.md read only if one of these is true:**
+- A condensed decision or specific idea clearly maps to a current gray area and the summary is not specific enough
+- Two prior phases appear to conflict and you need to inspect the source wording
+- `has_more_decisions` or `has_more_specifics` is `true` for a phase that seems directly relevant
+- `relevance_score` is high enough that the phase likely sets a precedent for the current work
+- The user explicitly references a prior phase or says "same as before" / "use the earlier approach"
+
+When escalating, read only the specific `path` returned by `context-history` for the relevant phase. Do not fall back to bulk-reading every prior CONTEXT.md file.
+If `counts.omitted_phases > 0` and the current gray area still feels underdetermined after reviewing the brief, rerun `context-history` with a higher `--limit` before reading many full source files.
 
 **Step 4: Load spike/sketch findings (if they exist)**
 ```bash
@@ -383,6 +405,12 @@ If raw spikes/sketches exist but no findings skill, note in output:
 - `analyze_phase`: Skip gray areas already decided in prior phases or validated by spikes/sketches
 - `present_gray_areas`: Annotate options with prior decisions ("You chose X in Phase 5") and spike/sketch findings ("Spike 002 validated this approach")
 - `discuss_areas`: Pre-fill answers or flag conflicts ("This contradicts Phase 3 — same here or different?")
+
+**If `context-history` fails or returns no usable data:** Fall back to the legacy approach for reliability:
+```bash
+(find .planning/phases -name "*-CONTEXT.md" 2>/dev/null || true) | sort
+```
+In that fallback path, read only the `<decisions>` and `<specifics>` sections from prior CONTEXT.md files rather than the entire documents.
 
 **If no prior context exists:** Continue without — this is expected for early phases.
 </step>

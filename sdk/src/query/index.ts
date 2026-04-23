@@ -23,6 +23,7 @@ import { stateProjectLoad } from './state-project-load.js';
 import { findPhase, phasePlanIndex } from './phase.js';
 import { phaseListPlans, phaseListArtifacts } from './phase-list-queries.js';
 import { planTaskStructure } from './plan-task-structure.js';
+import { planExecutionRoute } from './plan-execution-route.js';
 import { requirementsExtractFromPlans } from './requirements-extract-from-plans.js';
 import { roadmapAnalyze, roadmapGetPhase } from './roadmap.js';
 import { progressJson } from './progress.js';
@@ -62,6 +63,7 @@ import {
 } from './progress.js';
 import { milestoneComplete } from './phase-lifecycle.js';
 import { summaryExtract, historyDigest } from './summary.js';
+import { contextHistory } from './context-history.js';
 import { commitToSubrepo } from './commit.js';
 import {
   workstreamGet, workstreamList, workstreamCreate, workstreamSet, workstreamStatus,
@@ -290,6 +292,8 @@ export function createRegistry(
   registry.register('phase list-artifacts', phaseListArtifacts);
   registry.register('plan.task-structure', planTaskStructure);
   registry.register('plan task-structure', planTaskStructure);
+  registry.register('plan.execution-route', planExecutionRoute);
+  registry.register('plan execution-route', planExecutionRoute);
   registry.register('requirements.extract-from-plans', requirementsExtractFromPlans);
   registry.register('requirements extract-from-plans', requirementsExtractFromPlans);
   registry.register('roadmap.analyze', roadmapAnalyze);
@@ -474,6 +478,9 @@ export function createRegistry(
   registry.register('history.digest', historyDigest);
   registry.register('history digest', historyDigest);
   registry.register('history-digest', historyDigest);
+  registry.register('context.history', contextHistory);
+  registry.register('context history', contextHistory);
+  registry.register('context-history', contextHistory);
   registry.register('stats', statsJson);
   registry.register('stats.json', statsJson);
   registry.register('stats json', statsJson);

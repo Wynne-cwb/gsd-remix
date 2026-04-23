@@ -46,8 +46,11 @@ If no CONTEXT.md: proceed to analysis.
 Read project-level and prior phase context:
 - PROJECT.md — vision, principles, non-negotiables
 - REQUIREMENTS.md — acceptance criteria, constraints
-- STATE.md — current progress, decisions
-- Prior CONTEXT.md files — locked preferences from earlier phases
+- Prefer `gsd-sdk query state-snapshot` over full STATE.md reads when only structured progress/decision data is needed
+- Prefer `gsd-sdk query context-history <phase> --limit 8 --max-decisions 3 --max-specifics 2` for prior CONTEXT.md history
+- Use `relevance_score`, `relevance_reasons`, and `conflicts` from that query to prioritize which historical phases deserve attention
+- Treat `counts.omitted_phases` as a sign that the brief is intentionally trimmed; increase `--limit` only when the current gray area remains underdetermined
+- Read a full prior CONTEXT.md only when the condensed history is clearly relevant but underspecified or conflicting
 </step>
 
 <step name="analyze_phase">

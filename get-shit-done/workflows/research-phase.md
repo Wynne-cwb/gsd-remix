@@ -42,6 +42,7 @@ If exists: Offer update/view/skip options.
 INIT=$(gsd-sdk query init.phase-op "${PHASE}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 # Extract: phase_dir, padded_phase, phase_number, state_path, requirements_path, context_path
+STATE_SNAPSHOT=$(gsd-sdk query state-snapshot 2>/dev/null || echo "{}")
 AGENT_SKILLS_RESEARCHER=$(gsd-sdk query agent-skills gsd-researcher 2>/dev/null)
 ```
 
@@ -56,8 +57,14 @@ Research implementation approach for Phase {phase}: {name}
 <files_to_read>
 - {context_path} (USER DECISIONS from /gsd-discuss-phase)
 - {requirements_path} (Project requirements)
-- {state_path} (Project decisions and history)
 </files_to_read>
+
+<state_snapshot>
+${STATE_SNAPSHOT}
+</state_snapshot>
+
+Use `state_snapshot` as the default source for project status, blockers, and recent decisions.
+Read the full `{state_path}` only if the snapshot surfaces a blocker or decision whose exact wording materially affects the research.
 
 ${AGENT_SKILLS_RESEARCHER}
 

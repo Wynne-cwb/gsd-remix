@@ -96,7 +96,7 @@ If "Update": Load existing SPEC.md, continue to Step 3.
 
 **Read these files before any questions:**
 - `{requirements_path}` — Project requirements
-- `{state_path}` — Decisions already made, current phase, blockers
+- `STATE_SNAPSHOT=$(gsd-sdk query state-snapshot 2>/dev/null || echo "{}")` — Decisions already made, current phase, blockers without loading full STATE.md
 - ROADMAP.md phase entry — Phase description, goals, canonical refs
 
 **Grep the codebase** for code/files relevant to this phase goal. Look for:

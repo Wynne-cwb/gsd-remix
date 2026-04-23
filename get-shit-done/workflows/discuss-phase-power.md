@@ -17,7 +17,24 @@ Begin at **Step 1** immediately.
 <step name="analyze">
 Run the same gray area identification as standard discuss-phase mode.
 
-1. Load prior context (PROJECT.md, REQUIREMENTS.md, STATE.md, prior CONTEXT.md files)
+1. Load prior context using the same summary-first strategy as standard discuss-phase:
+   ```bash
+   cat .planning/PROJECT.md 2>/dev/null || true
+   cat .planning/REQUIREMENTS.md 2>/dev/null || true
+   STATE_SNAPSHOT=$(gsd-sdk query state-snapshot 2>/dev/null || echo "{}")
+   PRIOR_CONTEXT=$(gsd-sdk query context-history "${PHASE_NUMBER}" --limit 8 --max-decisions 3 --max-specifics 2 2>/dev/null || echo "{}")
+   ```
+   Parse `PRIOR_CONTEXT` for `prior_contexts[]`, `recurring_topics[]`, and `conflicts[]`.
+   Treat the condensed history as the default source of prior decisions.
+   Treat `counts.omitted_phases` as expected when the brief is trimmed for token budget.
+   Escalate to a full prior `CONTEXT.md` read only when:
+   - A summary entry is clearly relevant but too terse for a question you need to generate
+   - `has_more_decisions` or `has_more_specifics` is `true` for a highly relevant phase
+   - `relevance_score` is high and you need source wording to avoid inventing tradeoffs
+   - `conflicts[]` indicates a possible contradiction in the topic area you are about to ask about
+   - The user explicitly references a prior phase or says to reuse an earlier approach
+   If the brief still feels insufficient and `counts.omitted_phases > 0`, rerun `context-history` with a higher `--limit` before bulk-reading old context files.
+   If `context-history` fails, fall back to scanning prior `CONTEXT.md` files, but read only `<decisions>` and `<specifics>` sections rather than full files.
 2. Scout codebase for reusable assets and patterns relevant to this phase
 3. Read the phase goal from ROADMAP.md
 4. Identify ALL gray areas — specific implementation decisions the user should weigh in on

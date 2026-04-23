@@ -135,6 +135,16 @@ describe('createRegistry', () => {
     expect(registry.has('summary-extract')).toBe(true);
   });
 
+  it('has context-history registered', () => {
+    const registry = createRegistry();
+    expect(registry.has('context-history')).toBe(true);
+  });
+
+  it('has plan.execution-route registered', () => {
+    const registry = createRegistry();
+    expect(registry.has('plan.execution-route')).toBe(true);
+  });
+
   it('can dispatch generate-slug', async () => {
     const registry = createRegistry();
     const result = await registry.dispatch('generate-slug', ['My Phase'], '/tmp');

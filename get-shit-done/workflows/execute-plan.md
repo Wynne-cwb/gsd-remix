@@ -61,17 +61,27 @@ PLAN_START_EPOCH=$(date +%s)
 
 <step name="parse_segments">
 ```bash
-# Count tasks — match <task tag at any indentation level
-TASK_COUNT=$(grep -cE '^\s*<task[[:space:]>]' .planning/phases/XX-name/{phase}-{plan}-PLAN.md 2>/dev/null || echo "0")
+PLAN_FILE=".planning/phases/XX-name/{phase}-{plan}-PLAN.md"
 INLINE_THRESHOLD=$(gsd-sdk query config-get workflow.inline_plan_threshold 2>/dev/null || echo "2")
-grep -n "type=\"checkpoint" .planning/phases/XX-name/{phase}-{plan}-PLAN.md
+EXECUTION_ROUTE=$(gsd-sdk query plan.execution-route "$PLAN_FILE" --inline-threshold "${INLINE_THRESHOLD}" 2>/dev/null || echo "{}")
 ```
 
-**Primary routing: task count threshold (#1979)**
+Parse JSON for: `task_count`, `inline_threshold`, `checkpoint_mode`, `threshold_inline`, `dynamic_inline_band`, `low_complexity_inline`, `low_complexity_reasons[]`, `low_complexity_blockers[]`, `complexity_score`, `complexity_signals[]`, `recommended_pattern`, `recommended_execution`, `reason`.
 
-If `INLINE_THRESHOLD > 0` AND `TASK_COUNT <= INLINE_THRESHOLD`: Use Pattern C (inline) regardless of checkpoint type. Small plans execute faster inline — avoids ~14K token subagent spawn overhead and preserves prompt cache. Configure threshold via `workflow.inline_plan_threshold` (default: 2, set to `0` to always spawn subagents).
+**Primary routing: code-derived execution route**
 
-Otherwise: Apply checkpoint-based routing below.
+Use the route returned by `plan.execution-route` by default. This decision is deterministic and code-based — do NOT substitute your own LLM judgment unless the query failed.
+
+Routing rules encoded in the query:
+- `INLINE_THRESHOLD` remains the hard floor. If `task_count <= INLINE_THRESHOLD`, use inline execution immediately.
+- For plans above the threshold, a conservative low-complexity override is allowed only for simple `3-5` task plans with:
+  - no checkpoint tasks
+  - small file surface
+  - small `read_first` surface
+  - small acceptance criteria surface
+- Verify-only checkpoints still route to Pattern B.
+- Decision or human-action checkpoints still route to Pattern C.
+- All other plans route to Pattern A.
 
 **Checkpoint-based routing (plans with > threshold tasks):**
 
@@ -80,6 +90,21 @@ Otherwise: Apply checkpoint-based routing below.
 | None | A (autonomous) | Single subagent: full plan + SUMMARY + commit |
 | Verify-only | B (segmented) | Segments between checkpoints. After none/human-verify → SUBAGENT. After decision/human-action → MAIN |
 | Decision | C (main) | Execute entirely in main context |
+
+If `reason == "low_complexity_override"`:
+- Treat this plan as intentionally inline to avoid unnecessary ~14K token subagent overhead
+- Use `low_complexity_reasons[]` as the justification
+- Do NOT escalate back to Pattern A unless you discover contradictory evidence while reading the plan
+
+If `EXECUTION_ROUTE` failed or returned no usable recommendation:
+- Fall back to the legacy behavior:
+  ```bash
+  TASK_COUNT=$(grep -cE '^\s*<task[[:space:]>]' "$PLAN_FILE" 2>/dev/null || echo "0")
+  grep -n 'type="checkpoint' "$PLAN_FILE"
+  ```
+  - count `<task>` tags
+  - inline when `TASK_COUNT <= INLINE_THRESHOLD`
+  - otherwise apply checkpoint-based routing
 
 **Pattern A:** init_agent_tracking → capture `EXPECTED_BASE=$(git rev-parse HEAD)` → spawn Task(subagent_type="gsd-executor", model=executor_model) with prompt: execute plan at [path], autonomous, all tasks + SUMMARY + commit, follow deviation/auth rules, report: plan name, tasks, SUMMARY path, commit hash → track agent_id → wait → update tracking → report. **Include `isolation="worktree"` only if `workflow.use_worktrees` is not `false`** (read via `config-get workflow.use_worktrees`). **When using `isolation="worktree"`, include a `<worktree_branch_check>` block in the prompt** instructing the executor to run `git merge-base HEAD {EXPECTED_BASE}` and, if the result differs from `{EXPECTED_BASE}`, hard-reset the branch with `git reset --hard {EXPECTED_BASE}` before starting work (safe — runs before any agent work), then verify with `[ "$(git rev-parse HEAD)" != "{EXPECTED_BASE}" ] && exit 1`. This corrects a known issue where `EnterWorktree` creates branches from `main` instead of the feature branch HEAD (affects all platforms).
 
