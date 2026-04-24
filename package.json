@@ -1,6 +1,6 @@
 {
   "name": "gsd-remix",
-  "version": "1.37.1",
+  "version": "1.0.0",
   "description": "An unofficial, opinionated remix of GSD for Claude Code, OpenCode, Gemini and Codex.",
   "bin": {
     "gsd-remix": "bin/install.js"
