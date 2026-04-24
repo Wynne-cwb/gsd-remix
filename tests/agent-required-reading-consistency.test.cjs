@@ -4,7 +4,7 @@
  * Validates that all agent .md files use the standardized <required_reading>
  * pattern and that no legacy <files_to_read> blocks remain.
  *
- * See: https://github.com/gsd-build/get-shit-done/issues/2168
+ * See: https://github.com/Wynne-cwb/gsd-remix/issues/2168
  */
 
 const { test, describe } = require('node:test');

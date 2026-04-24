@@ -5,7 +5,7 @@ Use this procedure when `npx get-shit-done-cc@latest` is unavailable — e.g. du
 ## Prerequisites
 
 - Node.js installed
-- This repo cloned locally (`git clone https://github.com/gsd-build/get-shit-done`)
+- This repo cloned locally (`git clone https://github.com/Wynne-cwb/gsd-remix`)
 
 ## Steps
 

@@ -55,7 +55,7 @@ Use this document at the start of a new session so work continues in context wit
 
 - **Workspace:** `D:\Repos\get-shit-done` (GSD PBR backport initiative).
 - **Feature branch:** `feat/sdk-phase3-query-layer` (62 commits ahead of `main`; confirm against `origin` before merging).
-- **Upstream PRs:** `gsd-build/get-shit-done` issue #2302.
+- **Upstream PRs:** `Wynne-cwb/gsd-remix` issue #2302.
 
 ---
 

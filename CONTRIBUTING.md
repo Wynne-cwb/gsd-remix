@@ -4,7 +4,7 @@
 
 ```bash
 # Clone the repo
-git clone https://github.com/gsd-build/get-shit-done.git
+git clone https://github.com/Wynne-cwb/gsd-remix.git
 cd get-shit-done
 
 # Install dependencies
@@ -25,7 +25,7 @@ GSD accepts three types of contributions. Each type has a different process and 
 A fix corrects something that is broken, crashes, produces wrong output, or behaves contrary to documented behavior.
 
 **Process:**
-1. Open a [Bug Report issue](https://github.com/gsd-build/get-shit-done/issues/new?template=bug_report.yml) — fill it out completely.
+1. Open a [Bug Report issue](https://github.com/Wynne-cwb/gsd-remix/issues/new?template=bug_report.yml) — fill it out completely.
 2. Wait for a maintainer to confirm it is a bug (label: `confirmed-bug`). For obvious, reproducible bugs this is typically fast.
 3. Fix it. Write a test that would have caught the bug.
 4. Open a PR using the [Fix PR template](.github/PULL_REQUEST_TEMPLATE/fix.md) — link the confirmed issue.
@@ -41,7 +41,7 @@ An enhancement improves an existing feature — better output, faster execution,
 **The bar:** Enhancements must have a scoped written proposal approved by a maintainer before any code is written. A PR for an enhancement will be closed without review if the linked issue does not carry the `approved-enhancement` label.
 
 **Process:**
-1. Open an [Enhancement issue](https://github.com/gsd-build/get-shit-done/issues/new?template=enhancement.yml) with the full proposal.  The issue template requires: the problem being solved, the concrete benefit, the scope of changes, and alternatives considered.
+1. Open an [Enhancement issue](https://github.com/Wynne-cwb/gsd-remix/issues/new?template=enhancement.yml) with the full proposal.  The issue template requires: the problem being solved, the concrete benefit, the scope of changes, and alternatives considered.
 2. **Wait for maintainer approval.** A maintainer must label the issue `approved-enhancement` before you write a single line of code. Do not open a PR against an unapproved enhancement issue — it will be closed.
 3. Write the code. Keep the scope exactly as approved. If scope creep occurs, comment on the issue and get re-approval before continuing.
 4. Open a PR using the [Enhancement PR template](.github/PULL_REQUEST_TEMPLATE/enhancement.md) — link the approved issue.
@@ -57,8 +57,8 @@ A feature adds something new — a new command, a new workflow, a new concept, a
 **The bar:** Features require a complete written specification approved by a maintainer before any code is written. A PR for a feature will be closed without review if the linked issue does not carry the `approved-feature` label. Incomplete specs are closed, not revised by maintainers.
 
 **Process:**
-1. **Discuss first** — check [Discussions](https://github.com/gsd-build/get-shit-done/discussions) to see if the idea has been raised. If it has and was declined, don't open a new issue.
-2. Open a [Feature Request issue](https://github.com/gsd-build/get-shit-done/issues/new?template=feature_request.yml) with the complete spec. The template requires: the solo-developer problem being solved, what is being added, full scope of affected files and systems, user stories, acceptance criteria, and assessment of maintenance burden.
+1. **Discuss first** — check [Discussions](https://github.com/Wynne-cwb/gsd-remix/discussions) to see if the idea has been raised. If it has and was declined, don't open a new issue.
+2. Open a [Feature Request issue](https://github.com/Wynne-cwb/gsd-remix/issues/new?template=feature_request.yml) with the complete spec. The template requires: the solo-developer problem being solved, what is being added, full scope of affected files and systems, user stories, acceptance criteria, and assessment of maintenance burden.
 3. **Wait for maintainer approval.** A maintainer must label the issue `approved-feature` before you write a single line of code. Approval is not guaranteed — GSD is intentionally lean and many valid ideas are declined because they conflict with the project's design philosophy.
 4. Write the code. Implement exactly the approved spec. Changes to scope require re-approval.
 5. Open a PR using the [Feature PR template](.github/PULL_REQUEST_TEMPLATE/feature.md) — link the approved issue.

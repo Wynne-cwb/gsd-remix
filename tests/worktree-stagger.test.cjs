@@ -5,7 +5,7 @@
  * instructions to prevent git config.lock contention when multiple
  * agents create worktrees in parallel within the same wave.
  *
- * See: https://github.com/gsd-build/get-shit-done/issues/1511
+ * See: https://github.com/Wynne-cwb/gsd-remix/issues/1511
  */
 
 const { test, describe } = require('node:test');
