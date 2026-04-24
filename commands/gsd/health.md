@@ -1,6 +1,6 @@
 ---
 name: gsd:health
-description: Diagnose planning or runtime health and optionally repair planning issues
+description: Diagnose planning or runtime health, repair planning issues, or rebuild the bundled SDK
 argument-hint: [--runtime] [--repair] [--backfill]
 allowed-tools:
   - Read
@@ -9,7 +9,7 @@ allowed-tools:
   - AskUserQuestion
 ---
 <objective>
-Validate `.planning/` directory integrity or the installed GSD runtime and report actionable issues. Planning mode checks for missing files, invalid configurations, inconsistent state, and orphaned plans. Runtime mode checks the installed Node runtime and legacy bridge health.
+Validate `.planning/` directory integrity or the installed GSD runtime and report actionable issues. Planning mode checks for missing files, invalid configurations, inconsistent state, and orphaned plans. Runtime mode checks the installed Node runtime, legacy bridge health, and remix identity marker; `--runtime --repair` rebuilds the bundled SDK CLI without reinstalling all runtime assets.
 </objective>
 
 <execution_context>

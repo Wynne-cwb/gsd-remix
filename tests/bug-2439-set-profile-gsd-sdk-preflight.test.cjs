@@ -43,12 +43,12 @@ describe('bug #2439: /gsd-set-profile gsd-remix-sdk pre-flight check', () => {
     const sdkCall = content.indexOf('gsd-remix-sdk query config-set-model-profile');
     const preamble = content.slice(0, sdkCall);
     const hasInstallHint =
-      preamble.includes('@gsd-remix/sdk') ||
+      preamble.includes('/gsd-health --runtime --repair') ||
       preamble.includes('gsd-update') ||
       preamble.includes('/gsd-update');
     assert.ok(
       hasInstallHint,
-      'Pre-flight error must point users at `npm install -g @gsd-remix/sdk` or `/gsd-update`.'
+      'Pre-flight error must point users at `/gsd-health --runtime --repair` or `/gsd-update`.'
     );
   });
 });

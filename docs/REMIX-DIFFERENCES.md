@@ -53,7 +53,7 @@ This lets the remix stay close to upstream usage patterns while still making opi
 ### 2026-04-23 — SDK Namespace Isolation
 
 - **Area:** SDK packaging / installer behavior
-- **Change:** Rename the bundled SDK package and binary from `@gsd-build/sdk` / `gsd-sdk` to `@gsd-remix/sdk` / `gsd-remix-sdk`, and migrate workflows plus runtime preflights to the new binary
+- **Change:** Rename the bundled SDK package identity and binary from `@gsd-build/sdk` / `gsd-sdk` to `@gsd-remix/sdk` / `gsd-remix-sdk`, and migrate workflows plus runtime preflights to the new binary
 - **Rationale:** Prevent the remix SDK from colliding with upstream global installs while keeping the `/gsd-*` command surface unchanged
 - **Key files:** [sdk/package.json](../sdk/package.json), [sdk/package-lock.json](../sdk/package-lock.json), [bin/install.js](../bin/install.js), [get-shit-done/workflows/health.md](../get-shit-done/workflows/health.md), [README.md](../README.md)
 - **Compatibility impact:** Medium. Fresh `gsd-remix` installs now rely on `gsd-remix-sdk`; users with tooling that shells out to `gsd-sdk` must switch to the remix binary.
@@ -105,6 +105,22 @@ This lets the remix stay close to upstream usage patterns while still making opi
 - **Rationale:** Catch broken installs, unsupported Node runtimes, and missing `gsd-tools.cjs` bridge assets before workflows degrade into manual fallback or opaque shell failures
 - **Key files:** [sdk/src/runtime-health.ts](../sdk/src/runtime-health.ts), [sdk/src/query/runtime-health.ts](../sdk/src/query/runtime-health.ts), [get-shit-done/workflows/discuss-phase.md](../get-shit-done/workflows/discuss-phase.md), [get-shit-done/workflows/plan-phase.md](../get-shit-done/workflows/plan-phase.md), [get-shit-done/workflows/execute-phase.md](../get-shit-done/workflows/execute-phase.md)
 - **Compatibility impact:** Medium. The remix now fails fast on unsupported Node versions or mismatched runtime installs instead of continuing into degraded execution paths.
+
+### 2026-04-24 — Bundled SDK Runtime Repair
+
+- **Area:** Runtime repair / installer behavior
+- **Change:** Install a bundled SDK source snapshot into `get-shit-done/sdk/` and add `get-shit-done/bin/repair-sdk.cjs`, allowing `/gsd-health --runtime --repair` to rebuild `gsd-remix-sdk` without publishing or fetching a separate SDK package
+- **Rationale:** Keep `gsd-remix` as a single npm package while preserving a real SDK repair path when the SDK CLI is missing, stale, or unable to answer health queries
+- **Key files:** [bin/install.js](../bin/install.js), [get-shit-done/bin/repair-sdk.cjs](../get-shit-done/bin/repair-sdk.cjs), [get-shit-done/workflows/health.md](../get-shit-done/workflows/health.md), [docs/COMMANDS.md](COMMANDS.md)
+- **Compatibility impact:** Low to medium. Runtime installs include a larger `get-shit-done/` payload, but SDK repair no longer depends on a separately published `@gsd-remix/sdk` package.
+
+### 2026-04-24 — Runtime Identity Marker
+
+- **Area:** Runtime diagnostics / install confidence
+- **Change:** Write `get-shit-done/IDENTITY.json` during install and surface it through `runtime.health` / `/gsd-health --runtime`
+- **Rationale:** Let users confirm that shared `/gsd-*` commands resolve to `gsd-remix` rather than stale upstream GSD assets
+- **Key files:** [bin/install.js](../bin/install.js), [sdk/src/runtime-health.ts](../sdk/src/runtime-health.ts), [get-shit-done/workflows/health.md](../get-shit-done/workflows/health.md), [README.md](../README.md)
+- **Compatibility impact:** Low. The marker is additive; missing or unexpected identity markers appear as runtime warnings.
 
 ### 2026-04-23 — Statusline Compact Phase + Rate Limits
 

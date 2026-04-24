@@ -150,18 +150,18 @@ Text mode applies to ALL workflows in the session, not just discuss-phase.
 if ! command -v gsd-remix-sdk &>/dev/null; then
   echo "⚠ gsd-remix-sdk not found in PATH — /gsd-discuss-phase requires it."
   echo ""
-  echo "Install the GSD SDK:"
-  echo "  npm install -g @gsd-remix/sdk"
+  echo "Repair the bundled SDK:"
+  echo "  /gsd-health --runtime --repair"
   echo ""
-  echo "Or update GSD to get the latest packages:"
+  echo "Or refresh all runtime assets:"
   echo "  /gsd-update"
   exit 1
 fi
 
-RUNTIME_HEALTH=$(gsd-remix-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","level":"block","message":"Installed gsd-remix-sdk does not expose runtime.health.","fix":"Run /gsd-update to sync gsd-remix and @gsd-remix/sdk."}],"warnings":[],"checks":[]}')
+RUNTIME_HEALTH=$(gsd-remix-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","level":"block","message":"Installed gsd-remix-sdk does not expose runtime.health.","fix":"Run /gsd-health --runtime --repair to rebuild the bundled SDK."}],"warnings":[],"checks":[]}')
 ```
 
-Parse JSON for: `passed`, `blockers[]`, `warnings[]`, `checks[]`, `node_version`, `required_node_range`, `gsd_tools_source`, `gsd_tools_path`, `legacy_bridge_available`.
+Parse JSON for: `passed`, `blockers[]`, `warnings[]`, `checks[]`, `node_version`, `required_node_range`, `runtime_identity`, `runtime_identity_path`, `gsd_tools_source`, `gsd_tools_path`, `legacy_bridge_available`.
 
 Rules:
 - If `blockers[]` is non-empty: stop immediately, show each blocker and fix, and do not continue to `initialize`.

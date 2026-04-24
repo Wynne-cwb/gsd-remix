@@ -853,18 +853,19 @@ Generate a developer behavioral profile from Claude Code session analysis across
 
 ### `/gsd-health`
 
-Validate `.planning/` directory integrity or check runtime/install health.
+Validate `.planning/` directory integrity or check runtime/install health. Runtime mode also prints the installed distribution identity so shared `/gsd-*` commands can be confirmed as `gsd-remix` instead of stale upstream GSD assets.
 
 | Flag | Description |
 |------|-------------|
 | `--runtime` | Run runtime/install diagnostics (Node version + legacy bridge health) |
-| `--repair` | Auto-fix recoverable issues |
+| `--repair` | Auto-fix recoverable planning issues, or rebuild the bundled SDK when combined with `--runtime` |
 | `--backfill` | Backfill milestone snapshots into `MILESTONES.md` during planning health repair |
 
 ```bash
 /gsd-health                         # Check integrity
 /gsd-health --repair                # Check and fix
-/gsd-health --runtime               # Check runtime/install health
+/gsd-health --runtime               # Check runtime/install health and remix identity
+/gsd-health --runtime --repair      # Rebuild gsd-remix-sdk from bundled source
 ```
 
 ### `/gsd-cleanup`

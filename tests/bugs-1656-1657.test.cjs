@@ -50,9 +50,8 @@ describe('#1656: community .sh hooks must be present in hooks/dist', () => {
 // ─── #1657 ───────────────────────────────────────────────────────────────────
 //
 // Historical context: #1657 originally guarded against a broken `promptSdk()`
-// flow that shipped when `@gsd-remix/sdk` did not yet exist on npm. The
-// package was published at v0.1.0 and is now a hard runtime requirement for
-// every /gsd-* command (they all shell out to `gsd-remix-sdk query …`).
+// flow. The SDK CLI is now a hard runtime requirement for every /gsd-* command
+// and is built from bundled source rather than fetched as a separate package.
 //
 // #2385 restored the `--sdk` flag and made SDK install the default path in
 // bin/install.js. These guards are inverted: we now assert that SDK install
@@ -83,10 +82,8 @@ describe('#1657 / #2385: SDK install must be wired into installer source', () =>
   test('install.js builds gsd-remix-sdk from in-repo sdk/ source (#2385)', () => {
     src = src || fs.readFileSync(INSTALL_SRC, 'utf-8');
     // The installer must locate the in-repo sdk/ directory, run the build,
-    // and install it globally. We intentionally do NOT install
-    // @gsd-remix/sdk from npm because that published version lags the source
-    // tree and shipping it breaks query handlers added since the last
-    // publish.
+    // and install it globally. We intentionally build from bundled source so
+    // users get the SDK that matches the installed gsd-remix release.
     assert.ok(
       src.includes("path.resolve(__dirname, '..', 'sdk')") ||
       src.includes('path.resolve(__dirname, "..", "sdk")'),
@@ -109,6 +106,22 @@ describe('#1657 / #2385: SDK install must be wired into installer source', () =>
     assert.ok(
       files.some((f) => f === 'sdk' || f.startsWith('sdk/')),
       'root package.json `files` must include sdk source so npm-registry installs can build gsd-remix-sdk from source'
+    );
+  });
+
+  test('install.js copies bundled sdk source into runtime assets for repair', () => {
+    src = src || fs.readFileSync(INSTALL_SRC, 'utf-8');
+    assert.ok(
+      src.includes('copySdkBundleToRuntime'),
+      'installer must copy bundled SDK source into get-shit-done/sdk so runtime repair does not require a second npm package'
+    );
+  });
+
+  test('install.js writes a remix runtime identity marker', () => {
+    src = src || fs.readFileSync(INSTALL_SRC, 'utf-8');
+    assert.ok(
+      src.includes('IDENTITY.json') && src.includes("distribution: 'gsd-remix'"),
+      'installer must write get-shit-done/IDENTITY.json so users can distinguish remix from upstream GSD'
     );
   });
 });

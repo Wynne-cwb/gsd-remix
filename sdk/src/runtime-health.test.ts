@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -16,6 +16,19 @@ async function createProject(): Promise<{ projectDir: string; cleanup: () => Pro
 async function createNodeScript(projectDir: string, name: string, body: string): Promise<string> {
   const filePath = join(projectDir, name);
   await writeFile(filePath, body, 'utf-8');
+  return filePath;
+}
+
+async function createIdentity(dir: string, extra: Record<string, unknown> = {}): Promise<string> {
+  await mkdir(dir, { recursive: true });
+  const filePath = join(dir, 'IDENTITY.json');
+  await writeFile(filePath, JSON.stringify({
+    distribution: 'gsd-remix',
+    package_name: 'gsd-remix',
+    version: '1.37.1',
+    display_name: 'GSD Remix',
+    ...extra,
+  }), 'utf-8');
   return filePath;
 }
 
@@ -40,16 +53,19 @@ describe('runtime-health', () => {
       nodeVersion: 'v22.4.1',
       requiredNodeRange: '>=22.0.0',
       gsdToolsCandidates: [{ path: bridgePath, source: 'custom' }],
+      runtimeIdentityPath: await createIdentity(projectDir),
     });
 
     expect(result.passed).toBe(true);
     expect(result.blockers).toHaveLength(0);
     expect(result.warnings).toHaveLength(0);
+    expect(result.runtime_identity?.package_name).toBe('gsd-remix');
     expect(result.legacy_bridge_available).toBe(true);
     expect(result.gsd_tools_source).toBe('custom');
     expect(result.checks.map(check => check.code)).toEqual([
       'node_version_supported',
       'legacy_bridge_ready',
+      'runtime_identity_verified',
     ]);
   });
 
@@ -61,6 +77,7 @@ describe('runtime-health', () => {
       nodeVersion: 'v22.4.1',
       requiredNodeRange: '>=22.0.0',
       gsdToolsCandidates: [{ path: join(projectDir, 'missing-gsd-tools.cjs'), source: 'custom' }],
+      runtimeIdentityPath: await createIdentity(projectDir),
     });
 
     expect(result.passed).toBe(true);
@@ -83,6 +100,7 @@ describe('runtime-health', () => {
       nodeVersion: 'v22.4.1',
       requiredNodeRange: '>=22.0.0',
       gsdToolsCandidates: [{ path: bridgePath, source: 'custom' }],
+      runtimeIdentityPath: await createIdentity(projectDir),
     });
 
     expect(result.passed).toBe(true);
@@ -105,10 +123,54 @@ describe('runtime-health', () => {
       nodeVersion: 'v20.11.1',
       requiredNodeRange: '>=22.0.0',
       gsdToolsCandidates: [{ path: bridgePath, source: 'custom' }],
+      runtimeIdentityPath: await createIdentity(projectDir),
     });
 
     expect(result.passed).toBe(false);
     expect(result.blockers).toHaveLength(1);
     expect(result.blockers[0]?.code).toBe('node_version_unsupported');
+  });
+
+  it('warns when the remix identity marker is missing', async () => {
+    const { projectDir, cleanup } = await createProject();
+    cleanups.push(cleanup);
+
+    const bridgePath = await createNodeScript(
+      projectDir,
+      'gsd-tools-ok.cjs',
+      `process.stdout.write('/tmp/config.json\\n');`,
+    );
+
+    const result = await runRuntimeHealth(projectDir, {
+      nodeVersion: 'v22.4.1',
+      requiredNodeRange: '>=22.0.0',
+      gsdToolsCandidates: [{ path: bridgePath, source: 'custom' }],
+      runtimeIdentityPath: join(projectDir, 'missing-IDENTITY.json'),
+    });
+
+    expect(result.passed).toBe(true);
+    expect(result.runtime_identity).toBeNull();
+    expect(result.warnings.some(warning => warning.code === 'runtime_identity_missing')).toBe(true);
+  });
+
+  it('resolves project-local runtime assets for non-Claude runtimes', async () => {
+    const { projectDir, cleanup } = await createProject();
+    cleanups.push(cleanup);
+
+    const runtimeRoot = join(projectDir, '.codex', 'get-shit-done');
+    const bridgeDir = join(runtimeRoot, 'bin');
+    await mkdir(bridgeDir, { recursive: true });
+    await writeFile(join(bridgeDir, 'gsd-tools.cjs'), `process.stdout.write('/tmp/config.json\\n');`, 'utf-8');
+    await createIdentity(runtimeRoot, { runtime: 'codex', install_scope: 'local' });
+
+    const result = await runRuntimeHealth(projectDir, {
+      nodeVersion: 'v22.4.1',
+      requiredNodeRange: '>=22.0.0',
+      runtime: 'codex',
+    });
+
+    expect(result.gsd_tools_source).toBe('project');
+    expect(result.runtime_identity?.runtime).toBe('codex');
+    expect(result.checks.some(check => check.code === 'runtime_identity_verified')).toBe(true);
   });
 });

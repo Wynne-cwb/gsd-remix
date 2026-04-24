@@ -73,7 +73,7 @@ All remix-specific changes are tracked in [docs/REMIX-DIFFERENCES.md](docs/REMIX
 
 Current highlights:
 - Published independently on npm as `gsd-remix`, while keeping the `/gsd-*` command surface and core planning layout compatible
-- Isolates the SDK namespace as `@gsd-remix/sdk` / `gsd-remix-sdk`, so remix installs no longer collide with upstream `@gsd-build/sdk`
+- Isolates the bundled SDK namespace as `@gsd-remix/sdk` / `gsd-remix-sdk`, so remix installs no longer collide with upstream `@gsd-build/sdk`
 - Token-efficiency changes in the main workflow path, including summary-first discuss history loading and low-complexity inline execution routing
 - Failure-memory event capture and promotion via `.planning/failure-memory/`, turning repeated execution mistakes into project-local memory and deterministic execute preflight checks
 - Runtime health diagnostics via automatic workflow preflight checks and `/gsd-health --runtime`, so broken installs and unsupported Node versions fail fast instead of silently degrading
@@ -113,8 +113,8 @@ Built-in quality gates catch real problems: schema drift detection flags ORM cha
 - **Spiking & sketching** — `/gsd-spike` runs 2–5 focused experiments with Given/When/Then verdicts; `/gsd-sketch` produces 2–3 interactive HTML mockup variants per design question — both store artifacts in `.planning/` and pair with wrap-up commands to package findings into project-local skills
 - **Agent size-budget enforcement** — Tiered line-count limits (XL: 1 600, Large: 1 000, Default: 500) keep agent prompts lean; violations surface in CI
 - **Shared boilerplate extraction** — Mandatory-initial-read and project-skills-discovery logic extracted to reference files, reducing duplication across a dozen agents
-- **Runtime health checks** — `discuss-phase`, `plan-phase`, and `execute-phase` now run deterministic runtime preflight checks up front, and `/gsd-health --runtime` exposes the same install/runtime diagnostics on demand
-- **Isolated SDK package/binary** — the remix now ships its SDK as `@gsd-remix/sdk` with the `gsd-remix-sdk` binary, avoiding PATH/package collisions with upstream installs
+- **Runtime health checks** — `discuss-phase`, `plan-phase`, and `execute-phase` now run deterministic runtime preflight checks up front; `/gsd-health --runtime` diagnoses install/runtime drift and `/gsd-health --runtime --repair` rebuilds the bundled SDK
+- **Isolated SDK package/binary** — the remix now builds its bundled SDK as `@gsd-remix/sdk` with the `gsd-remix-sdk` binary, avoiding PATH/package collisions with upstream installs
 
 ---
 
@@ -214,7 +214,9 @@ npx gsd-remix --all --global      # Install to all directories
 
 Use `--global` (`-g`) or `--local` (`-l`) to skip the location prompt.
 Use `--claude`, `--opencode`, `--gemini`, `--kilo`, `--codex`, `--copilot`, `--cursor`, `--windsurf`, `--antigravity`, `--augment`, `--trae`, `--qwen`, `--codebuddy`, `--cline`, or `--all` to skip the runtime prompt.
-The GSD Remix SDK CLI (`gsd-remix-sdk`) is installed automatically (required by `/gsd-*` commands). Pass `--no-sdk` to skip the SDK install, or `--sdk` to force a reinstall.
+The GSD Remix SDK CLI (`gsd-remix-sdk`) is installed automatically from bundled source (required by `/gsd-*` commands). Pass `--no-sdk` to skip the SDK install, or `--sdk` to force a reinstall. Runtime SDK repair is available through `/gsd-health --runtime --repair`.
+
+To confirm that an existing `/gsd-*` command surface is coming from `gsd-remix` rather than an upstream GSD leftover, run `/gsd-health --runtime`. The output includes `Distribution: GSD Remix`, the package version, and the resolved `IDENTITY.json` path. You can also inspect the marker directly at `~/.claude/get-shit-done/IDENTITY.json` for Claude global installs.
 
 </details>
 
@@ -702,7 +704,7 @@ You're never locked in. The system adapts.
 | `/gsd-do <text>` | Route freeform text to the right GSD command automatically |
 | `/gsd-note <text>` | Zero-friction idea capture — append, list, or promote notes to todos |
 | `/gsd-quick [--full] [--validate] [--discuss] [--research]` | Execute ad-hoc task with GSD guarantees (`--full` enables all phases, `--validate` adds plan-checking and verification, `--discuss` gathers context first, `--research` investigates approaches before planning) |
-| `/gsd-health [--runtime] [--repair]` | Validate `.planning/` directory integrity, auto-repair with `--repair`, or run runtime/install diagnostics with `--runtime` |
+| `/gsd-health [--runtime] [--repair]` | Validate `.planning/` integrity, auto-repair planning issues, confirm runtime identity, or rebuild `gsd-remix-sdk` with `--runtime --repair` |
 | `/gsd-stats` | Display project statistics — phases, plans, requirements, git metrics |
 | `/gsd-profile-user [--questionnaire] [--refresh]` | Generate developer behavioral profile from session analysis for personalized responses |
 

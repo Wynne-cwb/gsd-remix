@@ -73,7 +73,7 @@ npx gsd-remix@latest
 
 当前已经存在的差异包括：
 - 独立以 `gsd-remix` 的 npm 包名发布，但保留 `/gsd-*` 命令面和核心 planning 布局兼容
-- 将 SDK 命名空间隔离成 `@gsd-remix/sdk` / `gsd-remix-sdk`，避免 remix 安装与上游 `@gsd-build/sdk` 互相覆盖
+- 将内置 SDK 命名空间隔离成 `@gsd-remix/sdk` / `gsd-remix-sdk`，避免 remix 安装与上游 `@gsd-build/sdk` 互相覆盖
 - 主流程的 token 优化，包括 discuss 历史摘要优先加载，以及小型 plan 的低复杂度 inline 路由
 - 通过 `.planning/failure-memory/` 增加 failure-memory 采集与晋升，把重复执行错误沉淀成项目内记忆，并编译成执行前的确定性守卫
 - 通过主 workflow 的自动预检和 `/gsd-health --runtime` 提供 runtime health 诊断，让安装损坏或不受支持的 Node 版本更早失败，而不是静默退化
@@ -111,8 +111,8 @@ GSD 解决的就是这个问题。它是让 Claude Code 变得可靠的上下文
 - **Spiking 与 sketching** — `/gsd-spike` 可运行 2–5 个聚焦实验并给出 Given/When/Then 结论；`/gsd-sketch` 可围绕设计问题产出 2–3 个交互式 HTML 方案，这两类产物都会落到 `.planning/`，并可配合 wrap-up 命令整理成项目本地 skills
 - **Agent 大小预算约束** — 分级行数上限（XL: 1600、Large: 1000、Default: 500）用于压缩 agent prompt，超限会在 CI 中暴露
 - **共享 boilerplate 抽取** — 将 mandatory-initial-read 和 project-skills-discovery 等逻辑提取到 reference 文件，减少多个 agent 之间的重复内容
-- **Runtime health 检查** — `discuss-phase`、`plan-phase` 和 `execute-phase` 现在都会先运行确定性的 runtime 预检；同时可以用 `/gsd-health --runtime` 手动查看安装/runtime 诊断
-- **独立 SDK 包与二进制** — remix 现在通过 `@gsd-remix/sdk` 和 `gsd-remix-sdk` 发布自己的 SDK，不再和上游 `@gsd-build/sdk` 共用全局命名空间
+- **Runtime health 检查** — `discuss-phase`、`plan-phase` 和 `execute-phase` 现在都会先运行确定性的 runtime 预检；`/gsd-health --runtime` 可手动诊断安装/runtime 漂移，`/gsd-health --runtime --repair` 可重建内置 SDK
+- **独立 SDK 包名与二进制** — remix 现在把内置 SDK 构建为 `@gsd-remix/sdk`，并安装 `gsd-remix-sdk` 二进制，不再和上游 `@gsd-build/sdk` 共用全局命名空间
 
 ---
 
@@ -210,7 +210,9 @@ npx gsd-remix --all --global      # 安装到所有目录
 
 使用 `--global`（`-g`）或 `--local`（`-l`）可以跳过安装位置提示。
 使用 `--claude`、`--opencode`、`--gemini`、`--kilo`、`--codex`、`--copilot`、`--cursor`、`--windsurf`、`--antigravity`、`--augment`、`--trae`、`--codebuddy`、`--cline` 或 `--all` 可以跳过运行时提示。
-`GSD Remix SDK` CLI（`gsd-remix-sdk`）会自动安装，它是 `/gsd-*` 命令运行所必需的。可用 `--no-sdk` 跳过 SDK 安装，或用 `--sdk` 强制重装。
+`GSD Remix SDK` CLI（`gsd-remix-sdk`）会从内置源码自动安装，它是 `/gsd-*` 命令运行所必需的。可用 `--no-sdk` 跳过 SDK 安装，或用 `--sdk` 强制重装。运行时 SDK 修复可通过 `/gsd-health --runtime --repair` 执行。
+
+如果你之前已经装过上游 GSD，想确认当前 `/gsd-*` 命令确实来自 `gsd-remix`，运行 `/gsd-health --runtime`。输出里会显示 `Distribution: GSD Remix`、包版本以及实际解析到的 `IDENTITY.json` 路径。Claude 全局安装也可以直接查看 `~/.claude/get-shit-done/IDENTITY.json`。
 
 </details>
 
@@ -667,7 +669,7 @@ lmn012o feat(08-02): create registration endpoint
 | `/gsd-do <text>` | 将自由文本自动路由到正确的 GSD 命令 |
 | `/gsd-note <text>` | 零摩擦想法捕捉——追加、列出或提升为待办 |
 | `/gsd-quick [--full] [--discuss] [--research]` | 以 GSD 保障执行临时任务（`--full` 增加计划检查和验证，`--discuss` 先补上下文，`--research` 在规划前先调研） |
-| `/gsd-health [--runtime] [--repair]` | 校验 `.planning/` 目录完整性，带 `--repair` 时自动修复，或用 `--runtime` 做运行时/安装诊断 |
+| `/gsd-health [--runtime] [--repair]` | 校验 `.planning/` 完整性、自动修复 planning 问题、确认 runtime 身份，或用 `--runtime --repair` 重建 `gsd-remix-sdk` |
 | `/gsd-stats` | 显示项目统计——阶段、计划、需求、git 指标 |
 | `/gsd-profile-user [--questionnaire] [--refresh]` | 从会话分析生成开发者行为档案，用于个性化响应 |
 

@@ -1,5 +1,5 @@
 <purpose>
-Validate `.planning/` directory integrity and report actionable issues. Checks for missing files, invalid configurations, inconsistent state, and orphaned plans. Optionally repairs auto-fixable issues.
+Validate `.planning/` directory integrity or runtime install health and report actionable issues. Checks for missing files, invalid configurations, inconsistent state, orphaned plans, unsupported runtime versions, and SDK availability. Optionally repairs auto-fixable planning issues or rebuilds the bundled SDK.
 </purpose>
 
 <required_reading>
@@ -28,24 +28,53 @@ if arguments contain "--backfill"; then
 fi
 ```
 
+**Runtime SDK repair script path:**
+
+The installer rewrites this path for non-Claude runtimes and local installs.
+
+```bash
+RUNTIME_REPAIR_SCRIPT="$HOME/.claude/get-shit-done/bin/repair-sdk.cjs"
+```
+
+**If runtime repair is requested, repair before any SDK query:**
+
+```bash
+if [[ -n "$RUNTIME_FLAG" && -n "$REPAIR_FLAG" ]]; then
+  if [[ ! -f "$RUNTIME_REPAIR_SCRIPT" ]]; then
+    echo "✗ Runtime repair script not found:"
+    echo "  $RUNTIME_REPAIR_SCRIPT"
+    echo ""
+    echo "Re-run the gsd-remix installer to refresh runtime assets:"
+    echo "  npx gsd-remix@latest"
+    exit 1
+  fi
+
+  echo "Running GSD Remix SDK repair..."
+  node "$RUNTIME_REPAIR_SCRIPT"
+  REPAIR_STATUS=$?
+  if [[ "$REPAIR_STATUS" -ne 0 ]]; then
+    echo ""
+    echo "✗ GSD Remix SDK repair failed with exit $REPAIR_STATUS."
+    exit "$REPAIR_STATUS"
+  fi
+fi
+```
+
 **Guard `gsd-remix-sdk` before any query:**
 
 ```bash
 if ! command -v gsd-remix-sdk &>/dev/null; then
   echo "⚠ gsd-remix-sdk not found in PATH — /gsd-health requires it."
   echo ""
-  echo "Install the GSD Remix SDK:"
-  echo "  npm install -g @gsd-remix/sdk"
-  echo ""
-  echo "Or update GSD to get the latest packages:"
-  echo "  /gsd-update"
+  echo "Repair the bundled SDK without reinstalling all runtime assets:"
+  echo "  /gsd-health --runtime --repair"
   exit 1
 fi
 ```
 
 **Runtime mode constraints:**
 
-If `RUNTIME_FLAG` is set, ignore `REPAIR_FLAG` and `BACKFILL_FLAG` for this run. Runtime checks are read-only; they do not modify project artifacts.
+If `RUNTIME_FLAG` is set, ignore `BACKFILL_FLAG` for this run. Runtime checks are read-only unless `REPAIR_FLAG` is also set. Runtime repair only rebuilds and reinstalls the bundled SDK from `get-shit-done/sdk/`; it does not reinstall commands, agents, hooks, or project artifacts.
 </step>
 
 <step name="run_health_check">
@@ -54,13 +83,15 @@ If `RUNTIME_FLAG` is set, ignore `REPAIR_FLAG` and `BACKFILL_FLAG` for this run.
 **If `RUNTIME_FLAG` is set:**
 
 ```bash
-HEALTH=$(gsd-remix-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","message":"Installed gsd-remix-sdk does not expose runtime.health.","fix":"Run /gsd-update to sync gsd-remix and @gsd-remix/sdk."}],"warnings":[],"checks":[]}')
+HEALTH=$(gsd-remix-sdk query runtime.health 2>/dev/null || echo '{"passed":false,"blockers":[{"code":"runtime_health_unavailable","message":"Installed gsd-remix-sdk does not expose runtime.health.","fix":"Run /gsd-health --runtime --repair to rebuild the bundled SDK."}],"warnings":[],"checks":[]}')
 ```
 
 Parse JSON output:
 - `passed`: boolean
 - `node_version`: Current Node version
 - `required_node_range`: Required Node range from package metadata
+- `runtime_identity`: Installed runtime identity marker (`distribution`, `package_name`, `version`, `runtime`, `install_scope`, `identity_path`) or null
+- `runtime_identity_path`: Expected identity marker path
 - `gsd_tools_source`: `bundled` | `project` | `user` | `custom` | `missing`
 - `gsd_tools_path`: Resolved `gsd-tools.cjs` path if found
 - `legacy_bridge_available`: boolean
@@ -99,10 +130,13 @@ Determine status:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Status: HEALTHY | DEGRADED | BROKEN
+Distribution: {runtime_identity.display_name or runtime_identity.distribution or "unknown"} {runtime_identity.version or ""}
+Package: {runtime_identity.package_name or "unknown"} ({runtime_identity.runtime or "unknown"} / {runtime_identity.install_scope or "unknown"})
 Node: {node_version} (required: {required_node_range or "unknown"})
 Legacy bridge: READY | DEGRADED | MISSING
 Source: {gsd_tools_source}
 Path: {gsd_tools_path or "not found"}
+Identity: {runtime_identity.identity_path or runtime_identity_path or "not found"}
 Warnings: N
 ```
 
@@ -119,13 +153,13 @@ Warnings: N
 ## Warnings
 
 - [legacy_bridge_missing] No gsd-tools.cjs bridge could be found for CJS fallback commands.
-  Fix: Run /gsd-update to restore the bundled bridge, or reinstall gsd-remix and @gsd-remix/sdk together.
+  Fix: Run /gsd-update to restore the bundled bridge. Use /gsd-health --runtime --repair only for SDK CLI repair.
 ```
 
 **Footer:**
 ```
 ---
-Runtime mode is read-only. Use /gsd-update to repair install/runtime drift.
+Runtime mode is read-only unless --repair is set. Use /gsd-health --runtime --repair to rebuild the bundled SDK, or /gsd-update to refresh all runtime assets.
 ```
 
 Then STOP. Do not proceed to repair prompts.

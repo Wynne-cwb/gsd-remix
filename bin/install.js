@@ -4295,6 +4295,30 @@ function copyWithPathReplacement(srcDir, destDir, pathPrefix, runtime, isCommand
   }
 }
 
+function copySdkBundleToRuntime(srcRoot, gsdRuntimeDir) {
+  const sdkSrc = path.join(srcRoot, 'sdk');
+  const sdkDest = path.join(gsdRuntimeDir, 'sdk');
+  const sdkEntries = ['src', 'prompts', 'package.json', 'package-lock.json', 'tsconfig.json'];
+
+  if (!fs.existsSync(path.join(sdkSrc, 'package.json'))) {
+    console.log(`  ${yellow}⚠${reset} SDK source not found; runtime SDK repair will be unavailable`);
+    return false;
+  }
+
+  if (fs.existsSync(sdkDest)) {
+    fs.rmSync(sdkDest, { recursive: true });
+  }
+  fs.mkdirSync(sdkDest, { recursive: true });
+
+  for (const entry of sdkEntries) {
+    const source = path.join(sdkSrc, entry);
+    if (!fs.existsSync(source)) continue;
+    fs.cpSync(source, path.join(sdkDest, entry), { recursive: true });
+  }
+
+  return true;
+}
+
 /**
  * Clean up orphaned files from previous GSD versions
  */
@@ -5705,9 +5729,13 @@ function install(isGlobal, runtime = 'claude') {
   const skillDest = path.join(targetDir, 'get-shit-done');
   const savedGsdArtifacts = preserveUserArtifacts(skillDest, ['USER-PROFILE.md']);
   copyWithPathReplacement(skillSrc, skillDest, pathPrefix, runtime, false, isGlobal);
+  const copiedSdkBundle = copySdkBundleToRuntime(src, skillDest);
   restoreUserArtifacts(skillDest, savedGsdArtifacts);
   if (verifyInstalled(skillDest, 'get-shit-done')) {
     console.log(`  ${green}✓${reset} Installed get-shit-done`);
+    if (copiedSdkBundle) {
+      console.log(`  ${green}✓${reset} Installed bundled SDK repair source`);
+    }
   } else {
     failures.push('get-shit-done');
   }
@@ -5809,6 +5837,27 @@ function install(isGlobal, runtime = 'claude') {
     console.log(`  ${green}✓${reset} Wrote VERSION (${pkg.version})`);
   } else {
     failures.push('VERSION');
+  }
+
+  // Write runtime identity marker so users can distinguish remix installs from
+  // upstream GSD installs that intentionally share the same /gsd-* commands.
+  const identityDest = path.join(targetDir, 'get-shit-done', 'IDENTITY.json');
+  const identity = {
+    distribution: 'gsd-remix',
+    package_name: pkg.name,
+    version: pkg.version,
+    display_name: 'GSD Remix',
+    sdk_binary: 'gsd-remix-sdk',
+    sdk_package: '@gsd-remix/sdk',
+    runtime,
+    install_scope: isGlobal ? 'global' : 'local',
+    installed_at: new Date().toISOString(),
+  };
+  fs.writeFileSync(identityDest, JSON.stringify(identity, null, 2) + '\n');
+  if (verifyFileInstalled(identityDest, 'IDENTITY.json')) {
+    console.log(`  ${green}✓${reset} Wrote IDENTITY.json (gsd-remix ${pkg.version})`);
+  } else {
+    failures.push('IDENTITY.json');
   }
 
   if (!isCodex && !isCopilot && !isCursor && !isWindsurf && !isTrae && !isCline) {
@@ -6463,8 +6512,13 @@ function finishInstall(settingsPath, settings, statuslineCommand, shouldInstallS
   if (runtime === 'trae') command = '/gsd-new-project';
   if (runtime === 'cline') command = '/gsd-new-project';
   if (runtime === 'qwen') command = '/gsd-new-project';
+  let healthCommand = '/gsd-health --runtime';
+  if (runtime === 'codex') healthCommand = '$gsd-health --runtime';
+  if (runtime === 'cursor') healthCommand = 'gsd-health --runtime (mention the skill name)';
   console.log(`
   ${green}Done!${reset} Open a blank directory in ${program} and run ${cyan}${command}${reset}.
+
+  Confirm remix runtime: ${cyan}${healthCommand}${reset}
 
   ${cyan}Join the community:${reset} https://discord.gg/mYgfVNfA2r
 `);
@@ -6648,13 +6702,12 @@ function promptLocation(runtimes) {
 }
 
 /**
- * Build `@gsd-remix/sdk` from the in-repo `sdk/` source tree and install the
+ * Build the bundled GSD Remix SDK from the in-repo `sdk/` source tree and install the
  * resulting `gsd-remix-sdk` binary globally so workflow commands that shell out to
  * `gsd-remix-sdk query …` succeed.
  *
- * We build from source rather than `npm install -g @gsd-remix/sdk` because the
- * npm-published package lags the source tree and shipping a stale SDK breaks
- * every /gsd-* command that depends on newer query handlers.
+ * We build from bundled source instead of relying on a separately published SDK
+ * package so the installed CLI always matches this gsd-remix release.
  *
  * Skip if --no-sdk. Skip if already on PATH (unless --sdk was explicit).
  * Failures are FATAL — we exit non-zero so install does not complete with a
@@ -6855,12 +6908,11 @@ function installAllRuntimes(runtimes, isGlobal, isInteractive) {
   const primaryStatuslineResult = results.find(r => statuslineRuntimes.includes(r.runtime));
 
   const finalize = (shouldInstallStatusline) => {
-    // Build @gsd-remix/sdk from the in-repo sdk/ source and install it globally
+    // Build the bundled GSD Remix SDK from the in-repo sdk/ source and install it globally
     // so `gsd-remix-sdk` lands on PATH. Every /gsd-* command shells out to
     // `gsd-remix-sdk query …`; without this, commands fail with "command not found:
-    // gsd-remix-sdk". The npm-published @gsd-remix/sdk is kept intentionally frozen
-    // at an older version; we always build from source so users get the SDK
-    // that matches the installed GSD version.
+    // gsd-remix-sdk". We always build from source so users get the SDK that
+    // matches the installed GSD Remix version.
     // Runs by default; skip with --no-sdk. Idempotent when already present.
     installSdkIfNeeded();
 

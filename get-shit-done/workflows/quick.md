@@ -128,10 +128,10 @@ If `$VALIDATE_MODE` only:
 if ! command -v gsd-remix-sdk &>/dev/null; then
   echo "⚠ gsd-remix-sdk not found in PATH — /gsd-quick requires it."
   echo ""
-  echo "Install the GSD SDK:"
-  echo "  npm install -g @gsd-remix/sdk"
+  echo "Repair the bundled SDK:"
+  echo "  /gsd-health --runtime --repair"
   echo ""
-  echo "Or update GSD to get the latest packages:"
+  echo "Or refresh all runtime assets:"
   echo "  /gsd-update"
   exit 1
 fi

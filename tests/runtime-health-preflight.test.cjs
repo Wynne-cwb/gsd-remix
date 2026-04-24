@@ -52,12 +52,12 @@ describe('runtime-health workflow preflight', () => {
       );
 
       const hasInstallHint =
-        preamble.includes('@gsd-remix/sdk') ||
+        preamble.includes('/gsd-health --runtime --repair') ||
         preamble.includes('gsd-update') ||
         preamble.includes('/gsd-update');
       assert.ok(
         hasInstallHint,
-        `${entry.label} preflight must point users to npm install -g @gsd-remix/sdk or /gsd-update.`,
+        `${entry.label} preflight must point users to /gsd-health --runtime --repair or /gsd-update.`,
       );
     });
 
