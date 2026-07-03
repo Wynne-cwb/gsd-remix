@@ -233,23 +233,7 @@ Identify reusable assets, established patterns, integration points, and creative
 Spawn a `gsd-assumptions-analyzer` agent to deeply analyze the codebase for this phase. This
 keeps raw file contents out of the main context window, protecting token budget.
 
-**Resolve calibration tier (if USER-PROFILE.md exists):**
-
-```bash
-PROFILE_PATH="$HOME/.claude/get-shit-done/USER-PROFILE.md"
-```
-
-If file exists at PROFILE_PATH:
-- Priority 1: Read config.json > preferences.vendor_philosophy (project-level override)
-- Priority 2: Read USER-PROFILE.md Vendor Choices/Philosophy rating (global)
-- Priority 3: Default to "standard"
-
-Map to calibration tier:
-- conservative OR thorough-evaluator → full_maturity (more alternatives, detailed evidence)
-- opinionated → minimal_decisive (fewer alternatives, decisive recommendations)
-- pragmatic-fast OR any other value → standard
-
-If no USER-PROFILE.md: calibration_tier = "standard"
+**Calibration tier:** fixed at `standard`.
 
 **Spawn Explore subagent:**
 

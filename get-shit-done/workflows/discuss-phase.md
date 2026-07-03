@@ -526,58 +526,18 @@ Analyze the phase to identify gray areas worth discussing. **Use both `prior_dec
 
 **Advisor Mode Detection:**
 
-Check if advisor mode should activate:
+Advisor mode is ON by default. It is disabled only when the `--no-advisor` flag is present in $ARGUMENTS.
 
-1. Check for USER-PROFILE.md:
-   ```bash
-   PROFILE_PATH="$HOME/.claude/get-shit-done/USER-PROFILE.md"
-   ```
-   ADVISOR_MODE = file exists at PROFILE_PATH → true, otherwise → false
+1. Set ADVISOR_MODE = true unless `--no-advisor` was passed.
 
-2. If ADVISOR_MODE is true, resolve vendor_philosophy calibration tier:
-   - Priority 1: Read config.json > preferences.vendor_philosophy (project-level override)
-   - Priority 2: Read USER-PROFILE.md Vendor Choices/Philosophy rating (global)
-   - Priority 3: Default to "standard" if neither has a value or value is UNSCORED
-
-   Map to calibration tier:
-   - conservative OR thorough-evaluator → full_maturity
-   - opinionated → minimal_decisive
-   - pragmatic-fast OR any other value OR empty → standard
+2. Calibration tier is fixed at `standard`.
 
 3. Resolve model for advisor agents:
    ```bash
    ADVISOR_MODEL=$(gsd-remix-sdk query resolve-model gsd-advisor-researcher --raw)
    ```
 
-If ADVISOR_MODE is false, skip all advisor-specific steps — workflow proceeds with existing conversational flow unchanged.
-
-**User Profile Language Detection:**
-
-Check USER-PROFILE.md for communication preferences that indicate a non-technical product owner:
-
-```bash
-PROFILE_CONTENT=$(cat "$HOME/.claude/get-shit-done/USER-PROFILE.md" 2>/dev/null || true)
-```
-
-Set NON_TECHNICAL_OWNER = true if ANY of the following are present in USER-PROFILE.md:
-- `learning_style: guided`
-- The word `jargon` appears in a `frustration_triggers` section
-- `explanation_depth: practical-detailed` (without a technical modifier)
-- `explanation_depth: high-level`
-
-NON_TECHNICAL_OWNER = false if USER-PROFILE.md does not exist or none of the above signals are present.
-
-When NON_TECHNICAL_OWNER is true, reframe gray area labels and descriptions in product-outcome language before presenting them to the user. Preserve the same underlying decision — only change the framing:
-- Technical implementation term → outcome the user will experience
-  - "Token architecture" → "Color system: which approach prevents the dark theme from flashing white on open"
-  - "CSS variable strategy" → "Theme colors: how your brand colors stay consistent in both light and dark mode"
-  - "Component API surface area" → "How the building blocks connect: how tightly coupled should these parts be"
-  - "Caching strategy: SWR vs React Query" → "Loading speed: should screens show saved data right away or wait for fresh data"
-- All decisions stay the same. Only the question language adapts.
-
-This reframing applies to:
-1. Gray area labels and descriptions in `present_gray_areas`
-2. Advisor research rationale rewrites in `advisor_research` synthesis
+If ADVISOR_MODE is false (`--no-advisor`), skip all advisor-specific steps — workflow proceeds with the plain conversational flow unchanged.
 
 **Output your analysis internally, then present to user.**
 
@@ -686,7 +646,7 @@ After user selects gray areas in present_gray_areas, spawn parallel research age
      <gray_area>{area_name}: {area_description from gray area identification}</gray_area>
      <phase_context>{phase_goal and description from ROADMAP.md}</phase_context>
      <project_context>{project name and brief description from PROJECT.md}</project_context>
-     <calibration_tier>{resolved calibration tier: full_maturity | standard | minimal_decisive}</calibration_tier>
+     <calibration_tier>standard</calibration_tier>
 
      Research this gray area and return a structured comparison table with rationale.
      ${AGENT_SKILLS_ADVISOR}",
@@ -701,15 +661,10 @@ After user selects gray areas in present_gray_areas, spawn parallel research age
    For each agent's return:
    a. Parse the markdown comparison table and rationale paragraph
    b. Verify all 5 columns present (Option | Pros | Cons | Complexity | Recommendation) — fill any missing columns rather than showing broken table
-   c. Verify option count matches calibration tier:
-      - full_maturity: 3-5 options acceptable
-      - standard: 2-4 options acceptable
-      - minimal_decisive: 1-2 options acceptable
+   c. Verify option count matches the standard calibration (2-4 options acceptable).
       If agent returned too many, trim least viable. If too few, accept as-is.
    d. Rewrite rationale paragraph to weave in project context and ongoing discussion context that the agent did not have access to
    e. If agent returned only 1 option, convert from table format to direct recommendation: "Standard approach for {area}: {option}. {rationale}"
-   f. **If NON_TECHNICAL_OWNER is true:** After completing steps a–e, apply a plain language rewrite to the rationale paragraph. Replace implementation-level terms with outcome descriptions the user can reason about without technical context. The table option names may also be rewritten in plain language if they are implementation terms — the Recommendation column value and the table structure remain intact. Do not remove detail; translate it. Example: "SWR uses stale-while-revalidate to serve cached responses immediately" → "This approach shows you something right away, then quietly updates in the background — users see data instantly."
-
 4. Store synthesized tables for use in discuss_areas.
 
 **If ADVISOR_MODE is false:** Skip this step entirely — proceed directly from present_gray_areas to discuss_areas.
