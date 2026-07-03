@@ -30,18 +30,18 @@ import type { QueryHandler } from './utils.js';
  * Ported from get-shit-done/bin/lib/model-profiles.cjs.
  */
 export const MODEL_PROFILES: Record<string, Record<string, string>> = {
-  'gsd-planner': { quality: 'opus', balanced: 'opus', budget: 'sonnet', adaptive: 'opus' },
-  'gsd-roadmapper': { quality: 'opus', balanced: 'sonnet', budget: 'sonnet', adaptive: 'sonnet' },
-  'gsd-executor': { quality: 'opus', balanced: 'sonnet', budget: 'sonnet', adaptive: 'sonnet' },
-  'gsd-phase-researcher': { quality: 'opus', balanced: 'sonnet', budget: 'haiku', adaptive: 'sonnet' },
-  'gsd-project-researcher': { quality: 'opus', balanced: 'sonnet', budget: 'haiku', adaptive: 'sonnet' },
-  'gsd-research-synthesizer': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku', adaptive: 'haiku' },
-  'gsd-debugger': { quality: 'opus', balanced: 'sonnet', budget: 'sonnet', adaptive: 'opus' },
-  'gsd-codebase-mapper': { quality: 'sonnet', balanced: 'haiku', budget: 'haiku', adaptive: 'haiku' },
-  'gsd-verifier': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku', adaptive: 'sonnet' },
-  'gsd-plan-checker': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku', adaptive: 'haiku' },
-  'gsd-integration-checker': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku', adaptive: 'haiku' },
-  'gsd-pattern-mapper': { quality: 'sonnet', balanced: 'sonnet', budget: 'haiku', adaptive: 'haiku' },
+  'gsd-planner': { quality: 'opus', balanced: 'opus', budget: 'opus', adaptive: 'opus' },
+  'gsd-roadmapper': { quality: 'opus', balanced: 'opus', budget: 'opus', adaptive: 'opus' },
+  'gsd-executor': { quality: 'sonnet', balanced: 'sonnet', budget: 'sonnet', adaptive: 'sonnet' },
+  'gsd-phase-researcher': { quality: 'opus', balanced: 'opus', budget: 'opus', adaptive: 'opus' },
+  'gsd-project-researcher': { quality: 'opus', balanced: 'opus', budget: 'opus', adaptive: 'opus' },
+  'gsd-research-synthesizer': { quality: 'sonnet', balanced: 'sonnet', budget: 'sonnet', adaptive: 'sonnet' },
+  'gsd-debugger': { quality: 'opus', balanced: 'opus', budget: 'opus', adaptive: 'opus' },
+  'gsd-codebase-mapper': { quality: 'sonnet', balanced: 'sonnet', budget: 'sonnet', adaptive: 'sonnet' },
+  'gsd-verifier': { quality: 'sonnet', balanced: 'sonnet', budget: 'sonnet', adaptive: 'sonnet' },
+  'gsd-plan-checker': { quality: 'sonnet', balanced: 'sonnet', budget: 'sonnet', adaptive: 'sonnet' },
+  'gsd-integration-checker': { quality: 'sonnet', balanced: 'sonnet', budget: 'sonnet', adaptive: 'sonnet' },
+  'gsd-pattern-mapper': { quality: 'sonnet', balanced: 'sonnet', budget: 'sonnet', adaptive: 'sonnet' },
 };
 
 /** Valid model profile names. */

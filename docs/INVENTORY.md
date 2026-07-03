@@ -165,7 +165,7 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 
 ---
 
-## References (33 shipped)
+## References (32 shipped)
 
 Full roster at `get-shit-done/references/*.md`. References are shared knowledge documents that workflows and agents `@-reference`. The groupings below match [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#references-get-shit-donereferencesmd) — core, workflow clusters, and the modular planner decomposition.
 
@@ -176,7 +176,6 @@ Full roster at `get-shit-done/references/*.md`. References are shared knowledge 
 | `checkpoints.md` | Checkpoint type definitions and interaction patterns. |
 | `gates.md` | 4 canonical gate types (Confirm, Quality, Safety, Transition) wired into plan-checker and verifier. |
 | `model-profiles.md` | Per-agent model tier assignments. |
-| `model-profile-resolution.md` | Model resolution algorithm documentation. |
 | `verification-patterns.md` | How to verify different artifact types. |
 | `verification-overrides.md` | Per-artifact verification override rules. |
 | `planning-config.md` | Full config schema and behavior. |

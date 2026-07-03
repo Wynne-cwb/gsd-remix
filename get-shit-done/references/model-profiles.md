@@ -4,43 +4,44 @@ Model profiles control which Claude model each GSD agent uses. This allows balan
 
 ## Profile Definitions
 
-| Agent | `quality` | `balanced` | `budget` | `adaptive` | `inherit` |
-|-------|-----------|------------|----------|------------|-----------|
-| gsd-planner | opus | opus | sonnet | opus | inherit |
-| gsd-roadmapper | opus | sonnet | sonnet | sonnet | inherit |
-| gsd-executor | opus | sonnet | sonnet | sonnet | inherit |
-| gsd-phase-researcher | opus | sonnet | haiku | sonnet | inherit |
-| gsd-project-researcher | opus | sonnet | haiku | sonnet | inherit |
-| gsd-research-synthesizer | sonnet | sonnet | haiku | haiku | inherit |
-| gsd-debugger | opus | sonnet | sonnet | opus | inherit |
-| gsd-codebase-mapper | sonnet | haiku | haiku | haiku | inherit |
-| gsd-verifier | sonnet | sonnet | haiku | sonnet | inherit |
-| gsd-plan-checker | sonnet | sonnet | haiku | haiku | inherit |
-| gsd-integration-checker | sonnet | sonnet | haiku | haiku | inherit |
+All named profiles (`quality` / `balanced` / `budget` / `adaptive`) resolve to the same unified allocation — the profile keys are kept for config compatibility, not differentiation. `inherit` resolves every agent to the current session model.
+
+| Agent | All profiles | `inherit` |
+|-------|--------------|-----------|
+| gsd-planner | opus | inherit |
+| gsd-roadmapper | opus | inherit |
+| gsd-phase-researcher | opus | inherit |
+| gsd-project-researcher | opus | inherit |
+| gsd-debugger | opus | inherit |
+| gsd-executor | sonnet | inherit |
+| gsd-research-synthesizer | sonnet | inherit |
+| gsd-codebase-mapper | sonnet | inherit |
+| gsd-verifier | sonnet | inherit |
+| gsd-plan-checker | sonnet | inherit |
+| gsd-integration-checker | sonnet | inherit |
+| gsd-pattern-mapper | sonnet | inherit |
+
+Agents not in the table (e.g. gsd-advisor-researcher) resolve to `sonnet` via the default fallback.
 
 ## Profile Philosophy
 
-**quality** - Maximum reasoning power
-- Opus for all decision-making agents
-- Sonnet for read-only verification
-- Use when: quota available, critical architecture work
+**Unified allocation** (all named profiles)
+- Opus for planning, roadmapping, research, and debugging — where reasoning quality has the highest downstream impact and the call frequency is low (once per phase)
+- Sonnet for execution, verification, checking, and mapping — these follow explicit instructions produced by the Opus tier
+- Research quality directly determines plan quality, so both researchers ride the Opus tier
 
-**balanced** (default) - Smart allocation
-- Opus only for planning (where architecture decisions happen)
-- Sonnet for execution and research (follows explicit instructions)
-- Sonnet for verification (needs reasoning, not just pattern matching)
-- Use when: normal development, good balance of quality and cost
+**Executor escape hatch**
+The executor stays on Sonnet by default (plans carry the reasoning; execution is implementation). If a phase's implementation itself demands top-tier reasoning, override just the executor without touching the profile:
 
-**budget** - Minimal Opus usage
-- Sonnet for anything that writes code
-- Haiku for research and verification
-- Use when: conserving quota, high-volume work, less critical phases
+```json
+{
+  "model_overrides": {
+    "gsd-executor": "opus"
+  }
+}
+```
 
-**adaptive** — Role-based cost optimization
-- Opus for planning and debugging (where reasoning quality has highest impact)
-- Sonnet for execution, research, and verification (follows explicit instructions)
-- Haiku for mapping, checking, and auditing (high volume, structured output)
-- Use when: optimizing cost without sacrificing plan quality, solo development on paid API tiers
+`model_overrides` takes precedence over the profile table (resolution order: override > profile > default). This turns the "small tasks run inline on Opus, big tasks spawn on Sonnet" inversion into a conscious, per-project choice.
 
 **inherit** - Follow the current session model
 - All agents resolve to `inherit`
@@ -131,11 +132,11 @@ Planning involves architecture decisions, goal decomposition, and task design. T
 **Why Sonnet for gsd-executor?**
 Executors follow explicit PLAN.md instructions. The plan already contains the reasoning; execution is implementation.
 
-**Why Sonnet (not Haiku) for verifiers in balanced?**
-Verification requires goal-backward reasoning - checking if code *delivers* what the phase promised, not just pattern matching. Sonnet handles this well; Haiku may miss subtle gaps.
+**Why Opus for the researchers?**
+Research quality directly determines plan quality, and each researcher runs at most once per phase — a low-frequency, high-leverage path.
 
-**Why Haiku for gsd-codebase-mapper?**
-Read-only exploration and pattern extraction. No reasoning required, just structured output from file contents.
+**Why Sonnet (not Haiku) for verifiers?**
+Verification requires goal-backward reasoning - checking if code *delivers* what the phase promised, not just pattern matching. Sonnet handles this well; Haiku may miss subtle gaps.
 
 **Why `inherit` instead of passing `opus` directly?**
 Claude Code's `"opus"` alias maps to a specific model version. Organizations may block older opus versions while allowing newer ones. GSD returns `"inherit"` for opus-tier agents, causing them to use whatever opus version the user has configured in their session. This avoids version conflicts and silent fallbacks to Sonnet.

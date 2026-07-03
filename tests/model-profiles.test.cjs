@@ -77,32 +77,17 @@ describe('VALID_PROFILES', () => {
 // ─── getAgentToModelMapForProfile ─────────────────────────────────────────────
 
 describe('getAgentToModelMapForProfile', () => {
-  test('returns correct models for balanced profile', () => {
-    const map = getAgentToModelMapForProfile('balanced');
-    assert.strictEqual(map['gsd-planner'], 'opus');
-    assert.strictEqual(map['gsd-codebase-mapper'], 'haiku');
-    assert.strictEqual(map['gsd-verifier'], 'sonnet');
-  });
-
-  test('returns correct models for budget profile', () => {
-    const map = getAgentToModelMapForProfile('budget');
-    assert.strictEqual(map['gsd-planner'], 'sonnet');
-    assert.strictEqual(map['gsd-phase-researcher'], 'haiku');
-  });
-
-  test('returns correct models for quality profile', () => {
-    const map = getAgentToModelMapForProfile('quality');
-    assert.strictEqual(map['gsd-planner'], 'opus');
-    assert.strictEqual(map['gsd-executor'], 'opus');
-  });
-
-  test('returns correct models for adaptive profile', () => {
-    const map = getAgentToModelMapForProfile('adaptive');
-    assert.strictEqual(map['gsd-planner'], 'opus', 'planner should use opus in adaptive');
-    assert.strictEqual(map['gsd-debugger'], 'opus', 'debugger should use opus in adaptive');
-    assert.strictEqual(map['gsd-executor'], 'sonnet', 'executor should use sonnet in adaptive');
-    assert.strictEqual(map['gsd-codebase-mapper'], 'haiku', 'mapper should use haiku in adaptive');
-    assert.strictEqual(map['gsd-plan-checker'], 'haiku', 'checker should use haiku in adaptive');
+  test('all profiles resolve to the unified slim allocation', () => {
+    // Slim redesign (B2 保形改值): every profile column carries the same target
+    // allocation — Opus for planning/research/debugging, Sonnet for the rest.
+    const OPUS_AGENTS = ['gsd-planner', 'gsd-roadmapper', 'gsd-debugger', 'gsd-phase-researcher', 'gsd-project-researcher'];
+    for (const profile of ['quality', 'balanced', 'budget', 'adaptive']) {
+      const map = getAgentToModelMapForProfile(profile);
+      for (const [agent, model] of Object.entries(map)) {
+        const expected = OPUS_AGENTS.includes(agent) ? 'opus' : 'sonnet';
+        assert.strictEqual(model, expected, `${agent} in ${profile} should be ${expected}`);
+      }
+    }
   });
 
   test('resolution order: override > profile > default', () => {
