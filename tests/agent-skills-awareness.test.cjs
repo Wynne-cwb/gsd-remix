@@ -20,7 +20,6 @@ describe('project skills awareness', () => {
     'gsd-codebase-mapper',
     'gsd-roadmapper',
     'gsd-eval-auditor',
-    'gsd-intel-updater',
     'gsd-doc-writer',
   ];
 

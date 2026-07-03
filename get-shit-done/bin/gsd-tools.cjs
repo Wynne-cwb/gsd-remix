@@ -78,15 +78,6 @@
  * Open Artifact Audit:
  *   audit-open [--json]                 Scan all .planning/ artifact types for unresolved items
  *
- * Intel:
- *   intel query <term>             Query intel files for a term
- *   intel status                   Show intel file freshness
- *   intel update                   Trigger intel refresh (returns agent spawn hint)
- *   intel diff                     Show changed intel entries since last snapshot
- *   intel snapshot                 Save current intel state as diff baseline
- *   intel patch-meta <file>        Update _meta.updated_at in an intel file
- *   intel validate                 Validate intel file structure
- *   intel extract-exports <file>   Extract exported symbols from a source file
  *
  * Scaffolding:
  *   scaffold context --phase <N>       Create CONTEXT.md template
@@ -933,79 +924,6 @@ async function runCommand(command, args, cwd, raw, defaultValue) {
 
     // ─── Intel ────────────────────────────────────────────────────────────
 
-    case 'intel': {
-      const intel = require('./lib/intel.cjs');
-      const subcommand = args[1];
-      if (subcommand === 'query') {
-        const term = args[2];
-        if (!term) error('Usage: gsd-tools intel query <term>');
-        const planningDir = path.join(cwd, '.planning');
-        core.output(intel.intelQuery(term, planningDir), raw);
-      } else if (subcommand === 'status') {
-        const planningDir = path.join(cwd, '.planning');
-        const status = intel.intelStatus(planningDir);
-        if (!raw && status.files) {
-          for (const file of Object.values(status.files)) {
-            if (file.updated_at) {
-              file.updated_at = core.timeAgo(new Date(file.updated_at));
-            }
-          }
-        }
-        core.output(status, raw);
-      } else if (subcommand === 'diff') {
-        const planningDir = path.join(cwd, '.planning');
-        core.output(intel.intelDiff(planningDir), raw);
-      } else if (subcommand === 'snapshot') {
-        const planningDir = path.join(cwd, '.planning');
-        core.output(intel.intelSnapshot(planningDir), raw);
-      } else if (subcommand === 'patch-meta') {
-        const filePath = args[2];
-        if (!filePath) error('Usage: gsd-tools intel patch-meta <file-path>');
-        core.output(intel.intelPatchMeta(path.resolve(cwd, filePath)), raw);
-      } else if (subcommand === 'validate') {
-        const planningDir = path.join(cwd, '.planning');
-        core.output(intel.intelValidate(planningDir), raw);
-      } else if (subcommand === 'extract-exports') {
-        const filePath = args[2];
-        if (!filePath) error('Usage: gsd-tools intel extract-exports <file-path>');
-        core.output(intel.intelExtractExports(path.resolve(cwd, filePath)), raw);
-      } else if (subcommand === 'update') {
-        const planningDir = path.join(cwd, '.planning');
-        core.output(intel.intelUpdate(planningDir), raw);
-      } else {
-        error('Unknown intel subcommand. Available: query, status, update, diff, snapshot, patch-meta, validate, extract-exports');
-      }
-      break;
-    }
-
-    // ─── Graphify ──────────────────────────────────────────────────────────
-
-    case 'graphify': {
-      const graphify = require('./lib/graphify.cjs');
-      const subcommand = args[1];
-      if (subcommand === 'query') {
-        const term = args[2];
-        if (!term) error('Usage: gsd-tools graphify query <term>');
-        const budgetIdx = args.indexOf('--budget');
-        const budget = budgetIdx !== -1 ? parseInt(args[budgetIdx + 1], 10) : null;
-        core.output(graphify.graphifyQuery(cwd, term, { budget }), raw);
-      } else if (subcommand === 'status') {
-        core.output(graphify.graphifyStatus(cwd), raw);
-      } else if (subcommand === 'diff') {
-        core.output(graphify.graphifyDiff(cwd), raw);
-      } else if (subcommand === 'build') {
-        if (args[2] === 'snapshot') {
-          core.output(graphify.writeSnapshot(cwd), raw);
-        } else {
-          core.output(graphify.graphifyBuild(cwd), raw);
-        }
-      } else {
-        error('Unknown graphify subcommand. Available: build, query, status, diff');
-      }
-      break;
-    }
-
-    // ─── Documentation ────────────────────────────────────────────────────
 
     case 'docs-init': {
       docs.cmdDocsInit(cwd, raw);

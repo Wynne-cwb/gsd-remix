@@ -23,7 +23,6 @@ This document records contracts for the typed query layer consumed by `gsd-remix
 ## Error handling
 
 - **Validation and programmer errors**: Handlers throw `GSDError` with an `ErrorClassification` (e.g. missing required args, invalid phase). The CLI maps these to exit codes via `exitCodeFor()`.
-- **Expected domain failures**: Handlers return `{ data: { error: string, ... } }` for cases that are not exceptional in normal use (file not found, intel disabled, todo missing, etc.). Callers must check `data.error` when present.
 - Do not mix both styles for the same failure mode in new code: prefer **throw** for "caller must fix input"; prefer `**data.error`** for "operation could not complete in this project state."
 
 ## Mutation commands and events
@@ -33,9 +32,7 @@ This document records contracts for the typed query layer consumed by `gsd-remix
 - `**state.validate`** is **read-only** — not listed in `QUERY_MUTATION_COMMANDS`.
 - `**skill-manifest`**: writes to disk only when invoked with `**--write**`. It is **not** in `QUERY_MUTATION_COMMANDS`, so conditional writes do not emit mutation events today. If event consumers need `skill-manifest` writes, add a follow-up that either registers a dedicated command name for the write path or documents the exception.
 
-## Intel: `intel.update`
 
-- `**intel.update`** / `**intel update**` matches CJS `intel.cjs` `intelUpdate` **JSON** (not an in-process graph refresh): when intel is enabled it returns `{ action: 'spawn_agent', message: '...' }`; when disabled, `{ disabled: true, message: '...' }`. The **gsd-intel-updater** agent performs the actual refresh after spawn. Golden tests use full `toEqual` vs `gsd-tools.cjs` on this repo’s intel config.
 
 ## Session correlation (`sessionId`)
 
@@ -45,9 +42,7 @@ This document records contracts for the typed query layer consumed by `gsd-remix
 
 - `STATE.md` (and ROADMAP) locks use a sibling `.lock` file with the holder's PID. Stale locks are cleared when the PID no longer exists (`process.kill(pid, 0)` fails) or when the lock file is older than the existing time-based threshold.
 
-## Intel JSON search
 
-- `searchJsonEntries` in `intel.ts` caps recursion depth (`MAX_JSON_SEARCH_DEPTH`) to avoid stack overflow on pathological nested JSON.
 
 ## Phase / plan listing (SDK-only)
 
@@ -108,7 +103,6 @@ These tests expect `sdkResult.data` to match the parsed CJS stdout JSON (possibl
 | `verify.plan-structure` / `validate.consistency` / `verify.phase-completeness` | Full object parity on representative repo paths.                          |
 | `init.execute-phase` / `init.plan-phase` / `init.resume` / `init.verify-work` | Full `toEqual` vs CJS.                                              |
 | `init.quick`                  | Full parity **after** stripping `quick_id`, `timestamp`, `branch_name`, `task_dir` (`init-golden-normalize.ts`). |
-| `intel.update`                | Full `toEqual` vs CJS for this project (disabled vs spawn-hint payload per `intel.cjs`).               |
 
 From `read-only-parity.integration.test.ts` (full `toEqual` on this repo):
 
@@ -126,8 +120,6 @@ From `read-only-parity.integration.test.ts` (full `toEqual` on this repo):
 | `verify.commits` | Two git SHAs (`HEAD~1` / `HEAD` or fallback). |
 | `websearch` | Limited query (may hit network — test uses small limit). |
 | `learnings.list` | No args. |
-| `intel.status` | No args. |
-| `intel.diff` / `intel.validate` / `intel.query` | When intel is disabled, disabled payload matches CJS (including message text). |
 | `agent-skills` | No agent type → JSON `""` (same as CJS). |
 | `summary.extract` | Fixture `sdk/src/golden/fixtures/summary-extract-sample.md`; uses `extractFrontmatterLeading` (first `---` block) for parity with `frontmatter.cjs`. |
 | `history.digest` | No args; aggregate over `.planning/phases` + archived milestone phase dirs (`commands.cjs` `cmdHistoryDigest`). |
@@ -294,7 +286,6 @@ Disposition: **Registered** = handled in `createRegistry()` under the listed SDK
 | `summary-extract`                                                                                                                       | `summary.extract`, `summary extract`, `history-digest`, …                 | Alias                   |                                                                           |
 | `websearch`                                                                                                                             | `websearch`                                                               | Registered              |                                                                           |
 | `generate-claude-md` | same kebab-case name | Registered | |
-| `intel`                                                                                                                                 | `intel.status`, `intel.diff`, `intel.update`, …                           | Registered              | `**intel.update**`: JSON parity with CJS spawn hint / disabled payload (see **Intel: intel.update**).                                     |
 | `graphify`                                                                                                                              | —                                                                         | CLI-only                | See **CLI-only** table.                                                   |
 | `docs-init`                                                                                                                             | `docs-init`                                                               | Registered              | Golden: normalized compare (see above).                                   |
 | `learnings`                                                                                                                             | `learnings.list`, `learnings.query`, …                                    | Registered              |                                                                           |

@@ -10,7 +10,7 @@
 
 ---
 
-## Agents (29 shipped)
+## Agents (28 shipped)
 
 Full roster at `agents/gsd-*.md`. The "Primary doc" column flags whether [`docs/AGENTS.md`](AGENTS.md) carries a full role card (*primary*), a short stub in the "Advanced and Specialized Agents" section (*advanced stub*), or no coverage (*inventory only*).
 
@@ -42,7 +42,6 @@ Full roster at `agents/gsd-*.md`. The "Primary doc" column flags whether [`docs/
 | gsd-eval-planner | Designs structured evaluation strategy for an AI phase (AI-SPEC.md §5–§7). | `/gsd-ai-integration-phase` | advanced stub |
 | gsd-eval-auditor | Retroactive audit of an AI phase's evaluation coverage; produces EVAL-REVIEW.md (COVERED/PARTIAL/MISSING). | `/gsd-eval-review` | advanced stub |
 | gsd-framework-selector | ≤6-question interactive decision matrix that scores and recommends an AI/LLM framework. | `/gsd-ai-integration-phase`, `/gsd-select-framework` | advanced stub |
-| gsd-intel-updater | Writes structured intel files (`.planning/intel/*.json`) used as a queryable codebase knowledge base. | `/gsd-intel` | advanced stub |
 | gsd-doc-classifier | Classifies a single planning document as ADR, PRD, SPEC, DOC, or UNKNOWN; spawned in parallel to process the doc corpus. | `/gsd-ingest-docs` | advanced stub |
 | gsd-doc-synthesizer | Synthesizes classified planning docs into a single consolidated context with precedence rules, cycle detection, and three-bucket conflicts report. | `/gsd-ingest-docs` | advanced stub |
 
@@ -50,7 +49,7 @@ Full roster at `agents/gsd-*.md`. The "Primary doc" column flags whether [`docs/
 
 ---
 
-## Commands (76 shipped)
+## Commands (74 shipped)
 
 Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md` section order; each row carries the command name, a one-line role derived from the command's frontmatter `description:`, and a link to the source file. `tests/command-count-sync.test.cjs` locks the count against the filesystem.
 
@@ -127,8 +126,6 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 |---------|------|--------|
 | `/gsd-map-codebase` | Analyze codebase with parallel mapper agents; produces `.planning/codebase/` documents. | [commands/gsd/map-codebase.md](../commands/gsd/map-codebase.md) |
 | `/gsd-scan` | Rapid codebase assessment — lightweight alternative to `/gsd-map-codebase`. | [commands/gsd/scan.md](../commands/gsd/scan.md) |
-| `/gsd-intel` | Query, inspect, or refresh codebase intelligence files in `.planning/intel/`. | [commands/gsd/intel.md](../commands/gsd/intel.md) |
-| `/gsd-graphify` | Build, query, and inspect the project knowledge graph in `.planning/graphs/`. | [commands/gsd/graphify.md](../commands/gsd/graphify.md) |
 | `/gsd-extract-learnings` | Extract decisions, lessons, patterns, and surprises from completed phase artifacts. | [commands/gsd/extract_learnings.md](../commands/gsd/extract_learnings.md) |
 
 ### Review, Debug & Recovery
@@ -334,7 +331,7 @@ The `gsd-planner` agent is decomposed into a core agent plus reference modules t
 
 ---
 
-## CLI Modules (24 shipped)
+## CLI Modules (22 shipped)
 
 Full listing: `get-shit-done/bin/lib/*.cjs`.
 
@@ -348,10 +345,8 @@ Full listing: `get-shit-done/bin/lib/*.cjs`.
 | `core.cjs` | Error handling, output formatting, shared utilities, runtime fallbacks |
 | `docs.cjs` | Docs-update workflow init, Markdown scanning, monorepo detection |
 | `frontmatter.cjs` | YAML frontmatter CRUD operations |
-| `graphify.cjs` | Knowledge-graph build/query/status/diff for `/gsd-graphify` |
 | `gsd2-import.cjs` | External-plan ingest for `/gsd-from-gsd2` |
 | `init.cjs` | Compound context loading for each workflow type |
-| `intel.cjs` | Codebase intel store backing `/gsd-intel` and `gsd-intel-updater` |
 | `learnings.cjs` | Cross-phase learnings extraction for `/gsd-extract-learnings` |
 | `milestone.cjs` | Milestone archival, requirements marking |
 | `model-profiles.cjs` | Model profile resolution table (authoritative profile data) |

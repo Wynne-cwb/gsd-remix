@@ -69,10 +69,6 @@ import { docsInit } from './docs-init.js';
 import { uatRenderCheckpoint, auditUat } from './uat.js';
 import { websearch } from './websearch.js';
 import {
-  intelStatus, intelDiff, intelSnapshot, intelValidate, intelQuery,
-  intelExtractExports, intelPatchMeta, intelUpdate,
-} from './intel.js';
-import {
   learningsCopy, learningsQuery, learningsListHandler, learningsPrune, learningsDelete,
 } from './profile.js';
 import { generateClaudeMd } from './claude-md.js';
@@ -146,7 +142,6 @@ export const QUERY_MUTATION_COMMANDS = new Set<string>([
   'learnings.copy', 'learnings copy',
   'learnings.prune', 'learnings prune',
   'learnings.delete', 'learnings delete',
-  'intel.snapshot', 'intel.patch-meta', 'intel snapshot', 'intel patch-meta',
   'generate-claude-md',
 ]);
 
@@ -241,7 +236,7 @@ function buildMutationEvent(
     } as GSDStateMutationEvent;
   }
 
-  // roadmap, requirements, todo, milestone, workstream, intel, profile, learnings, docs-init
+  // roadmap, requirements, todo, milestone, learnings, docs-init
   return {
     ...base,
     type: GSDEventType.StateMutation,
@@ -508,22 +503,6 @@ export function createRegistry(
   registry.register('audit-uat', auditUat);
   registry.register('uat.render-checkpoint', uatRenderCheckpoint);
   registry.register('uat render-checkpoint', uatRenderCheckpoint);
-  registry.register('intel.diff', intelDiff);
-  registry.register('intel diff', intelDiff);
-  registry.register('intel.snapshot', intelSnapshot);
-  registry.register('intel snapshot', intelSnapshot);
-  registry.register('intel.validate', intelValidate);
-  registry.register('intel validate', intelValidate);
-  registry.register('intel.status', intelStatus);
-  registry.register('intel status', intelStatus);
-  registry.register('intel.query', intelQuery);
-  registry.register('intel query', intelQuery);
-  registry.register('intel.extract-exports', intelExtractExports);
-  registry.register('intel extract-exports', intelExtractExports);
-  registry.register('intel.patch-meta', intelPatchMeta);
-  registry.register('intel patch-meta', intelPatchMeta);
-  registry.register('intel.update', intelUpdate);
-  registry.register('intel update', intelUpdate);
   registry.register('generate-claude-md', generateClaudeMd);
 
   // Wire event emission for mutation commands
