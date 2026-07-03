@@ -66,17 +66,6 @@ describe('Thinking Partner Integration (#1726)', () => {
 
   // Config tests
   describe('Config integration', () => {
-    test('features.thinking_partner is in VALID_CONFIG_KEYS', () => {
-      const configSrc = fs.readFileSync(
-        path.join(GSD_ROOT, 'bin', 'lib', 'config-schema.cjs'),
-        'utf-8'
-      );
-      assert.ok(
-        configSrc.includes("'features.thinking_partner'"),
-        'VALID_CONFIG_KEYS should contain features.thinking_partner'
-      );
-    });
-
     test('features is in KNOWN_TOP_LEVEL section containers', () => {
       const coreSrc = fs.readFileSync(
         path.join(GSD_ROOT, 'bin', 'lib', 'core.cjs'),

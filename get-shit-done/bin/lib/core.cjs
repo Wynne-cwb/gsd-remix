@@ -250,7 +250,7 @@ const CONFIG_DEFAULTS = {
   research: true,
   plan_checker: true,
   verifier: true,
-  nyquist_validation: true,
+  nyquist_validation: false,
   ai_integration_phase: true,
   parallelization: true,
   brave_search: false,
@@ -263,9 +263,8 @@ const CONFIG_DEFAULTS = {
   phase_naming: 'sequential', // 'sequential' (default, auto-increment) or 'custom' (arbitrary string IDs)
   project_code: null, // optional short prefix for phase dirs (e.g., 'CK' → 'CK-01-foundation')
   subagent_timeout: 300000, // 5 min default; increase for large codebases or slower models (ms)
-  security_enforcement: true, // workflow.security_enforcement — threat-model-anchored security verification via /gsd-secure-phase
-  security_asvs_level: 1, // workflow.security_asvs_level — OWASP ASVS verification level (1=opportunistic, 2=standard, 3=comprehensive)
-  security_block_on: 'high', // workflow.security_block_on — minimum severity that blocks phase advancement ('high' | 'medium' | 'low')
+  security_enforcement: false, // workflow.security_enforcement — threat-model-anchored security verification (legacy; superseded by security_review)
+  security_review: 'auto', // workflow.security_review — diff-scoped security review trigger ('auto' | 'always' | 'off')
 };
 
 function loadConfig(cwd) {

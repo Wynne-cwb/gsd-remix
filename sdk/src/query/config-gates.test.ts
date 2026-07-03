@@ -23,7 +23,7 @@ describe('checkConfigGates', () => {
         workflow: null,
         research_enabled: true,
         plan_checker_enabled: true,
-        nyquist_validation: true,
+        nyquist_validation: false,
         auto_advance: false,
         auto_chain_active: false,
         code_review: true,

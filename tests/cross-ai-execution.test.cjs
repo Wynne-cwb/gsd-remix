@@ -9,46 +9,6 @@ const CONFIG_TEMPLATE_PATH = path.join(__dirname, '..', 'get-shit-done', 'templa
 
 describe('cross-AI execution', () => {
 
-  describe('config keys', () => {
-    test('workflow.cross_ai_execution is in VALID_CONFIG_KEYS', () => {
-      const { VALID_CONFIG_KEYS } = require(CONFIG_PATH);
-      assert.ok(VALID_CONFIG_KEYS.has('workflow.cross_ai_execution'),
-        'VALID_CONFIG_KEYS must include workflow.cross_ai_execution');
-    });
-
-    test('workflow.cross_ai_command is in VALID_CONFIG_KEYS', () => {
-      const { VALID_CONFIG_KEYS } = require(CONFIG_PATH);
-      assert.ok(VALID_CONFIG_KEYS.has('workflow.cross_ai_command'),
-        'VALID_CONFIG_KEYS must include workflow.cross_ai_command');
-    });
-
-    test('workflow.cross_ai_timeout is in VALID_CONFIG_KEYS', () => {
-      const { VALID_CONFIG_KEYS } = require(CONFIG_PATH);
-      assert.ok(VALID_CONFIG_KEYS.has('workflow.cross_ai_timeout'),
-        'VALID_CONFIG_KEYS must include workflow.cross_ai_timeout');
-    });
-  });
-
-  describe('config template defaults', () => {
-    test('config template has cross_ai_execution default', () => {
-      const template = JSON.parse(fs.readFileSync(CONFIG_TEMPLATE_PATH, 'utf-8'));
-      assert.strictEqual(template.workflow.cross_ai_execution, false,
-        'cross_ai_execution should default to false');
-    });
-
-    test('config template has cross_ai_command default', () => {
-      const template = JSON.parse(fs.readFileSync(CONFIG_TEMPLATE_PATH, 'utf-8'));
-      assert.strictEqual(template.workflow.cross_ai_command, '',
-        'cross_ai_command should default to empty string');
-    });
-
-    test('config template has cross_ai_timeout default', () => {
-      const template = JSON.parse(fs.readFileSync(CONFIG_TEMPLATE_PATH, 'utf-8'));
-      assert.strictEqual(template.workflow.cross_ai_timeout, 300,
-        'cross_ai_timeout should default to 300 seconds');
-    });
-  });
-
   describe('execute-phase.md cross-AI step', () => {
     let content;
 

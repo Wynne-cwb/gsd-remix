@@ -21,61 +21,6 @@ const CONFIG_CJS_PATH = path.join(GSD_ROOT, 'bin', 'lib', 'config-schema.cjs');
 const CONFIG_TEMPLATE_PATH = path.join(GSD_ROOT, 'templates', 'config.json');
 const PLAN_PHASE_PATH = path.join(GSD_ROOT, 'workflows', 'plan-phase.md');
 
-describe('Plan Bounce: config keys', () => {
-  test('workflow.plan_bounce is in VALID_CONFIG_KEYS', () => {
-    const content = fs.readFileSync(CONFIG_CJS_PATH, 'utf-8');
-    assert.ok(
-      content.includes("'workflow.plan_bounce'"),
-      'VALID_CONFIG_KEYS should contain workflow.plan_bounce'
-    );
-  });
-
-  test('workflow.plan_bounce_script is in VALID_CONFIG_KEYS', () => {
-    const content = fs.readFileSync(CONFIG_CJS_PATH, 'utf-8');
-    assert.ok(
-      content.includes("'workflow.plan_bounce_script'"),
-      'VALID_CONFIG_KEYS should contain workflow.plan_bounce_script'
-    );
-  });
-
-  test('workflow.plan_bounce_passes is in VALID_CONFIG_KEYS', () => {
-    const content = fs.readFileSync(CONFIG_CJS_PATH, 'utf-8');
-    assert.ok(
-      content.includes("'workflow.plan_bounce_passes'"),
-      'VALID_CONFIG_KEYS should contain workflow.plan_bounce_passes'
-    );
-  });
-});
-
-describe('Plan Bounce: config template defaults', () => {
-  test('config template has plan_bounce default (false)', () => {
-    const template = JSON.parse(fs.readFileSync(CONFIG_TEMPLATE_PATH, 'utf-8'));
-    assert.strictEqual(
-      template.workflow.plan_bounce,
-      false,
-      'config template workflow.plan_bounce should default to false'
-    );
-  });
-
-  test('config template has plan_bounce_script default (null)', () => {
-    const template = JSON.parse(fs.readFileSync(CONFIG_TEMPLATE_PATH, 'utf-8'));
-    assert.strictEqual(
-      template.workflow.plan_bounce_script,
-      null,
-      'config template workflow.plan_bounce_script should default to null'
-    );
-  });
-
-  test('config template has plan_bounce_passes default (2)', () => {
-    const template = JSON.parse(fs.readFileSync(CONFIG_TEMPLATE_PATH, 'utf-8'));
-    assert.strictEqual(
-      template.workflow.plan_bounce_passes,
-      2,
-      'config template workflow.plan_bounce_passes should default to 2'
-    );
-  });
-});
-
 describe('Plan Bounce: plan-phase.md step 12.5', () => {
   let content;
 

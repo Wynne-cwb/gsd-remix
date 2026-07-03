@@ -23,6 +23,8 @@ export interface WorkflowConfig {
   plan_check: boolean;
   verifier: boolean;
   nyquist_validation: boolean;
+  /** Diff-scoped security review trigger: 'auto' | 'always' | 'off'. */
+  security_review: string;
   /** Mirrors gsd-tools flat `config.tdd_mode` (from `workflow.tdd_mode`). */
   tdd_mode: boolean;
   auto_advance: boolean;
@@ -83,7 +85,8 @@ export const CONFIG_DEFAULTS: GSDConfig = {
     research: true,
     plan_check: true,
     verifier: true,
-    nyquist_validation: true,
+    nyquist_validation: false,
+    security_review: 'auto',
     tdd_mode: false,
     auto_advance: false,
     node_repair: true,

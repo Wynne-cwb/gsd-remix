@@ -61,11 +61,11 @@ PHASE=$(echo "$PLAN_PATH" | grep -oE '[0-9]+(\.[0-9]+)?-[0-9]+')
 # config settings can be fetched via gsd-remix-sdk query config-get if needed
 ```
 
-<if mode="yolo">
+<if mode="yolo" OR="gates.execute_next_plan is false or absent">
 Auto-approve: `⚡ Execute {phase}-{plan}-PLAN.md [Plan X of Y for Phase Z]` → parse_segments.
 </if>
 
-<if mode="interactive" OR="custom with gates.execute_next_plan true">
+<if mode="interactive" AND="gates.execute_next_plan is explicitly true">
 Present plan identification, wait for confirmation.
 </if>
 </step>

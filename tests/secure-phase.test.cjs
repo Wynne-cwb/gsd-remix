@@ -300,28 +300,12 @@ describe('SECURE: config.json security defaults', () => {
     const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     assert.strictEqual(
       config.workflow.security_enforcement,
-      true,
-      'security_enforcement must default to true'
+      false,
+      'security_enforcement must default to false (slim: legacy path off by default)'
     );
   });
 
-  test('has workflow.security_asvs_level set to 1', () => {
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    assert.strictEqual(
-      config.workflow.security_asvs_level,
-      1,
-      'security_asvs_level must default to 1'
-    );
-  });
 
-  test('has workflow.security_block_on set to "high"', () => {
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    assert.strictEqual(
-      config.workflow.security_block_on,
-      'high',
-      'security_block_on must default to "high"'
-    );
-  });
 
   test('security_enforcement appears after nyquist_validation (opt-out pattern parity)', () => {
     const raw = fs.readFileSync(configPath, 'utf-8');

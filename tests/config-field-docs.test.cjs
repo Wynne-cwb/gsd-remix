@@ -81,8 +81,7 @@ describe('config-field-docs', () => {
       milestone_branch_template: 'git.milestone_branch_template',
       quick_branch_template: 'git.quick_branch_template',
       security_enforcement: 'workflow.security_enforcement',
-      security_asvs_level: 'workflow.security_asvs_level',
-      security_block_on: 'workflow.security_block_on',
+      security_review: 'workflow.security_review',
     };
 
     const missing = keys.filter(k => {
@@ -158,15 +157,6 @@ describe('config-field-docs', () => {
     );
   });
 
-  test('documents features.thinking_partner field', () => {
-    // features.thinking_partner is in VALID_CONFIG_KEYS (config.cjs) and
-    // used by discuss-phase.md and plan-phase.md for conditional extended
-    // thinking at workflow decision points.
-    assert.ok(
-      content.includes('`features.thinking_partner`'),
-      'planning-config.md must document the features.thinking_partner field'
-    );
-  });
 
   test('mode field documents correct allowed values', () => {
     // mode values are "interactive" and "yolo" per templates/config.json

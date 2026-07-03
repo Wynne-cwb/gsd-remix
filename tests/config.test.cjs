@@ -275,7 +275,7 @@ describe('config-set command', () => {
 
     const config = readConfig(tmpDir);
     assert.strictEqual(config.workflow.nyquist_validation_enabled, undefined);
-    assert.strictEqual(config.workflow.nyquist_validation, true);
+    assert.strictEqual(config.workflow.nyquist_validation, false);
   });
 });
 
@@ -474,7 +474,7 @@ describe('config-new-project command', () => {
     assert.ok(config.git && typeof config.git === 'object');
     assert.strictEqual(config.git.branching_strategy, 'none');
     assert.ok(config.workflow && typeof config.workflow === 'object');
-    assert.strictEqual(config.workflow.nyquist_validation, true);
+    assert.strictEqual(config.workflow.nyquist_validation, false);
     assert.strictEqual(config.workflow.auto_advance, false);
     assert.strictEqual(config.workflow.node_repair, true);
     assert.strictEqual(config.workflow.node_repair_budget, 2);
