@@ -10,7 +10,7 @@
 
 ---
 
-## Agents (30 shipped)
+## Agents (29 shipped)
 
 Full roster at `agents/gsd-*.md`. The "Primary doc" column flags whether [`docs/AGENTS.md`](AGENTS.md) carries a full role card (*primary*), a short stub in the "Advanced and Specialized Agents" section (*advanced stub*), or no coverage (*inventory only*).
 
@@ -30,7 +30,6 @@ Full roster at `agents/gsd-*.md`. The "Primary doc" column flags whether [`docs/
 | gsd-nyquist-auditor | Fills Nyquist validation gaps by generating tests. | `/gsd-validate-phase` | primary |
 | gsd-codebase-mapper | Explores codebase and writes structured analysis documents. | `/gsd-map-codebase` | primary |
 | gsd-debugger | Investigates bugs using scientific method with persistent state. | `/gsd-debug`, `/gsd-verify-work` | primary |
-| gsd-user-profiler | Scores developer behavior across 8 dimensions. | `/gsd-profile-user` | primary |
 | gsd-doc-writer | Writes and updates project documentation. | `/gsd-docs-update` | primary |
 | gsd-doc-verifier | Verifies factual claims in generated documentation. | `/gsd-docs-update` | primary |
 | gsd-security-auditor | Verifies threat mitigations from PLAN.md threat model. | `/gsd-secure-phase` | primary |
@@ -51,7 +50,7 @@ Full roster at `agents/gsd-*.md`. The "Primary doc" column flags whether [`docs/
 
 ---
 
-## Commands (81 shipped)
+## Commands (80 shipped)
 
 Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md` section order; each row carries the command name, a one-line role derived from the command's frontmatter `description:`, and a link to the source file. `tests/command-count-sync.test.cjs` locks the count against the filesystem.
 
@@ -156,7 +155,6 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 | `/gsd-ingest-docs` | Scan a repo for mixed ADRs/PRDs/SPECs/DOCs and bootstrap or merge the full `.planning/` setup with classification, synthesis, and conflicts report. | [commands/gsd/ingest-docs.md](../commands/gsd/ingest-docs.md) |
 | `/gsd-spike-wrap-up` | Package spike findings into a persistent project skill for future build conversations. | [commands/gsd/spike-wrap-up.md](../commands/gsd/spike-wrap-up.md) |
 | `/gsd-sketch-wrap-up` | Package sketch design findings into a persistent project skill for future build conversations. | [commands/gsd/sketch-wrap-up.md](../commands/gsd/sketch-wrap-up.md) |
-| `/gsd-profile-user` | Generate developer behavioral profile and Claude-discoverable artifacts. | [commands/gsd/profile-user.md](../commands/gsd/profile-user.md) |
 | `/gsd-settings` | Configure GSD workflow toggles and model profile. | [commands/gsd/settings.md](../commands/gsd/settings.md) |
 | `/gsd-set-profile` | Switch model profile for GSD agents (quality/balanced/budget/inherit). | [commands/gsd/set-profile.md](../commands/gsd/set-profile.md) |
 | `/gsd-pr-branch` | Create a clean PR branch by filtering out `.planning/` commits. | [commands/gsd/pr-branch.md](../commands/gsd/pr-branch.md) |
@@ -168,7 +166,7 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 
 ---
 
-## Workflows (79 shipped)
+## Workflows (78 shipped)
 
 Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators that commands reference internally; most are not read directly by end users. Rows below map each workflow file to its role (derived from the `<purpose>` block) and, where applicable, to the command that invokes it.
 
@@ -226,7 +224,6 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 | `plan-review-convergence.md` | Cross-AI plan convergence loop — replan with review feedback until no HIGH concerns remain. | `/gsd-plan-review-convergence` |
 | `plant-seed.md` | Capture a forward-looking idea as a structured seed file with trigger conditions. | `/gsd-plant-seed` |
 | `pr-branch.md` | Create a clean branch for pull requests by filtering `.planning/` commits. | `/gsd-pr-branch` |
-| `profile-user.md` | Orchestrate the full developer profiling flow — consent, session scan, profile generation. | `/gsd-profile-user` |
 | `progress.md` | Progress rendering — project context, position, and next-action routing. | `/gsd-progress` |
 | `quick.md` | Quick-task execution with GSD guarantees (atomic commits, state tracking). | `/gsd-quick` |
 | `remove-phase.md` | Remove a future phase from the roadmap and renumber subsequent phases. | `/gsd-remove-phase` |
@@ -258,7 +255,7 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 
 ---
 
-## References (49 shipped)
+## References (48 shipped)
 
 Full roster at `get-shit-done/references/*.md`. References are shared knowledge documents that workflows and agents `@-reference`. The groupings below match [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#references-get-shit-donereferencesmd) — core, workflow, thinking-model clusters, and the modular planner decomposition.
 
@@ -298,7 +295,6 @@ Full roster at `get-shit-done/references/*.md`. References are shared knowledge 
 | `phase-argument-parsing.md` | Phase argument parsing conventions. |
 | `decimal-phase-calculation.md` | Decimal sub-phase numbering rules. |
 | `workstream-flag.md` | Workstream active-pointer conventions (`--ws`). |
-| `user-profiling.md` | User behavioral profiling detection heuristics. |
 | `thinking-partner.md` | Conditional thinking-partner activation at decision points. |
 | `autonomous-smart-discuss.md` | Smart-discuss logic for autonomous mode. |
 | `ios-scaffold.md` | iOS application scaffolding patterns. |
@@ -346,7 +342,7 @@ The `gsd-planner` agent is decomposed into a core agent plus reference modules t
 
 ---
 
-## CLI Modules (26 shipped)
+## CLI Modules (25 shipped)
 
 Full listing: `get-shit-done/bin/lib/*.cjs`.
 
@@ -368,8 +364,7 @@ Full listing: `get-shit-done/bin/lib/*.cjs`.
 | `milestone.cjs` | Milestone archival, requirements marking |
 | `model-profiles.cjs` | Model profile resolution table (authoritative profile data) |
 | `phase.cjs` | Phase directory operations, decimal numbering, plan indexing |
-| `profile-output.cjs` | Profile rendering, USER-PROFILE.md and dev-preferences.md generation |
-| `profile-pipeline.cjs` | User behavioral profiling data pipeline, session file scanning |
+| `claude-md.cjs` | CLAUDE.md generation with managed sections (generate-claude-md) |
 | `roadmap.cjs` | ROADMAP.md parsing, phase extraction, plan progress |
 | `schema-detect.cjs` | Schema-drift detection for ORM patterns (Prisma, Drizzle, etc.) |
 | `security.cjs` | Path traversal prevention, prompt injection detection, safe JSON/shell helpers |
@@ -389,7 +384,7 @@ Full listing: `hooks/`.
 
 | Hook | Event | Purpose |
 |------|-------|---------|
-| `gsd-statusline.js` | `statusLine` | Displays model, task, directory, context usage |
+| `gsd-statusline.js` | `statusLine` | Displays model, directory, context usage, rate limits |
 | `gsd-context-monitor.js` | `PostToolUse` / `AfterTool` | Injects agent-facing context warnings at 35%/25% remaining |
 | `gsd-check-update.js` | `SessionStart` | Background check for new GSD versions |
 | `gsd-check-update-worker.js` | (worker) | Background worker helper for check-update |

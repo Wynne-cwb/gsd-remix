@@ -78,11 +78,8 @@ import {
 } from './intel.js';
 import {
   learningsCopy, learningsQuery, learningsListHandler, learningsPrune, learningsDelete,
-  extractMessages, scanSessions, profileSample, profileQuestionnaire,
 } from './profile.js';
-import {
-  writeProfile, generateClaudeProfile, generateDevPreferences, generateClaudeMd,
-} from './profile-output.js';
+import { generateClaudeMd } from './claude-md.js';
 import { skillManifest } from './skill-manifest.js';
 import { auditOpen } from './audit-open.js';
 import { detectCustomFiles } from './detect-custom-files.js';
@@ -156,7 +153,7 @@ export const QUERY_MUTATION_COMMANDS = new Set<string>([
   'learnings.prune', 'learnings prune',
   'learnings.delete', 'learnings delete',
   'intel.snapshot', 'intel.patch-meta', 'intel snapshot', 'intel patch-meta',
-  'write-profile', 'generate-claude-profile', 'generate-dev-preferences', 'generate-claude-md',
+  'generate-claude-md',
 ]);
 
 // ─── Event builder ────────────────────────────────────────────────────────
@@ -534,8 +531,6 @@ export function createRegistry(
   registry.register('audit-open', auditOpen);
   registry.register('audit open', auditOpen);
   registry.register('detect-custom-files', detectCustomFiles);
-  registry.register('extract-messages', extractMessages);
-  registry.register('extract.messages', extractMessages);
   registry.register('audit-uat', auditUat);
   registry.register('uat.render-checkpoint', uatRenderCheckpoint);
   registry.register('uat render-checkpoint', uatRenderCheckpoint);
@@ -555,12 +550,6 @@ export function createRegistry(
   registry.register('intel patch-meta', intelPatchMeta);
   registry.register('intel.update', intelUpdate);
   registry.register('intel update', intelUpdate);
-  registry.register('generate-claude-profile', generateClaudeProfile);
-  registry.register('generate-dev-preferences', generateDevPreferences);
-  registry.register('write-profile', writeProfile);
-  registry.register('profile-questionnaire', profileQuestionnaire);
-  registry.register('profile-sample', profileSample);
-  registry.register('scan-sessions', scanSessions);
   registry.register('generate-claude-md', generateClaudeMd);
 
   // Wire event emission for mutation commands

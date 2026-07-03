@@ -63,79 +63,6 @@ describe('claude_md_path config key', () => {
   });
 });
 
-describe('cmdGenerateClaudeProfile reads claude_md_path from config', () => {
-  let tmpDir;
-
-  beforeEach(() => {
-    tmpDir = createTempProject();
-  });
-
-  afterEach(() => {
-    cleanup(tmpDir);
-  });
-
-  test('uses claude_md_path from config when no --output or --global', () => {
-    // Set up config with custom claude_md_path
-    const configPath = path.join(tmpDir, '.planning', 'config.json');
-    const customPath = '.claude/CLAUDE.md';
-    fs.writeFileSync(configPath, JSON.stringify({ claude_md_path: customPath }), 'utf-8');
-
-    // Create the target directory
-    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
-
-    // Create a minimal analysis file
-    const analysisPath = path.join(tmpDir, '.planning', 'analysis.json');
-    const analysis = {
-      dimensions: {
-        communication_style: { rating: 'terse-direct', confidence: 'HIGH' },
-      },
-      data_source: 'test',
-    };
-    fs.writeFileSync(analysisPath, JSON.stringify(analysis), 'utf-8');
-
-    const result = runGsdTools(
-      ['generate-claude-profile', '--analysis', analysisPath],
-      tmpDir,
-      { HOME: tmpDir }
-    );
-    assert.ok(result.success, `Expected success but got error: ${result.error}`);
-
-    const parsed = JSON.parse(result.output);
-    const realTmpDir = fs.realpathSync(tmpDir);
-    const expectedPath = path.join(realTmpDir, customPath);
-    assert.strictEqual(parsed.claude_md_path, expectedPath);
-    assert.ok(fs.existsSync(expectedPath), `Expected file at ${expectedPath}`);
-  });
-
-  test('--output flag overrides claude_md_path from config', () => {
-    // Set up config with custom claude_md_path
-    const configPath = path.join(tmpDir, '.planning', 'config.json');
-    fs.writeFileSync(configPath, JSON.stringify({ claude_md_path: '.claude/CLAUDE.md' }), 'utf-8');
-
-    // Create analysis file
-    const analysisPath = path.join(tmpDir, '.planning', 'analysis.json');
-    const analysis = {
-      dimensions: {
-        communication_style: { rating: 'terse-direct', confidence: 'HIGH' },
-      },
-      data_source: 'test',
-    };
-    fs.writeFileSync(analysisPath, JSON.stringify(analysis), 'utf-8');
-
-    const outputFile = 'custom-output.md';
-    const result = runGsdTools(
-      ['generate-claude-profile', '--analysis', analysisPath, '--output', outputFile],
-      tmpDir,
-      { HOME: tmpDir }
-    );
-    assert.ok(result.success, `Expected success but got error: ${result.error}`);
-
-    const parsed = JSON.parse(result.output);
-    const realTmpDir = fs.realpathSync(tmpDir);
-    assert.strictEqual(parsed.claude_md_path, path.join(realTmpDir, outputFile));
-  });
-});
-
 describe('cmdGenerateClaudeMd reads claude_md_path from config', () => {
   let tmpDir;
 
@@ -171,6 +98,7 @@ describe('cmdGenerateClaudeMd reads claude_md_path from config', () => {
     assert.strictEqual(parsed.claude_md_path, expectedPath);
     assert.ok(fs.existsSync(expectedPath), `Expected file at ${expectedPath}`);
   });
+
 
   test('--output flag overrides claude_md_path from config', () => {
     // Set up config with custom claude_md_path

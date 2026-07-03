@@ -60,12 +60,6 @@ reads is inert — the consumption mechanism is what gives an artifact meaning.
 - **Location**: `.planning/phases/XX-name/XX-DISCUSSION-LOG.md`
 - **Consumed by**: Human review; not read by automated workflows
 
-### USER-PROFILE.md
-- **Shape**: Calibration tier and preferences profile
-- **Lifecycle**: Created by `profile-user` → Updated as preferences are observed
-- **Location**: `~/.claude/get-shit-done/USER-PROFILE.md`
-- **Consumed by**: `discuss-phase-assumptions` (calibration tier), `plan-phase`
-
 ### SPIKE.md / DESIGN.md (per-spike)
 - **Shape**: Research question + methodology + findings + recommendation
 - **Lifecycle**: Created → Investigated → Decided → Archived

@@ -27,7 +27,6 @@ This doc describes what IS, not what should be. Casing inconsistencies are docum
 | gsd-doc-verifier | Doc validation | No marker (writes JSON to `.planning/tmp/`) |
 | gsd-doc-writer | Doc generation | No marker (writes docs directly) |
 | gsd-advisor-researcher | Advisory research | No marker (utility agent) |
-| gsd-user-profiler | User profiling | No marker (returns JSON in analysis tags) |
 | gsd-intel-updater | Codebase intelligence analysis | `## INTEL UPDATE COMPLETE`, `## INTEL UPDATE FAILED` |
 
 ## Marker Rules

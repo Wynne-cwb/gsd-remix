@@ -44,7 +44,6 @@ export const READ_ONLY_JSON_PARITY_ROWS: JsonParityRow[] = [
   },
   { canonical: 'init.list-workspaces', sdkArgs: [], cjs: 'init', cjsArgs: ['list-workspaces'] },
   { canonical: 'agent-skills', sdkArgs: [], cjs: 'agent-skills', cjsArgs: [] },
-  { canonical: 'scan-sessions', sdkArgs: ['--json'], cjs: 'scan-sessions', cjsArgs: ['--json'] },
   { canonical: 'stats.json', sdkArgs: [], cjs: 'stats', cjsArgs: ['json'] },
   { canonical: 'todo.match-phase', sdkArgs: ['9'], cjs: 'todo', cjsArgs: ['match-phase', '9'] },
   { canonical: 'verify.key-links', sdkArgs: [GOLDEN_PLAN], cjs: 'verify', cjsArgs: ['key-links', GOLDEN_PLAN] },

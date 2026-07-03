@@ -12,7 +12,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 
-const { cmdGenerateClaudeMd } = require('../get-shit-done/bin/lib/profile-output.cjs');
+const { cmdGenerateClaudeMd } = require('../get-shit-done/bin/lib/claude-md.cjs');
 
 function makeTempProject(files = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-2415-'));

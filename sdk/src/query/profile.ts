@@ -1,5 +1,5 @@
 /**
- * Profile and learnings query handlers — session scanning, questionnaire,
+ * Learnings query handlers —
  * profile generation, and knowledge store management.
  *
  * Ported from get-shit-done/bin/lib/profile-pipeline.cjs, profile-output.cjs,
@@ -25,14 +25,6 @@ import { createHash, randomBytes } from 'node:crypto';
 import { planningPaths } from './helpers.js';
 import { GSDError, ErrorClassification } from '../errors.js';
 import type { QueryHandler } from './utils.js';
-import { buildScanSessionsProjects, getScanSessionsRoot } from './profile-scan-sessions.js';
-import { runExtractMessages } from './profile-extract-messages.js';
-import { runProfileSample } from './profile-sample.js';
-import {
-  PROFILING_QUESTIONS,
-  generateClaudeInstruction,
-  isAmbiguousAnswer,
-} from './profile-questionnaire-data.js';
 
 // ─── Learnings — ~/.gsd/knowledge/ knowledge store ───────────────────────
 
@@ -203,135 +195,3 @@ export const learningsDelete: QueryHandler = async (args) => {
  *
  * @param args - args[0]: project name/keyword (required), `--session <id>`, `--limit N`, `--path <dir>`
  */
-export const extractMessages: QueryHandler = async (args) => {
-  const pathIdx = args.indexOf('--path');
-  const overridePath = pathIdx !== -1 ? args[pathIdx + 1] : null;
-  const sessionIdx =
-    args.indexOf('--session') !== -1 ? args.indexOf('--session') : args.indexOf('--session-id');
-  const sessionId = sessionIdx !== -1 ? args[sessionIdx + 1]! : null;
-  const limitIdx = args.indexOf('--limit');
-  const limit = limitIdx !== -1 ? (parseInt(args[limitIdx + 1]!, 10) || null) : null;
-  const projectArg = args[0];
-  if (!projectArg || projectArg.startsWith('--')) {
-    throw new GSDError(
-      'Usage: gsd-tools extract-messages <project> [--session <id>] [--limit N] [--path <dir>]\nRun scan-sessions first to see available projects.',
-      ErrorClassification.Validation,
-    );
-  }
-  const data = await runExtractMessages(projectArg, { sessionId, limit }, overridePath ?? null);
-  return { data };
-};
-
-// ─── Profile — session scanning and profile generation ────────────────────
-
-export const scanSessions: QueryHandler = async (args) => {
-  const pathIdx = args.indexOf('--path');
-  const overridePath = pathIdx !== -1 ? args[pathIdx + 1] : null;
-  const verboseFlag = args.includes('--verbose');
-
-  if (getScanSessionsRoot(overridePath) === null) {
-    const searchedPath = overridePath || '~/.claude/projects';
-    throw new GSDError(
-      `No Claude Code sessions found at ${searchedPath}.${overridePath ? '' : ' Is Claude Code installed?'}`,
-      ErrorClassification.Validation,
-    );
-  }
-
-  const projects = buildScanSessionsProjects(overridePath, { verbose: verboseFlag });
-  return { data: projects };
-};
-
-/**
- * Multi-project session sampling for profiling — port of `cmdProfileSample` (`profile-pipeline.cjs`).
- * JSON matches `gsd-tools profile-sample` (`output_file` JSONL + metadata).
- */
-export const profileSample: QueryHandler = async (args) => {
-  const pathIdx = args.indexOf('--path');
-  const overridePath = pathIdx !== -1 ? args[pathIdx + 1] : null;
-  const limitIdx = args.indexOf('--limit');
-  const limit = limitIdx !== -1 ? parseInt(args[limitIdx + 1]!, 10) : 150;
-  const maxPerIdx = args.indexOf('--max-per-project');
-  const maxPerProject = maxPerIdx !== -1 ? parseInt(args[maxPerIdx + 1]!, 10) : null;
-  const maxCharsIdx = args.indexOf('--max-chars');
-  const maxChars = maxCharsIdx !== -1 ? parseInt(args[maxCharsIdx + 1]!, 10) : 500;
-  const data = await runProfileSample(overridePath ?? null, {
-    limit,
-    maxPerProject,
-    maxChars,
-  });
-  return { data };
-};
-
-/**
- * Profile questionnaire — port of `cmdProfileQuestionnaire` from profile-output.cjs.
- * Interactive: `{ mode: 'interactive', questions }` (options omit `rating`).
- * With `--answers a,b,c,...` (8 comma-separated values, order matches questions): full analysis object (includes volatile `analyzed_at`).
- */
-export const profileQuestionnaire: QueryHandler = async (args, _projectDir) => {
-  const answersIdx = args.indexOf('--answers');
-  const answersStr = answersIdx !== -1 ? args[answersIdx + 1] : null;
-
-  if (!answersStr) {
-    const questionsOutput = {
-      mode: 'interactive' as const,
-      questions: PROFILING_QUESTIONS.map((q) => ({
-        dimension: q.dimension,
-        header: q.header,
-        context: q.context,
-        question: q.question,
-        options: q.options.map((o) => ({ label: o.label, value: o.value })),
-      })),
-    };
-    return { data: questionsOutput };
-  }
-
-  const answerValues = answersStr.split(',').map((a) => a.trim());
-  if (answerValues.length !== PROFILING_QUESTIONS.length) {
-    throw new GSDError(
-      `Expected ${PROFILING_QUESTIONS.length} answers (comma-separated), got ${answerValues.length}`,
-      ErrorClassification.Validation,
-    );
-  }
-
-  const dimensions: Record<string, unknown> = {};
-  const analysis: Record<string, unknown> = {
-    profile_version: '1.0',
-    analyzed_at: new Date().toISOString(),
-    data_source: 'questionnaire',
-    projects_analyzed: [] as unknown[],
-    messages_analyzed: 0,
-    message_threshold: 'questionnaire',
-    sensitive_excluded: [] as unknown[],
-    dimensions,
-  };
-
-  for (let i = 0; i < PROFILING_QUESTIONS.length; i++) {
-    const question = PROFILING_QUESTIONS[i]!;
-    const answerValue = answerValues[i]!;
-    const selectedOption = question.options.find((o) => o.value === answerValue);
-    if (!selectedOption) {
-      throw new GSDError(
-        `Invalid answer "${answerValue}" for ${question.dimension}. Valid values: ${question.options.map((o) => o.value).join(', ')}`,
-        ErrorClassification.Validation,
-      );
-    }
-    const ambiguous = isAmbiguousAnswer(question.dimension, answerValue);
-    dimensions[question.dimension] = {
-      rating: selectedOption.rating,
-      confidence: ambiguous ? 'LOW' : 'MEDIUM',
-      evidence_count: 1,
-      cross_project_consistent: null,
-      evidence: [
-        {
-          signal: 'Self-reported via questionnaire',
-          quote: selectedOption.label,
-          project: 'N/A (questionnaire)',
-        },
-      ],
-      summary: `Developer self-reported as ${selectedOption.rating} for ${question.header.toLowerCase()}.`,
-      claude_instruction: generateClaudeInstruction(question.dimension, selectedOption.rating),
-    };
-  }
-
-  return { data: analysis };
-};

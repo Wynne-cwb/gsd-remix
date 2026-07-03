@@ -131,7 +131,6 @@ From `read-only-parity.integration.test.ts` (full `toEqual` on this repo):
 | `intel.diff` / `intel.validate` / `intel.query` | When intel is disabled, disabled payload matches CJS (including message text). |
 | `init.list-workspaces` | No args. |
 | `agent-skills` | No agent type → JSON `""` (same as CJS). |
-| `scan-sessions` | `--json`; SDK `scanSessions` output matches CJS project array (`profile-scan-sessions.ts`). |
 | `summary.extract` | Fixture `sdk/src/golden/fixtures/summary-extract-sample.md`; uses `extractFrontmatterLeading` (first `---` block) for parity with `frontmatter.cjs`. |
 | `history.digest` | No args; aggregate over `.planning/phases` + archived milestone phase dirs (`commands.cjs` `cmdHistoryDigest`). |
 | `audit-uat` | No args; full JSON parity with `uat.cjs` `cmdAuditUat` (`results`, `summary` with `by_category` / `by_phase`). |
@@ -150,7 +149,6 @@ From `read-only-parity.integration.test.ts` (full `toEqual` on this repo):
 | SDK / test  | Rule                                                                                                                                                                     |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `audit-open` | `audit-open --json`: `**scanned_at**` stripped before `toEqual` (volatile ISO time). `sanitizeForDisplay` in `audit-open.ts` matches `security.cjs` (CRLF body lines can leave `\r` in `items.todos[].summary`, matching CLI). |
-| `extract.messages` / `extract-messages` | Fixture `sdk/src/golden/fixtures/extract-messages-sessions/` passed as `--path` (sessions root). `**output_file**` stripped before `toEqual` (temp path under `os.tmpdir()`); then the two JSONL files are compared byte-for-byte. Parity with `profile-pipeline.cjs` `cmdExtractMessages` (`streamExtractMessages`, `isGenuineUserMessage`, batch limit 300). |
 | `docs-init` | `existing_docs` sorted by `path` before compare; `**agents_installed`** and `**missing_agents**` omitted (subprocess vs in-process path resolution for `~/.claude/...`). |
 
 
@@ -297,9 +295,7 @@ Disposition: **Registered** = handled in `createRegistry()` under the listed SDK
 | `failure.promote-phase`                                                                                                                 | `failure.promote-phase`, `failure promote-phase`                          | Registered              | Failure-memory promotion into index + Markdown memory artifacts.          |
 | `summary-extract`                                                                                                                       | `summary.extract`, `summary extract`, `history-digest`, …                 | Alias                   |                                                                           |
 | `websearch`                                                                                                                             | `websearch`                                                               | Registered              |                                                                           |
-| `scan-sessions`                                                                                                                         | `scan-sessions`                                                           | Registered              |                                                                           |
-| `extract-messages`                                                                                                                      | `extract-messages`, `extract.messages`                                    | Registered              | Golden: `output_file` strip + JSONL bytes (see **Normalized** table).      |
-| `profile-sample`, `profile-questionnaire`, `write-profile`, `generate-dev-preferences`, `generate-claude-profile`, `generate-claude-md` | same kebab-case names                                                     | Registered              |                                                                           |
+| `generate-claude-md` | same kebab-case name | Registered | |
 | `workstream`                                                                                                                            | `workstream.get`, `workstream.list`, …                                    | Registered              |                                                                           |
 | `intel`                                                                                                                                 | `intel.status`, `intel.diff`, `intel.update`, …                           | Registered              | `**intel.update**`: JSON parity with CJS spawn hint / disabled payload (see **Intel: intel.update**).                                     |
 | `graphify`                                                                                                                              | —                                                                         | CLI-only                | See **CLI-only** table.                                                   |

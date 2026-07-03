@@ -1207,7 +1207,6 @@ describe('E2E: Copilot full install verification', () => {
       'gsd-research-synthesizer.agent.md',
       'gsd-roadmapper.agent.md',
       'gsd-security-auditor.agent.md',
-      'gsd-user-profiler.agent.md',
       'gsd-verifier.agent.md',
     ].sort();
     assert.deepStrictEqual(gsdAgents, expected);

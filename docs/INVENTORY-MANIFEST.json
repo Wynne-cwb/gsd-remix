@@ -30,7 +30,6 @@
       "gsd-research-synthesizer",
       "gsd-roadmapper",
       "gsd-security-auditor",
-      "gsd-user-profiler",
       "gsd-verifier"
     ],
     "commands": [
@@ -85,7 +84,6 @@
       "/gsd-plan-review-convergence",
       "/gsd-plant-seed",
       "/gsd-pr-branch",
-      "/gsd-profile-user",
       "/gsd-progress",
       "/gsd-quick",
       "/gsd-reapply-patches",
@@ -169,7 +167,6 @@
       "plan-review-convergence.md",
       "plant-seed.md",
       "pr-branch.md",
-      "profile-user.md",
       "progress.md",
       "quick.md",
       "remove-phase.md",
@@ -243,7 +240,6 @@
       "thinking-partner.md",
       "ui-brand.md",
       "universal-anti-patterns.md",
-      "user-profiling.md",
       "verification-overrides.md",
       "verification-patterns.md",
       "workstream-flag.md"
@@ -251,6 +247,7 @@
     "cli_modules": [
       "artifacts.cjs",
       "audit.cjs",
+      "claude-md.cjs",
       "commands.cjs",
       "config-schema.cjs",
       "config.cjs",
@@ -265,8 +262,6 @@
       "milestone.cjs",
       "model-profiles.cjs",
       "phase.cjs",
-      "profile-output.cjs",
-      "profile-pipeline.cjs",
       "roadmap.cjs",
       "schema-detect.cjs",
       "security.cjs",
