@@ -246,8 +246,6 @@ Priority: Context7 > Exa (verified) > Firecrawl (official docs) > Official GitHu
 - [ ] Confidence levels assigned honestly
 - [ ] "What might I have missed?" review completed
 - [ ] **If rename/refactor phase:** Runtime State Inventory completed — all 5 categories answered explicitly (not left blank)
-- [ ] Security domain included (or `security_enforcement: false` confirmed)
-- [ ] ASVS categories verified against phase tech stack
 
 </verification_protocol>
 
@@ -420,27 +418,6 @@ Verified patterns from official sources:
 
 **Missing dependencies with fallback:**
 - [items with viable alternatives]
-
-## Security Domain
-
-> Required when `security_enforcement` is enabled (absent = enabled). Omit only if explicitly `false` in config.
-
-### Applicable ASVS Categories
-
-| ASVS Category | Applies | Standard Control |
-|---------------|---------|-----------------|
-| V2 Authentication | {yes/no} | {library or pattern} |
-| V3 Session Management | {yes/no} | {library or pattern} |
-| V4 Access Control | {yes/no} | {library or pattern} |
-| V5 Input Validation | yes | {e.g., zod / joi / pydantic} |
-| V6 Cryptography | {yes/no} | {library — never hand-roll} |
-
-### Known Threat Patterns for {stack}
-
-| Pattern | STRIDE | Standard Mitigation |
-|---------|--------|---------------------|
-| {e.g., SQL injection} | Tampering | {parameterized queries / ORM} |
-| {pattern} | {category} | {mitigation} |
 
 ## Sources
 

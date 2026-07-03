@@ -15,7 +15,7 @@ const path = require('path');
 const VERIFY_WORK = path.join(__dirname, '..', 'get-shit-done', 'workflows', 'verify-work.md');
 
 describe('verify-work.md — auto-transition after UAT passes with 0 issues', () => {
-  test('workflow reads transition.md when issues == 0 and security gate cleared', () => {
+  test('workflow reads transition.md when issues == 0', () => {
     const content = fs.readFileSync(VERIFY_WORK, 'utf-8');
     assert.ok(
       content.includes('transition.md'),
@@ -41,43 +41,4 @@ describe('verify-work.md — auto-transition after UAT passes with 0 issues', ()
     );
   });
 
-  test('security gate check gates the transition (no auto-transition when security pending)', () => {
-    const content = fs.readFileSync(VERIFY_WORK, 'utf-8');
-    // The security check must appear before the transition reference
-    const securityCfgIdx = content.indexOf('SECURITY_CFG');
-    const transitionIdx = content.indexOf('transition.md');
-    assert.ok(
-      securityCfgIdx !== -1,
-      'verify-work.md must check SECURITY_CFG before transitioning'
-    );
-    assert.ok(
-      securityCfgIdx < transitionIdx,
-      'SECURITY_CFG check must appear before transition.md reference'
-    );
-  });
-
-  test('transition is only invoked when security gate is cleared or disabled', () => {
-    const content = fs.readFileSync(VERIFY_WORK, 'utf-8');
-    // Transition must be guarded by security check:
-    // Either SECURITY_CFG is false, or security file exists with 0 open threats
-    const hasGuardedTransition =
-      content.includes('transition.md') &&
-      (
-        content.includes("SECURITY_CFG") &&
-        (content.includes('threats_open') || content.includes('SECURITY_FILE'))
-      );
-    assert.ok(
-      hasGuardedTransition,
-      'transition.md invocation must be guarded by security gate checks'
-    );
-  });
-
-  test('transition is NOT suggested when security enforcement is enabled and no SECURITY.md exists', () => {
-    const content = fs.readFileSync(VERIFY_WORK, 'utf-8');
-    // The workflow should suggest /gsd-secure-phase when security is enabled but no file exists
-    assert.ok(
-      content.includes('gsd-secure-phase'),
-      'verify-work.md must suggest /gsd-secure-phase when security gate blocks transition'
-    );
-  });
 });

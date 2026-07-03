@@ -395,32 +395,6 @@ Task(
 - **`## RESEARCH COMPLETE`:** Display confirmation, continue to step 6
 - **`## RESEARCH BLOCKED`:** Display blocker, offer: 1) Provide context, 2) Skip research, 3) Abort
 
-## 5.55. Security Threat Model Gate
-
-> Skip if `workflow.security_enforcement` is explicitly `false`. Absent = enabled.
-
-```bash
-SECURITY_CFG=$(gsd-remix-sdk query config-get workflow.security_enforcement --raw 2>/dev/null || echo "true")
-SECURITY_ASVS=$(gsd-remix-sdk query config-get workflow.security_asvs_level --raw 2>/dev/null || echo "1")
-SECURITY_BLOCK=$(gsd-remix-sdk query config-get workflow.security_block_on --raw 2>/dev/null || echo "high")
-```
-
-**If `SECURITY_CFG` is `false`:** Skip to step 5.7.
-
-**If `SECURITY_CFG` is `true`:** Display banner:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► SECURITY THREAT MODEL REQUIRED (ASVS L{SECURITY_ASVS})
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Each PLAN.md must include a <threat_model> block.
-Block on: {SECURITY_BLOCK} severity threats.
-Opt out: set security_enforcement: false in .planning/config.json
-```
-
-Continue to step 5.7. Security config is passed to the planner in step 8.
-
 ## 5.7. Schema Push Detection Gate
 
 > Detects schema-relevant files in the phase scope and injects a mandatory `[BLOCKING]` schema push task into the plan. Prevents false-positive verification where build/types pass because TypeScript types come from config, not the live database.
