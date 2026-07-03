@@ -246,7 +246,7 @@ Set via `workflow.*` namespace in config.json (e.g., `"workflow": { "research": 
 | `workflow.research` | boolean | `true` | `true`, `false` | Run research agent before planning |
 | `workflow.plan_check` | boolean | `true` | `true`, `false` | Run plan-checker agent to validate plans. _Alias:_ `plan_checker` is the flat-key form used in `CONFIG_DEFAULTS`; `workflow.plan_check` is the canonical namespaced form. |
 | `workflow.verifier` | boolean | `true` | `true`, `false` | Run verifier agent after execution |
-| `workflow.nyquist_validation` | boolean | `false` | `true`, `false` | Enable Nyquist-inspired validation gates (keep the key explicit — absent is treated as enabled by some readers) |
+| `workflow.nyquist_validation` | boolean | `false` | `true`, `false` | Legacy validation-gate switch. Feature removed; keep the key explicitly `false` — absent is treated as enabled by some readers |
 | `workflow.auto_prune_state` | boolean | `false` | `true`, `false` | Automatically prune old STATE.md entries on phase completion (keeps 3 most recent phases) |
 | `workflow.auto_advance` | boolean | `false` | `true`, `false` | Auto-advance to next phase after completion |
 | `workflow.node_repair` | boolean | `true` | `true`, `false` | Attempt automatic repair of failed plan nodes |

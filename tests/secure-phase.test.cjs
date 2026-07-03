@@ -320,56 +320,6 @@ describe('SECURE: config.json security defaults', () => {
   });
 });
 
-// ─── 6. VALIDATION.md template security columns ────────────────────────────
-
-describe('SECURE: VALIDATION.md security columns', () => {
-  const valPath = path.join(TEMPLATES_DIR, 'VALIDATION.md');
-
-  test('VALIDATION.md template exists', () => {
-    assert.ok(
-      fs.existsSync(valPath),
-      'VALIDATION.md must exist in get-shit-done/templates/'
-    );
-  });
-
-  test('contains Threat Ref column header', () => {
-    const content = fs.readFileSync(valPath, 'utf-8');
-    assert.ok(
-      content.includes('Threat Ref'),
-      'must have Threat Ref column in Per-Task Verification Map'
-    );
-  });
-
-  test('contains Secure Behavior column header', () => {
-    const content = fs.readFileSync(valPath, 'utf-8');
-    assert.ok(
-      content.includes('Secure Behavior'),
-      'must have Secure Behavior column in Per-Task Verification Map'
-    );
-  });
-
-  test('both columns appear in the Per-Task Verification Map table', () => {
-    const content = fs.readFileSync(valPath, 'utf-8');
-    // Find the table header row containing both columns
-    const lines = content.split('\n');
-    const headerLine = lines.find(
-      line => line.includes('Threat Ref') && line.includes('Secure Behavior')
-    );
-    assert.ok(
-      headerLine,
-      'Threat Ref and Secure Behavior must appear in the same table header row'
-    );
-    // Verify this is in the Per-Task Verification Map section
-    const mapIdx = content.indexOf('## Per-Task Verification Map');
-    const threatRefIdx = content.indexOf('Threat Ref');
-    assert.ok(mapIdx > -1, 'must have Per-Task Verification Map section');
-    assert.ok(
-      threatRefIdx > mapIdx,
-      'Threat Ref column must appear after Per-Task Verification Map heading'
-    );
-  });
-});
-
 // ─── 7. Threat-model-anchored behaviour (structural) ────────────────────────
 
 describe('SECURE: threat-model-anchored behaviour', () => {

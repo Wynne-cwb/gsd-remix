@@ -43,7 +43,6 @@ Always use the exact name from this list — do not fall back to 'general-purpos
 - gsd-debugger — Diagnoses and fixes issues
 - gsd-codebase-mapper — Maps project structure and dependencies
 - gsd-integration-checker — Checks cross-phase integration
-- gsd-nyquist-auditor — Validates verification coverage
 </available_agent_types>
 
 <process>

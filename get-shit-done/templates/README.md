@@ -41,7 +41,6 @@ These files live inside a phase directory. They are NOT checked by W019 (which o
 | `NN-MM-SUMMARY.md` | `summary.md` | `/gsd-execute-phase` | Post-execution summary with learnings |
 | `NN-CONTEXT.md` | `context.md` | `/gsd-discuss-phase` | Scoped discussion decisions for the phase |
 | `NN-RESEARCH.md` | `research.md` | `/gsd-research-phase`, `/gsd-plan-phase` | Technical research for the phase |
-| `NN-VALIDATION.md` | `VALIDATION.md` | `/gsd-research-phase` (Nyquist) | Validation architecture (Nyquist method) |
 | `NN-UAT.md` | `UAT.md` | `/gsd-validate-phase` | User acceptance test results |
 | `NN-PATTERNS.md` | *(inline)* | `/gsd-plan-phase` (pattern mapper) | Analog file mapping for the phase |
 | `NN-SECURITY.md` | `SECURITY.md` | `/gsd-secure-phase` | Security threat model |

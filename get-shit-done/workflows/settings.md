@@ -39,7 +39,6 @@ Parse current values (default to `true` if not present):
 - `workflow.research` — spawn researcher during plan-phase
 - `workflow.plan_check` — spawn plan checker during plan-phase
 - `workflow.verifier` — spawn verifier during execute-phase
-- `workflow.nyquist_validation` — validation architecture research during plan-phase (default: true if absent)
 - `workflow.ai_integration_phase` — framework selection + eval strategy for AI phases (default: true if absent)
 - `model_profile` — which model each agent uses (default: `balanced`)
 - `git.branching_strategy` — branching approach (default: `"none"`)
@@ -100,17 +99,6 @@ AskUserQuestion([
       { label: "Yes", description: "Chain stages via Task() subagents (same isolation)" }
     ]
   },
-  {
-    question: "Enable Nyquist Validation? (researches test coverage during planning)",
-    header: "Nyquist",
-    multiSelect: false,
-    options: [
-      { label: "Yes (Recommended)", description: "Research automated test coverage during plan-phase. Adds validation requirements to plans. Blocks approval if tasks lack automated verify." },
-      { label: "No", description: "Skip validation research. Good for rapid prototyping or no-test phases." }
-    ]
-  },
-  // Note: Nyquist validation depends on research output. If research is disabled,
-  // plan-phase automatically skips Nyquist steps (no RESEARCH.md to extract from).
   {
     question: "Enable AI Phase? (framework selection + eval strategy for AI phases)",
     header: "AI Phase",
@@ -182,7 +170,6 @@ Merge new settings into existing config.json:
     "plan_check": true/false,
     "verifier": true/false,
     "auto_advance": true/false,
-    "nyquist_validation": true/false,
     "ai_integration_phase": true/false,
     "text_mode": true/false,
     "research_before_questions": true/false,
@@ -242,7 +229,6 @@ Write `~/.gsd/defaults.json` with:
     "plan_check": <current>,
     "verifier": <current>,
     "auto_advance": <current>,
-    "nyquist_validation": <current>,
     "ai_integration_phase": <current>,
     "skip_discuss": <current>
   }
@@ -265,7 +251,6 @@ Display:
 | Plan Checker         | {On/Off} |
 | Execution Verifier   | {On/Off} |
 | Auto-Advance         | {On/Off} |
-| Nyquist Validation   | {On/Off} |
 | AI Integration Phase | {On/Off} |
 | Git Branching        | {None/Per Phase/Per Milestone} |
 | Skip Discuss         | {On/Off} |

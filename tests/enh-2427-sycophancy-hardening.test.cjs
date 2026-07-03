@@ -23,7 +23,6 @@ const AUDIT_AGENTS = [
   'gsd-security-auditor.md',
   'gsd-verifier.md',
   'gsd-eval-auditor.md',
-  'gsd-nyquist-auditor.md',
   'gsd-integration-checker.md',
 ];
 

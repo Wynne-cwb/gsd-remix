@@ -23,7 +23,7 @@ describe('MODEL_PROFILES', () => {
       'gsd-planner', 'gsd-roadmapper', 'gsd-executor',
       'gsd-phase-researcher', 'gsd-project-researcher', 'gsd-research-synthesizer',
       'gsd-debugger', 'gsd-codebase-mapper', 'gsd-verifier',
-      'gsd-plan-checker', 'gsd-integration-checker', 'gsd-nyquist-auditor',
+      'gsd-plan-checker', 'gsd-integration-checker',
     ];
     for (const agent of expectedAgents) {
       assert.ok(MODEL_PROFILES[agent], `Missing agent: ${agent}`);

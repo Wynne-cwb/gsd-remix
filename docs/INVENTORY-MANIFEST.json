@@ -16,7 +16,6 @@
       "gsd-executor",
       "gsd-framework-selector",
       "gsd-integration-checker",
-      "gsd-nyquist-auditor",
       "gsd-pattern-mapper",
       "gsd-phase-researcher",
       "gsd-plan-checker",
@@ -67,7 +66,6 @@
       "/gsd-settings",
       "/gsd-undo",
       "/gsd-update",
-      "/gsd-validate-phase",
       "/gsd-verify-work"
     ],
     "workflows": [
@@ -114,7 +112,6 @@
       "transition.md",
       "undo.md",
       "update.md",
-      "validate-phase.md",
       "verify-phase.md",
       "verify-work.md"
     ],

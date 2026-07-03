@@ -20,7 +20,6 @@ This doc describes what IS, not what should be. Casing inconsistencies are docum
 | gsd-roadmapper | Roadmap creation/revision | `## ROADMAP CREATED`, `## ROADMAP REVISED`, `## ROADMAP BLOCKED` |
 | gsd-verifier | Post-execution verification | `## Verification Complete` (title case) |
 | gsd-integration-checker | Cross-phase integration check | `## Integration Check Complete` (title case) |
-| gsd-nyquist-auditor | Sampling audit | `## PARTIAL`, `## ESCALATE` (non-standard) |
 | gsd-security-auditor | Security audit | `## OPEN_THREATS`, `## ESCALATE` (non-standard) |
 | gsd-codebase-mapper | Codebase analysis | No marker (writes docs directly) |
 | gsd-assumptions-analyzer | Assumption extraction | No marker (returns `## Assumptions` sections) |

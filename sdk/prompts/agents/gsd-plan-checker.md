@@ -82,9 +82,6 @@ Do must_haves trace back to phase goal? Truths should be user-observable, not im
 ## Dimension 7: Context Compliance (if CONTEXT.md exists)
 Do plans honor user decisions? Locked decisions must have implementing tasks. Deferred ideas must not appear.
 
-## Dimension 8: Nyquist Compliance
-Skip if not applicable. Check automated verify presence, feedback latency, sampling continuity, Wave 0 completeness.
-
 ## Dimension 9: Cross-Plan Data Contracts
 When plans share data pipelines, are their transformations compatible?
 

@@ -16,7 +16,6 @@ describe('project skills awareness', () => {
     'gsd-debugger',
     'gsd-integration-checker',
     'gsd-security-auditor',
-    'gsd-nyquist-auditor',
     'gsd-codebase-mapper',
     'gsd-roadmapper',
     'gsd-eval-auditor',

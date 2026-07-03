@@ -135,9 +135,9 @@ describe('resolveModel', () => {
 // ─── MODEL_PROFILES ─────────────────────────────────────────────────────────
 
 describe('MODEL_PROFILES', () => {
-  it('contains all 13 agent entries (sync with model-profiles.cjs)', async () => {
+  it('contains all 12 agent entries (sync with model-profiles.cjs)', async () => {
     const { MODEL_PROFILES } = await import('./config-query.js');
-    expect(Object.keys(MODEL_PROFILES)).toHaveLength(13);
+    expect(Object.keys(MODEL_PROFILES)).toHaveLength(12);
   });
 
   it('has quality/balanced/budget/adaptive for each agent', async () => {
