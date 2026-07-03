@@ -1,7 +1,7 @@
 <purpose>
 Retroactive audit of an implemented AI phase's evaluation coverage. Standalone command that works on any GSD-managed AI phase. Produces a scored EVAL-REVIEW.md with gap analysis and remediation plan.
 
-Use after /gsd-execute-phase to verify that the evaluation strategy from AI-SPEC.md was actually implemented. Mirrors the pattern of /gsd-ui-review and /gsd-validate-phase.
+Use after /gsd-execute-phase to verify that the evaluation strategy from AI-SPEC.md was actually implemented. Mirrors the pattern of /gsd-validate-phase.
 </purpose>
 
 <required_reading>

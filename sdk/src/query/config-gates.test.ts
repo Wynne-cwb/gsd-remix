@@ -24,7 +24,6 @@ describe('checkConfigGates', () => {
         research_enabled: true,
         plan_checker_enabled: true,
         nyquist_validation: true,
-        ui_phase: true,
         auto_advance: false,
         auto_chain_active: false,
         code_review: true,

@@ -44,9 +44,6 @@ Always use the exact name from this list — do not fall back to 'general-purpos
 - gsd-codebase-mapper — Maps project structure and dependencies
 - gsd-integration-checker — Checks cross-phase integration
 - gsd-nyquist-auditor — Validates verification coverage
-- gsd-ui-researcher — Researches UI/UX approaches
-- gsd-ui-checker — Reviews UI implementation quality
-- gsd-ui-auditor — Audits UI against design requirements
 </available_agent_types>
 
 <process>

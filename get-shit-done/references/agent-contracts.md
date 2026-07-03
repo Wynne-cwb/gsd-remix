@@ -18,9 +18,6 @@ This doc describes what IS, not what should be. Casing inconsistencies are docum
 | gsd-research-synthesizer | Multi-research synthesis | `## SYNTHESIS COMPLETE`, `## SYNTHESIS BLOCKED` |
 | gsd-debugger | Debug investigation | `## DEBUG COMPLETE`, `## ROOT CAUSE FOUND`, `## CHECKPOINT REACHED` |
 | gsd-roadmapper | Roadmap creation/revision | `## ROADMAP CREATED`, `## ROADMAP REVISED`, `## ROADMAP BLOCKED` |
-| gsd-ui-auditor | UI review | `## UI REVIEW COMPLETE` |
-| gsd-ui-checker | UI validation | `## ISSUES FOUND` |
-| gsd-ui-researcher | UI spec creation | `## UI-SPEC COMPLETE`, `## UI-SPEC BLOCKED` |
 | gsd-verifier | Post-execution verification | `## Verification Complete` (title case) |
 | gsd-integration-checker | Cross-phase integration check | `## Integration Check Complete` (title case) |
 | gsd-nyquist-auditor | Sampling audit | `## PARTIAL`, `## ESCALATE` (non-standard) |

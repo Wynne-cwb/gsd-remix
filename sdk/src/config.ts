@@ -28,8 +28,6 @@ export interface WorkflowConfig {
   auto_advance: boolean;
   node_repair: boolean;
   node_repair_budget: number;
-  ui_phase: boolean;
-  ui_safety_gate: boolean;
   text_mode: boolean;
   research_before_questions: boolean;
   discuss_mode: string;
@@ -90,8 +88,6 @@ export const CONFIG_DEFAULTS: GSDConfig = {
     auto_advance: false,
     node_repair: true,
     node_repair_budget: 2,
-    ui_phase: true,
-    ui_safety_gate: true,
     text_mode: false,
     research_before_questions: false,
     discuss_mode: 'discuss',

@@ -101,8 +101,6 @@ function buildNewProjectConfig(userChoices) {
       auto_advance: false,
       node_repair: true,
       node_repair_budget: 2,
-      ui_phase: true,
-      ui_safety_gate: true,
       ai_integration_phase: true,
       tdd_mode: false,
       text_mode: false,

@@ -275,45 +275,6 @@ PHASE_STATE=$(gsd-remix-sdk query init.phase-op ${PHASE_NUM})
 
 Check `has_context`. If false → go to handle_blocker: "Discuss for phase ${PHASE_NUM} did not produce CONTEXT.md."
 
-**3a.5. UI Design Contract (Frontend Phases)**
-
-Check if this phase has frontend indicators and whether a UI-SPEC already exists:
-
-```bash
-PHASE_SECTION=$(gsd-remix-sdk query roadmap.get-phase ${PHASE_NUM} 2>/dev/null)
-echo "$PHASE_SECTION" | grep -iE "UI|interface|frontend|component|layout|page|screen|view|form|dashboard|widget" > /dev/null 2>&1
-HAS_UI=$?
-UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
-```
-
-Check if UI phase workflow is enabled:
-
-```bash
-UI_PHASE_CFG=$(gsd-remix-sdk query config-get workflow.ui_phase 2>/dev/null || echo "true")
-```
-
-**If `HAS_UI` is 0 (frontend indicators found) AND `UI_SPEC_FILE` is empty (no UI-SPEC exists) AND `UI_PHASE_CFG` is not `false`:**
-
-Display:
-
-```
-Phase ${PHASE_NUM}: Frontend phase detected — generating UI design contract...
-```
-
-```
-Skill(skill="gsd-ui-phase", args="${PHASE_NUM}")
-```
-
-Verify UI-SPEC was created:
-
-```bash
-UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
-```
-
-**If `UI_SPEC_FILE` is still empty after ui-phase:** Display warning `Phase ${PHASE_NUM}: UI-SPEC generation did not produce output — continuing without design contract.` and proceed to 3b.
-
-**If `HAS_UI` is 1 (no frontend indicators) OR `UI_SPEC_FILE` is not empty (UI-SPEC already exists) OR `UI_PHASE_CFG` is `false`:** Skip silently to 3b.
-
 **3b. Plan**
 
 **If `INTERACTIVE` is set:** Dispatch plan as a background agent to keep the main context lean. While plan runs, the workflow can immediately start discussing the next phase (see step 4).
@@ -472,38 +433,6 @@ This limits gap closure to 1 automatic retry to prevent infinite loops.
 On **"Continue without fixing"**: Display `Phase ${PHASE_NUM} ⏭ Gaps deferred` and proceed to iterate step.
 
 On **"Stop autonomous mode"**: Go to handle_blocker with "User stopped — gaps remain in phase ${PHASE_NUM}".
-
-**3d.5. UI Review (Frontend Phases)**
-
-> Run after any successful execution routing (passed, human_needed accepted, or gaps deferred/accepted) — before proceeding to the iterate step.
-
-Check if this phase had a UI-SPEC (created in step 3a.5 or pre-existing):
-
-```bash
-UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
-```
-
-Check if UI review is enabled:
-
-```bash
-UI_REVIEW_CFG=$(gsd-remix-sdk query config-get workflow.ui_review 2>/dev/null || echo "true")
-```
-
-**If `UI_SPEC_FILE` is not empty AND `UI_REVIEW_CFG` is not `false`:**
-
-Display:
-
-```
-Phase ${PHASE_NUM}: Frontend phase with UI-SPEC — running UI review audit...
-```
-
-```
-Skill(skill="gsd-ui-review", args="${PHASE_NUM}")
-```
-
-Display the review result summary (score from UI-REVIEW.md if produced). Continue to iterate step regardless of score — UI review is advisory, not blocking.
-
-**If `UI_SPEC_FILE` is empty OR `UI_REVIEW_CFG` is `false`:** Skip silently to iterate step.
 
 </step>
 
@@ -740,7 +669,7 @@ When any phase operation fails or a blocker is detected, present 3 options via A
 </process>
 
 <success_criteria>
-- [ ] All incomplete phases executed in order (smart discuss → ui-phase → plan → execute → ui-review each)
+- [ ] All incomplete phases executed in order (smart discuss → plan → execute each)
 - [ ] Smart discuss proposes grey area answers in tables, user accepts or overrides per area
 - [ ] Progress banners displayed between phases
 - [ ] Execute-phase invoked with --no-transition (autonomous manages transitions)
@@ -764,10 +693,6 @@ When any phase operation fails or a blocker is detected, present 3 options via A
 - [ ] Final completion banner displayed after lifecycle
 - [ ] Progress bar uses phase number / total milestone phases (not position among incomplete), with fallback display when phase numbers exceed total
 - [ ] Smart discuss documents relationship to discuss-phase with CTRL-03 note
-- [ ] Frontend phases get UI-SPEC generated before planning (step 3a.5) if not already present
-- [ ] Frontend phases get UI review audit after successful execution (step 3d.5) if UI-SPEC exists
-- [ ] UI phase and UI review respect workflow.ui_phase and workflow.ui_review config toggles
-- [ ] UI review is advisory (non-blocking) — phase proceeds to iterate regardless of score
 - [ ] `--only N` restricts execution to exactly one phase
 - [ ] `--only N` skips lifecycle step (audit/complete/cleanup)
 - [ ] `--only N` exits cleanly after single phase completes

@@ -80,7 +80,7 @@ Parse JSON for: `researcher_model`, `planner_model`, `checker_model`, `research_
 
 ## 2. Parse and Normalize Arguments
 
-Extract from $ARGUMENTS: phase number (integer or decimal like `2.1`), flags (`--research`, `--skip-research`, `--gaps`, `--skip-verify`, `--skip-ui`, `--prd <filepath>`, `--reviews`, `--text`, `--bounce`, `--skip-bounce`).
+Extract from $ARGUMENTS: phase number (integer or decimal like `2.1`), flags (`--research`, `--skip-research`, `--gaps`, `--skip-verify`, `--prd <filepath>`, `--reviews`, `--text`, `--bounce`, `--skip-bounce`).
 
 Set `TEXT_MODE=true` if `--text` is present in $ARGUMENTS OR `text_mode` from init JSON is `true`. When `TEXT_MODE` is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for Claude Code remote sessions (`/rc` mode) where TUI menus don't work through the Claude App.
 
@@ -453,7 +453,7 @@ SECURITY_ASVS=$(gsd-remix-sdk query config-get workflow.security_asvs_level --ra
 SECURITY_BLOCK=$(gsd-remix-sdk query config-get workflow.security_block_on --raw 2>/dev/null || echo "high")
 ```
 
-**If `SECURITY_CFG` is `false`:** Skip to step 5.6.
+**If `SECURITY_CFG` is `false`:** Skip to step 5.7.
 
 **If `SECURITY_CFG` is `true`:** Display banner:
 
@@ -467,74 +467,7 @@ Block on: {SECURITY_BLOCK} severity threats.
 Opt out: set security_enforcement: false in .planning/config.json
 ```
 
-Continue to step 5.6. Security config is passed to the planner in step 8.
-
-## 5.6. UI Design Contract Gate
-
-> Skip if `workflow.ui_phase` is explicitly `false` AND `workflow.ui_safety_gate` is explicitly `false` in `.planning/config.json`. If keys are absent, treat as enabled.
-
-```bash
-UI_PHASE_CFG=$(gsd-remix-sdk query config-get workflow.ui_phase 2>/dev/null || echo "true")
-UI_GATE_CFG=$(gsd-remix-sdk query config-get workflow.ui_safety_gate 2>/dev/null || echo "true")
-```
-
-**If both are `false`:** Skip to step 6.
-
-Check if phase has frontend indicators:
-
-```bash
-PHASE_SECTION=$(gsd-remix-sdk query roadmap.get-phase "${PHASE}" 2>/dev/null)
-echo "$PHASE_SECTION" | grep -iE "UI|interface|frontend|component|layout|page|screen|view|form|dashboard|widget" > /dev/null 2>&1
-HAS_UI=$?
-```
-
-**If `HAS_UI` is 0 (frontend indicators found):**
-
-Check for existing UI-SPEC:
-```bash
-UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
-```
-
-**If UI-SPEC.md found:** Set `UI_SPEC_PATH=$UI_SPEC_FILE`. Display: `Using UI design contract: ${UI_SPEC_PATH}`
-
-**If UI-SPEC.md missing AND `--skip-ui` flag is present in $ARGUMENTS:** Skip silently to step 6.
-
-**If UI-SPEC.md missing AND `UI_GATE_CFG` is `true`:**
-
-Read ephemeral chain flag (same field as `check.auto-mode` → `auto_chain_active`):
-```bash
-AUTO_CHAIN=$(gsd-remix-sdk query check auto-mode --pick auto_chain_active 2>/dev/null || echo "false")
-```
-
-**If `AUTO_CHAIN` is `true` (running inside a `--chain` or `--auto` pipeline):**
-
-Auto-generate UI-SPEC without prompting:
-```
-Skill(skill="gsd-ui-phase", args="${PHASE} --auto ${GSD_WS}")
-```
-After `gsd-ui-phase` returns, re-read:
-```bash
-UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
-UI_SPEC_PATH="${UI_SPEC_FILE}"
-```
-Continue to step 6.
-
-**If `AUTO_CHAIN` is `false` (manual invocation):**
-
-Output this markdown directly (not as a code block):
-
-```
-## ⚠ UI-SPEC.md missing for Phase {N}
-▶ Recommended next step:
-`/gsd-ui-phase {N} ${GSD_WS}` — generate UI design contract before planning
-───────────────────────────────────────────────
-Also available:
-- `/gsd-plan-phase {N} --skip-ui ${GSD_WS}` — plan without UI-SPEC (not recommended for frontend phases)
-```
-
-**Exit the plan-phase workflow. Do not continue.**
-
-**If `HAS_UI` is 1 (no frontend indicators):** Skip silently to step 5.7.
+Continue to step 5.7. Security config is passed to the planner in step 8.
 
 ## 5.7. Schema Push Detection Gate
 
@@ -739,7 +672,6 @@ Planner prompt:
 - {verification_path} (Verification Gaps - if --gaps)
 - {uat_path} (UAT Gaps - if --gaps)
 - {reviews_path} (Cross-AI Review Feedback - if --reviews)
-- {UI_SPEC_PATH} (UI Design Contract — visual/interaction specs, if exists)
 - {SPIKE_FINDINGS_PATH} (Spike Findings — validated patterns, constraints, landmines from experiments, if exists)
 - {SKETCH_FINDINGS_PATH} (Sketch Findings — validated design decisions, CSS patterns, visual direction, if exists)
 ${CONTEXT_WINDOW >= 500000 ? `

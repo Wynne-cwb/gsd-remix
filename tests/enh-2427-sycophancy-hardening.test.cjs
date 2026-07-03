@@ -24,7 +24,6 @@ const AUDIT_AGENTS = [
   'gsd-verifier.md',
   'gsd-eval-auditor.md',
   'gsd-nyquist-auditor.md',
-  'gsd-ui-auditor.md',
   'gsd-integration-checker.md',
   'gsd-doc-verifier.md',
 ];

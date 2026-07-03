@@ -1,7 +1,7 @@
 /**
  * Regression tests for bug #2346
  *
- * Multiple GSD agents (gsd-ui-checker, gsd-planner) entered unbounded Read
+ * Multiple GSD agents (gsd-planner) entered unbounded Read
  * loops — re-reading the same file hundreds of times in a single run. Root
  * cause: no explicit no-re-read rule or tool-budget cap in the agent prompts.
  * gsd-pattern-mapper was fixed in #2312; this covers the remaining agents.
@@ -22,47 +22,6 @@ const path = require('path');
 const AGENTS_DIR = path.join(__dirname, '..', 'agents');
 
 describe('bug #2346: agent read loop guards', () => {
-
-  describe('gsd-ui-checker', () => {
-    const agentPath = path.join(AGENTS_DIR, 'gsd-ui-checker.md');
-    let content;
-
-    test('agent file exists', () => {
-      assert.ok(fs.existsSync(agentPath), 'agents/gsd-ui-checker.md must exist');
-      content = fs.readFileSync(agentPath, 'utf-8');
-    });
-
-    test('has <critical_rules> block', () => {
-      content = content || fs.readFileSync(agentPath, 'utf-8');
-      assert.ok(
-        content.includes('<critical_rules>'),
-        'gsd-ui-checker.md must have a <critical_rules> block to prevent unbounded read loops (#2346)'
-      );
-    });
-
-    test('critical_rules contains no-re-read constraint', () => {
-      content = content || fs.readFileSync(agentPath, 'utf-8');
-      const rulesStart = content.indexOf('<critical_rules>');
-      const rulesEnd = content.indexOf('</critical_rules>', rulesStart);
-      assert.ok(rulesStart !== -1 && rulesEnd !== -1, '<critical_rules> block must be complete');
-      const rulesBlock = content.slice(rulesStart, rulesEnd);
-      assert.ok(
-        rulesBlock.includes('re-read') || rulesBlock.includes('re read'),
-        'critical_rules must include a no-re-read rule'
-      );
-    });
-
-    test('critical_rules appears before success_criteria', () => {
-      content = content || fs.readFileSync(agentPath, 'utf-8');
-      const rulesIdx = content.indexOf('<critical_rules>');
-      const successIdx = content.indexOf('<success_criteria>');
-      assert.ok(rulesIdx !== -1 && successIdx !== -1, 'both sections must exist');
-      assert.ok(
-        rulesIdx < successIdx,
-        '<critical_rules> must appear before <success_criteria>'
-      );
-    });
-  });
 
   describe('gsd-planner', () => {
     const agentPath = path.join(AGENTS_DIR, 'gsd-planner.md');

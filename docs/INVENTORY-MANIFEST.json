@@ -1,5 +1,5 @@
 {
-  "generated": "2026-04-20",
+  "generated": "2026-07-03",
   "families": {
     "agents": [
       "gsd-advisor-researcher",
@@ -30,9 +30,6 @@
       "gsd-research-synthesizer",
       "gsd-roadmapper",
       "gsd-security-auditor",
-      "gsd-ui-auditor",
-      "gsd-ui-checker",
-      "gsd-ui-researcher",
       "gsd-user-profiler",
       "gsd-verifier"
     ],
@@ -110,11 +107,9 @@
       "/gsd-spike",
       "/gsd-spike-wrap-up",
       "/gsd-stats",
-      "/gsd-thread",
-      "/gsd-ui-phase",
-      "/gsd-ui-review",
-      "/gsd-ultraplan-phase",
       "/gsd-sync-skills",
+      "/gsd-thread",
+      "/gsd-ultraplan-phase",
       "/gsd-undo",
       "/gsd-update",
       "/gsd-validate-phase",
@@ -195,8 +190,6 @@
       "stats.md",
       "sync-skills.md",
       "transition.md",
-      "ui-phase.md",
-      "ui-review.md",
       "ultraplan-phase.md",
       "undo.md",
       "update.md",

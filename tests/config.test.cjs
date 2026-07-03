@@ -429,8 +429,6 @@ describe('config-new-project command', () => {
     assert.strictEqual(config.workflow.auto_advance, false);
     assert.strictEqual(config.workflow.node_repair, true);
     assert.strictEqual(config.workflow.node_repair_budget, 2);
-    assert.strictEqual(config.workflow.ui_phase, true);
-    assert.strictEqual(config.workflow.ui_safety_gate, true);
 
     // hooks section present
     assert.ok(config.hooks && typeof config.hooks === 'object', 'hooks section should exist');
@@ -480,8 +478,6 @@ describe('config-new-project command', () => {
     assert.strictEqual(config.workflow.auto_advance, false);
     assert.strictEqual(config.workflow.node_repair, true);
     assert.strictEqual(config.workflow.node_repair_budget, 2);
-    assert.strictEqual(config.workflow.ui_phase, true);
-    assert.strictEqual(config.workflow.ui_safety_gate, true);
     assert.ok(config.hooks && typeof config.hooks === 'object');
     assert.strictEqual(config.hooks.context_warnings, true);
   });

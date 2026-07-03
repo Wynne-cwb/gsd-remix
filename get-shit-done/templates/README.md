@@ -46,7 +46,6 @@ These files live inside a phase directory. They are NOT checked by W019 (which o
 | `NN-VALIDATION.md` | `VALIDATION.md` | `/gsd-research-phase` (Nyquist) | Validation architecture (Nyquist method) |
 | `NN-UAT.md` | `UAT.md` | `/gsd-validate-phase` | User acceptance test results |
 | `NN-PATTERNS.md` | *(inline)* | `/gsd-plan-phase` (pattern mapper) | Analog file mapping for the phase |
-| `NN-UI-SPEC.md` | `UI-SPEC.md` | `/gsd-ui-phase` | UI design contract |
 | `NN-SECURITY.md` | `SECURITY.md` | `/gsd-secure-phase` | Security threat model |
 | `NN-AI-SPEC.md` | `AI-SPEC.md` | `/gsd-ai-integration-phase` | AI integration spec with eval strategy |
 | `NN-DEBUG.md` | `DEBUG.md` | `/gsd-debug` | Debug session log |
