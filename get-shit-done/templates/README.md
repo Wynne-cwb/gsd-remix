@@ -18,16 +18,15 @@ These files live directly at `.planning/` — not inside phase subdirectories.
 | `REQUIREMENTS.md` | `requirements.md` | `/gsd-new-milestone` | Functional requirements with traceability |
 | `MILESTONES.md` | `milestone.md` | `/gsd-complete-milestone` | Log of completed milestones with accomplishments |
 | `BACKLOG.md` | *(inline)* | `/gsd-add-backlog` | Pending ideas and deferred work |
-| `LEARNINGS.md` | *(inline)* | `/gsd-extract-learnings`, `/gsd-execute-phase` | Phase retrospective learnings for future plans |
+| `LEARNINGS.md` | *(inline)* | `/gsd-execute-phase` | Phase retrospective learnings for future plans |
 | `THREADS.md` | *(inline)* | `/gsd-thread` | Persistent discussion threads |
 | `config.json` | `config.json` | `/gsd-new-project`, `/gsd-health --repair` | Project-specific GSD configuration |
-| `CLAUDE.md` | `claude-md.md` | `/gsd-profile` | Auto-assembled Claude Code context file |
+| `CLAUDE.md` | `claude-md.md` | `/gsd-new-project` (generate-claude-md) | Auto-assembled Claude Code context file |
 
 ### Version-stamped artifacts (pattern: `vX.Y-*.md`)
 
 | Pattern | Produced by | Purpose |
 |---------|-------------|---------|
-| `vX.Y-MILESTONE-AUDIT.md` | `/gsd-audit-milestone` | Milestone audit report before archiving |
 
 These files are archived to `.planning/milestones/` by `/gsd-complete-milestone`. Finding them at the `.planning/` root after completion indicates the archive step was skipped.
 
@@ -49,7 +48,6 @@ These files live inside a phase directory. They are NOT checked by W019 (which o
 | `NN-SECURITY.md` | `SECURITY.md` | `/gsd-secure-phase` | Security threat model |
 | `NN-AI-SPEC.md` | `AI-SPEC.md` | `/gsd-ai-integration-phase` | AI integration spec with eval strategy |
 | `NN-DEBUG.md` | `DEBUG.md` | `/gsd-debug` | Debug session log |
-| `NN-REVIEWS.md` | *(inline)* | `/gsd-review` | Cross-AI review feedback |
 
 ---
 

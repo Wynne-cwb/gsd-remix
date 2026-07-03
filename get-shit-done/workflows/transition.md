@@ -93,7 +93,7 @@ Append to the completion confirmation message (regardless of mode):
 Outstanding verification items in this phase:
 {list filenames}
 
-These will carry forward as debt. Review: `/gsd-audit-uat`
+These will carry forward as debt.
 ```
 
 This does NOT block transition — it ensures the user sees the debt before confirming.

@@ -54,8 +54,6 @@ Parse `$ARGUMENTS` before loading any context:
 - First positional token → `PHASE_ARG`
 - Optional `--wave N` → `WAVE_FILTER`
 - Optional `--gaps-only` keeps its current meaning
-- Optional `--cross-ai` → `CROSS_AI_FORCE=true` (force all plans through cross-AI execution)
-- Optional `--no-cross-ai` → `CROSS_AI_DISABLED=true` (disable cross-AI for this run, overrides config and frontmatter)
 
 If `--wave` is absent, preserve the current behavior of executing all incomplete waves in the phase.
 </step>
@@ -281,77 +279,6 @@ Report:
 | 1 | 01-01, 01-02 | {from plan objectives, 3-8 words} |
 | 2 | 01-03 | ... |
 ```
-</step>
-
-<step name="cross_ai_delegation">
-**Optional step 2.5 — Delegate plans to an external AI runtime.**
-
-This step runs after plan discovery and before normal wave execution. It identifies plans
-that should be delegated to an external AI command and executes them via stdin-based prompt
-delivery. Plans handled here are removed from the execute_waves plan list so the normal
-executor skips them.
-
-**Activation logic:**
-
-1. If `CROSS_AI_DISABLED` is true (`--no-cross-ai` flag): skip this step entirely.
-2. If `CROSS_AI_FORCE` is true (`--cross-ai` flag): mark ALL incomplete plans for cross-AI execution.
-3. Otherwise: check each plan's frontmatter for `cross_ai: true` AND verify config
-   `workflow.cross_ai_execution` is `true`. Plans matching both conditions are marked for cross-AI.
-
-```bash
-CROSS_AI_ENABLED=$(gsd-remix-sdk query config-get workflow.cross_ai_execution 2>/dev/null || echo "false")
-CROSS_AI_CMD=$(gsd-remix-sdk query config-get workflow.cross_ai_command 2>/dev/null || echo "")
-CROSS_AI_TIMEOUT=$(gsd-remix-sdk query config-get workflow.cross_ai_timeout 2>/dev/null || echo "300")
-```
-
-**If no plans are marked for cross-AI:** Skip to execute_waves.
-
-**If plans are marked but `cross_ai_command` is empty:** Error — tell user to set
-`workflow.cross_ai_command` via `gsd-remix-sdk query config-set workflow.cross_ai_command "<command>"`.
-
-**For each cross-AI plan (sequentially):**
-
-1. **Construct the task prompt** from the plan file:
-   - Extract `<objective>` and `<tasks>` sections from the PLAN.md
-   - Append PROJECT.md context (project name, description, tech stack)
-   - Format as a self-contained execution prompt
-
-2. **Check for dirty working tree before execution:**
-   ```bash
-   if ! git diff --quiet HEAD 2>/dev/null; then
-     echo "WARNING: dirty working tree detected — the external AI command may produce uncommitted changes that conflict with existing modifications"
-   fi
-   ```
-
-3. **Run the external command** from the project root, writing the prompt to stdin.
-   Never shell-interpolate the prompt — always pipe via stdin to prevent injection:
-   ```bash
-   echo "$TASK_PROMPT" | timeout "${CROSS_AI_TIMEOUT}s" ${CROSS_AI_CMD} > "$CANDIDATE_SUMMARY" 2>"$ERROR_LOG"
-   EXIT_CODE=$?
-   ```
-
-4. **Evaluate the result:**
-
-   **Success (exit 0 + valid summary):**
-   - Read `$CANDIDATE_SUMMARY` and validate it contains meaningful content
-     (not empty, has at least a heading and description — a valid SUMMARY.md structure)
-   - Write it as the plan's SUMMARY.md file
-   - Update STATE.md plan status to complete
-   - Update ROADMAP.md progress
-   - Mark plan as handled — skip it in execute_waves
-
-   **Failure (non-zero exit or invalid summary):**
-   - Display the error output and exit code
-   - Warn: "The external command may have left uncommitted changes or partial edits
-     in the working tree. Review `git status` and `git diff` before proceeding."
-   - Offer three choices:
-     - **retry** — run the same plan through cross-AI again
-     - **skip** — fall back to normal executor for this plan (re-add to execute_waves list)
-     - **abort** — stop execution entirely, preserve state for resume
-
-5. **After all cross-AI plans processed:** Remove successfully handled plans from the
-   incomplete plan list so execute_waves skips them. Any skipped-to-fallback plans remain
-   in the list for normal executor processing.
 </step>
 
 <step name="execute_waves">
@@ -1382,7 +1309,7 @@ All automated checks passed. {N} items need human testing:
 
 {From VERIFICATION.md human_verification section}
 
-Items saved to `{phase_num}-HUMAN-UAT.md` — they will appear in `/gsd-progress` and `/gsd-audit-uat`.
+Items saved to `{phase_num}-HUMAN-UAT.md` — they will appear in `/gsd-progress`.
 
 "approved" → continue | Report issues → gap closure
 ```
@@ -1477,7 +1404,7 @@ Extract from result: `next_phase`, `next_phase_name`, `is_last_phase`, `warnings
 
 {list each warning}
 
-These items are tracked and will appear in `/gsd-progress` and `/gsd-audit-uat`.
+These items are tracked and will appear in `/gsd-progress`.
 ```
 
 ```bash

@@ -27,7 +27,6 @@ const PLANNER_EXTRACTED_LIMIT = 48 * 1024;  // 48K — proves extraction happene
 const PLANNER_PATH = path.join(PROJECT_ROOT, 'agents', 'gsd-planner.md');
 const GAP_CLOSURE_REF = path.join(PROJECT_ROOT, 'get-shit-done', 'references', 'planner-gap-closure.md');
 const REVISION_REF = path.join(PROJECT_ROOT, 'get-shit-done', 'references', 'planner-revision.md');
-const REVIEWS_REF = path.join(PROJECT_ROOT, 'get-shit-done', 'references', 'planner-reviews.md');
 
 // ─── gsd-planner.md size ─────────────────────────────────────────────────────
 
@@ -68,9 +67,6 @@ describe('extracted reference files exist', () => {
     assert.ok(fs.existsSync(REVISION_REF), `Missing: ${REVISION_REF}`);
   });
 
-  test('planner-reviews.md exists', () => {
-    assert.ok(fs.existsSync(REVIEWS_REF), `Missing: ${REVIEWS_REF}`);
-  });
 });
 
 // ─── gsd-planner.md contains reference pointers ──────────────────────────────
@@ -94,13 +90,6 @@ describe('gsd-planner.md contains reference pointers to extracted files', () => 
     );
   });
 
-  test('planner references planner-reviews.md', () => {
-    plannerContent = plannerContent || fs.readFileSync(PLANNER_PATH, 'utf-8');
-    assert.ok(
-      plannerContent.includes('planner-reviews.md'),
-      'gsd-planner.md must reference planner-reviews.md'
-    );
-  });
 });
 
 // ─── Reference files contain key content ────────────────────────────────────
@@ -124,12 +113,4 @@ describe('reference files contain key content from original mode sections', () =
     assert.ok(hasRevisionContent, 'planner-revision.md must contain revision mode content');
   });
 
-  test('planner-reviews.md contains reviews content', () => {
-    const content = fs.readFileSync(REVIEWS_REF, 'utf-8');
-    const hasReviewsContent = content.includes('reviews') ||
-                              content.includes('Reviews') ||
-                              content.includes('REVIEWS') ||
-                              content.includes('REVIEWS.md');
-    assert.ok(hasReviewsContent, 'planner-reviews.md must contain reviews mode content');
-  });
 });

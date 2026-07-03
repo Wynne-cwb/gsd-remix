@@ -183,7 +183,7 @@ When a phase is re-verified (e.g., after gap closure):
 
 ### At Milestone Completion
 
-During `/gsd-audit-milestone`, overrides are surfaced in the audit report:
+When closing a milestone, surface accumulated overrides for review:
 
 ```
 ### Verification Overrides ({count} across {phase_count} phases)

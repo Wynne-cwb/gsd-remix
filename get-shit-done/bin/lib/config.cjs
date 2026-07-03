@@ -19,11 +19,9 @@ const CONFIG_KEY_SUGGESTIONS = {
   'hooks.research_questions': 'workflow.research_before_questions',
   'workflow.research_questions': 'workflow.research_before_questions',
   'workflow.codereview': 'workflow.code_review',
-  'workflow.review_command': 'workflow.code_review_command',
   'workflow.review': 'workflow.code_review',
   'workflow.code_review_level': 'workflow.code_review_depth',
   'workflow.review_depth': 'workflow.code_review_depth',
-  'review.model': 'review.models.<cli-name>',
 };
 
 function validateKnownConfigKeyPath(keyPath) {
@@ -109,7 +107,6 @@ function buildNewProjectConfig(userChoices) {
       skip_discuss: false,
       code_review: true,
       code_review_depth: 'standard',
-      code_review_command: null,
       pattern_mapper: true,
       auto_prune_state: false,
       security_enforcement: CONFIG_DEFAULTS.security_enforcement,

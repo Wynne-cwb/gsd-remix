@@ -122,10 +122,9 @@ Requirements: {N}/{M} v1 requirements checked off
 - [ ] {REQ-ID}: {description} (Phase {Y})
 ```
 
-MUST present 3 options:
+MUST present 2 options:
 1. **Proceed anyway** — mark milestone complete with known gaps
-2. **Run audit first** — `/gsd-audit-milestone` to assess gap severity
-3. **Abort** — return to development
+2. **Abort** — return to development
 
 If user selects "Proceed anyway": note incomplete requirements in MILESTONES.md under `### Known Gaps` with REQ-IDs and descriptions.
 
@@ -838,7 +837,7 @@ Milestone completion is successful when:
 - [ ] Git tag created (v[X.Y])
 - [ ] Milestone commit made (includes archive files and deletion)
 - [ ] Requirements completion checked against REQUIREMENTS.md traceability table
-- [ ] Incomplete requirements surfaced with proceed/audit/abort options
+- [ ] Incomplete requirements surfaced with proceed/abort options
 - [ ] Known gaps recorded in MILESTONES.md if user proceeded with incomplete requirements
 - [ ] RETROSPECTIVE.md updated with milestone section
 - [ ] Cross-milestone trends updated

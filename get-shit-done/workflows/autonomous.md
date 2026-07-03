@@ -469,7 +469,7 @@ Read and execute: `$HOME/.claude/get-shit-done/references/autonomous-smart-discu
  Resume with: /gsd-autonomous --from ${next_incomplete_phase}
 ```
 
-Proceed directly to lifecycle step (which handles partial completion — skips audit/complete/cleanup since not all phases are done). Exit cleanly.
+Proceed directly to lifecycle step (which handles partial completion — skips complete/cleanup since not all phases are done). Exit cleanly.
 
 **Otherwise:** After each phase completes, re-read ROADMAP.md to catch phases inserted mid-execution (decimal phases like 5.1):
 
@@ -508,7 +508,7 @@ If all phases complete, proceed to lifecycle step.
 
 ## 5. Lifecycle
 
-**If `ONLY_PHASE` is set:** Skip lifecycle. A single phase does not trigger audit/complete/cleanup. Display:
+**If `ONLY_PHASE` is set:** Skip lifecycle. A single phase does not trigger complete/cleanup. Display:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -519,12 +519,12 @@ If all phases complete, proceed to lifecycle step.
  Mode: Single phase (--only)
 
  Lifecycle skipped — run /gsd-autonomous without --only
- after all phases complete to trigger audit/complete/cleanup.
+ after all phases complete to trigger complete/cleanup.
 ```
 
 Exit cleanly.
 
-**Otherwise:** After all phases complete, run the milestone lifecycle sequence: audit → complete → cleanup.
+**Otherwise:** After all phases complete, run the milestone lifecycle sequence: complete → cleanup.
 
 Display lifecycle transition banner:
 
@@ -533,65 +533,9 @@ Display lifecycle transition banner:
  GSD ► AUTONOMOUS ▸ LIFECYCLE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
- All phases complete → Starting lifecycle: audit → complete → cleanup
+ All phases complete → Starting lifecycle: complete → cleanup
  Milestone: {milestone_version} — {milestone_name}
 ```
-
-**5a. Audit**
-
-```
-Skill(skill="gsd-audit-milestone")
-```
-
-After audit completes, detect the result:
-
-```bash
-AUDIT_FILE=".planning/v${milestone_version}-MILESTONE-AUDIT.md"
-AUDIT_STATUS=$(grep "^status:" "${AUDIT_FILE}" 2>/dev/null | head -1 | cut -d: -f2 | tr -d ' ')
-```
-
-**If AUDIT_STATUS is empty** (no audit file or no status field):
-
-Go to handle_blocker: "Audit did not produce results — audit file missing or malformed."
-
-**If `passed`:**
-
-Display:
-```
-Audit ✅ passed — proceeding to complete milestone
-```
-
-Proceed to 5b (no user pause — per CTRL-01).
-
-**If `gaps_found`:**
-
-Read the gaps summary from the audit file. Display:
-```
-⚠ Audit: Gaps Found
-```
-
-Ask user via AskUserQuestion:
-- **question:** "Milestone audit found gaps. How to proceed?"
-- **options:** "Continue anyway — accept gaps" / "Stop — fix gaps manually"
-
-On **"Continue anyway"**: Display `Audit ⏭ Gaps accepted — proceeding to complete milestone` and proceed to 5b.
-
-On **"Stop"**: Go to handle_blocker with "User stopped — audit gaps remain. Run /gsd-audit-milestone to review, then /gsd-complete-milestone when ready."
-
-**If `tech_debt`:**
-
-Read the tech debt summary from the audit file. Display:
-```
-⚠ Audit: Tech Debt Identified
-```
-
-Show the summary, then ask user via AskUserQuestion:
-- **question:** "Milestone audit found tech debt. How to proceed?"
-- **options:** "Continue with tech debt" / "Stop — address debt first"
-
-On **"Continue with tech debt"**: Display `Audit ⏭ Tech debt acknowledged — proceeding to complete milestone` and proceed to 5b.
-
-On **"Stop"**: Go to handle_blocker with "User stopped — tech debt to address. Run /gsd-audit-milestone to review details."
 
 **5b. Complete Milestone**
 
@@ -626,7 +570,7 @@ Display final completion banner:
 
  Milestone: {milestone_version} — {milestone_name}
  Status: Complete ✅
- Lifecycle: audit ✅ → complete ✅ → cleanup ✅
+ Lifecycle: complete ✅ → cleanup ✅
 
  Ship it! 🚀
 ```
@@ -684,8 +628,7 @@ When any phase operation fails or a blocker is detected, present 3 options via A
 - [ ] Blockers handled via user choice (retry / skip / stop)
 - [ ] Final completion or stop summary displayed
 - [ ] After all phases complete, lifecycle step is invoked (not manual suggestion)
-- [ ] Lifecycle transition banner displayed before audit
-- [ ] Audit invoked via Skill(skill="gsd-audit-milestone")
+- [ ] Lifecycle transition banner displayed before complete
 - [ ] Audit result routing: passed → auto-continue, gaps_found → user decides, tech_debt → user decides
 - [ ] Audit technical failure (no file/no status) routes to handle_blocker
 - [ ] Complete-milestone invoked via Skill() with ${milestone_version} arg
@@ -694,7 +637,7 @@ When any phase operation fails or a blocker is detected, present 3 options via A
 - [ ] Progress bar uses phase number / total milestone phases (not position among incomplete), with fallback display when phase numbers exceed total
 - [ ] Smart discuss documents relationship to discuss-phase with CTRL-03 note
 - [ ] `--only N` restricts execution to exactly one phase
-- [ ] `--only N` skips lifecycle step (audit/complete/cleanup)
+- [ ] `--only N` skips lifecycle step (complete/cleanup)
 - [ ] `--only N` exits cleanly after single phase completes
 - [ ] `--only N` on already-complete phase exits with message
 - [ ] `--only N` handle_blocker resume message uses --only flag

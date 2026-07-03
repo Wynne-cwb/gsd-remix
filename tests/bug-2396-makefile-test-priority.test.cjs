@@ -2,7 +2,7 @@
  * Regression test for #2396: hardcoded host-level test commands bypass
  * container-only project Makefiles.
  *
- * Fix: execute-phase.md, verify-phase.md, and audit-fix.md must check for
+ * Fix: execute-phase.md and verify-phase.md must check for
  * Makefile with a test target (and other wrappers) before falling through
  * to hardcoded language-sniffed commands.
  */
@@ -16,7 +16,6 @@ const path = require('path');
 
 const EXECUTE_PHASE_PATH = path.join(__dirname, '..', 'get-shit-done', 'workflows', 'execute-phase.md');
 const VERIFY_PHASE_PATH = path.join(__dirname, '..', 'get-shit-done', 'workflows', 'verify-phase.md');
-const AUDIT_FIX_PATH = path.join(__dirname, '..', 'get-shit-done', 'workflows', 'audit-fix.md');
 
 function assertMakefileCheckBeforeNpmTest(filePath, label) {
   const content = fs.readFileSync(filePath, 'utf-8');
@@ -82,20 +81,12 @@ describe('bug-2396: Makefile test target must take priority over hardcoded comma
     assert.ok(fs.existsSync(VERIFY_PHASE_PATH), 'verify-phase.md should exist');
   });
 
-  test('audit-fix.md exists', () => {
-    assert.ok(fs.existsSync(AUDIT_FIX_PATH), 'audit-fix.md should exist');
-  });
-
   test('execute-phase.md: Makefile check precedes npm test (post-merge gate)', () => {
     assertMakefileCheckBeforeNpmTest(EXECUTE_PHASE_PATH, 'execute-phase.md');
   });
 
   test('verify-phase.md: Makefile check precedes npm test', () => {
     assertMakefileCheckBeforeNpmTest(VERIFY_PHASE_PATH, 'verify-phase.md');
-  });
-
-  test('audit-fix.md: Makefile check precedes npm test', () => {
-    assertMakefileCheckBeforeNpmTest(AUDIT_FIX_PATH, 'audit-fix.md');
   });
 
   test('execute-phase.md: workflow.test_command config checked first (within bash block)', () => {
@@ -106,7 +97,4 @@ describe('bug-2396: Makefile test target must take priority over hardcoded comma
     assertConfigGetBeforeMakefile(VERIFY_PHASE_PATH, 'verify-phase.md');
   });
 
-  test('audit-fix.md: workflow.test_command config checked first (within bash block)', () => {
-    assertConfigGetBeforeMakefile(AUDIT_FIX_PATH, 'audit-fix.md');
-  });
 });

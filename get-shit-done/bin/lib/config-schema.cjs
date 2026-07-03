@@ -29,7 +29,6 @@ const VALID_CONFIG_KEYS = new Set([
   'workflow.use_worktrees',
   'workflow.code_review',
   'workflow.code_review_depth',
-  'workflow.code_review_command',
   'workflow.pattern_mapper',
   'workflow.security_enforcement',
   'workflow.security_review',
@@ -55,7 +54,6 @@ const VALID_CONFIG_KEYS = new Set([
  */
 const DYNAMIC_KEY_PATTERNS = [
   { test: (k) => /^agent_skills\.[a-zA-Z0-9_-]+$/.test(k),                   description: 'agent_skills.<agent-type>' },
-  { test: (k) => /^review\.models\.[a-zA-Z0-9_-]+$/.test(k),                 description: 'review.models.<cli-name>' },
   { test: (k) => /^features\.[a-zA-Z0-9_]+$/.test(k),                        description: 'features.<feature_name>' },
   { test: (k) => /^claude_md_assembly\.blocks\.[a-zA-Z0-9_]+$/.test(k),      description: 'claude_md_assembly.blocks.<section>' },
 ];

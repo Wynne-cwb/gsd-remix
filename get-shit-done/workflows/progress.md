@@ -185,7 +185,6 @@ Track: `outstanding_debt` — `summary.total_items` from the audit.
 | {phase} | {filename} | {pending_count} pending, {skipped_count} skipped, {blocked_count} blocked |
 | {phase} | {filename} | human_needed — {count} items |
 
-Review: `/gsd-audit-uat ${GSD_WS}` — full cross-phase audit
 Resume testing: `/gsd-verify-work {phase} ${GSD_WS}` — retest specific phase
 ```
 
@@ -262,7 +261,6 @@ Check if `{phase_num}-CONTEXT.md` exists in phase directory.
 
 **Also available:**
 - `/gsd-plan-phase {phase} ${GSD_WS}` — skip discussion, plan directly
-- `/gsd-list-phase-assumptions {phase} ${GSD_WS}` — see Claude's assumptions
 
 ---
 ```
@@ -313,7 +311,6 @@ UAT.md exists with `status: partial` — testing session ended before all items 
 ---
 
 **Also available:**
-- `/gsd-audit-uat ${GSD_WS}` — full cross-phase UAT audit
 - `/gsd-execute-phase {phase} ${GSD_WS}` — execute phase plans
 
 ---

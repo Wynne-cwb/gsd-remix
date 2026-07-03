@@ -82,15 +82,6 @@ Comprehensive ecosystem research for niche/complex domains.
 
 Usage: `/gsd-research-phase 3`
 
-**`/gsd-list-phase-assumptions <number>`**
-See what Claude is planning to do before it starts.
-
-- Shows Claude's intended approach for a phase
-- Lets you course-correct if Claude misunderstood your vision
-- No files created - conversational output only
-
-Usage: `/gsd-list-phase-assumptions 3`
-
 **`/gsd-plan-phase <number>`**
 Create detailed execution plan for a specific phase.
 
@@ -331,33 +322,6 @@ Usage: `/gsd-verify-work 3`
 
 ### Ship Work
 
-**`/gsd-ship [phase]`**
-Create a PR from completed phase work with an auto-generated body.
-
-- Pushes branch to remote
-- Creates PR with summary from SUMMARY.md, VERIFICATION.md, REQUIREMENTS.md
-- Optionally requests code review
-- Updates STATE.md with shipping status
-
-Prerequisites: Phase verified, `gh` CLI installed and authenticated.
-
-Usage: `/gsd-ship 4` or `/gsd-ship 4 --draft`
-
----
-
-**`/gsd-review --phase N [--gemini] [--claude] [--codex] [--coderabbit] [--opencode] [--qwen] [--cursor] [--all]`**
-Cross-AI peer review — invoke external AI CLIs to independently review phase plans.
-
-- Detects available CLIs (gemini, claude, codex, coderabbit)
-- Each CLI reviews plans independently with the same structured prompt
-- CodeRabbit reviews the current git diff (not a prompt) — may take up to 5 minutes
-- Produces REVIEWS.md with per-reviewer feedback and consensus summary
-- Feed reviews back into planning: `/gsd-plan-phase N --reviews`
-
-Usage: `/gsd-review --phase 3 --all`
-
----
-
 **`/gsd-pr-branch [target]`**
 Create a clean branch for pull requests by filtering out .planning/ commits.
 
@@ -368,48 +332,6 @@ Create a clean branch for pull requests by filtering out .planning/ commits.
 Usage: `/gsd-pr-branch` or `/gsd-pr-branch main`
 
 ---
-
-**`/gsd-plant-seed [idea]`**
-Capture a forward-looking idea with trigger conditions for automatic surfacing.
-
-- Seeds preserve WHY, WHEN to surface, and breadcrumbs to related code
-- Auto-surfaces during `/gsd-new-milestone` when trigger conditions match
-- Better than deferred items — triggers are checked, not forgotten
-
-Usage: `/gsd-plant-seed "add real-time notifications when we build the events system"`
-
----
-
-**`/gsd-audit-uat`**
-Cross-phase audit of all outstanding UAT and verification items.
-- Scans every phase for pending, skipped, blocked, and human_needed items
-- Cross-references against codebase to detect stale documentation
-- Produces prioritized human test plan grouped by testability
-- Use before starting a new milestone to clear verification debt
-
-Usage: `/gsd-audit-uat`
-
-### Milestone Auditing
-
-**`/gsd-audit-milestone [version]`**
-Audit milestone completion against original intent.
-
-- Reads all phase VERIFICATION.md files
-- Checks requirements coverage
-- Spawns integration checker for cross-phase wiring
-- Creates MILESTONE-AUDIT.md with gaps and tech debt
-
-Usage: `/gsd-audit-milestone`
-
-**`/gsd-plan-milestone-gaps`**
-Create phases to close gaps identified by audit.
-
-- Reads MILESTONE-AUDIT.md and groups gaps into phases
-- Prioritizes by requirement priority (must/should/nice)
-- Adds gap closure phases to ROADMAP.md
-- Ready for `/gsd-plan-phase` on new phases
-
-Usage: `/gsd-plan-milestone-gaps`
 
 ### Configuration
 

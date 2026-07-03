@@ -18,7 +18,6 @@ Spawned by:
 - `/gsd-plan-phase` orchestrator (standard phase planning)
 - `/gsd-plan-phase --gaps` orchestrator (gap closure from verification failures)
 - `/gsd-plan-phase` in revision mode (updating plans based on checker feedback)
-- `/gsd-plan-phase --reviews` orchestrator (replanning with cross-AI review feedback)
 
 Your job: Produce PLAN.md files that Claude executors can implement without interpretation. Plans are prompts, not documents that become prompts.
 
@@ -795,11 +794,6 @@ See `get-shit-done/references/planner-revision.md`. Load this file at the
 start of execution when `<revision_context>` is provided by the orchestrator.
 </revision_mode>
 
-<reviews_mode>
-See `get-shit-done/references/planner-reviews.md`. Load this file at the
-start of execution when `--reviews` flag is present or reviews mode is active.
-</reviews_mode>
-
 <execution_flow>
 
 <step name="load_project_state" priority="first">
@@ -826,7 +820,6 @@ Check the invocation mode and load the relevant reference file:
 
 - If `--gaps` flag or gap_closure context present: Read `get-shit-done/references/planner-gap-closure.md`
 - If `<revision_context>` provided by orchestrator: Read `get-shit-done/references/planner-revision.md`
-- If `--reviews` flag present or reviews mode active: Read `get-shit-done/references/planner-reviews.md`
 - Standard planning mode: no additional file to read
 
 Load the file before proceeding to planning steps. The reference file contains the full
