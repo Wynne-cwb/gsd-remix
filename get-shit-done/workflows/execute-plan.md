@@ -91,7 +91,7 @@ Parse JSON for: `task_count`, `inline_threshold`, `checkpoint_mode`, `threshold_
 Use the route returned by `plan.execution-route` by default. This decision is deterministic and code-based — do NOT substitute your own LLM judgment unless the query failed.
 
 Routing rules encoded in the query:
-- `INLINE_THRESHOLD` remains the hard floor. If `task_count <= INLINE_THRESHOLD`, use inline execution immediately.
+- `INLINE_THRESHOLD` remains the hard floor. If `INLINE_THRESHOLD > 0` and `task_count <= INLINE_THRESHOLD`, use inline execution immediately. A threshold of `0` disables inline routing.
 - For plans above the threshold, a conservative low-complexity override is allowed only for simple `3-5` task plans with:
   - no checkpoint tasks
   - small file surface
@@ -121,7 +121,7 @@ If `EXECUTION_ROUTE` failed or returned no usable recommendation:
   grep -n 'type="checkpoint' "$PLAN_FILE"
   ```
   - count `<task>` tags
-  - inline when `TASK_COUNT <= INLINE_THRESHOLD`
+  - inline when `INLINE_THRESHOLD > 0` and `TASK_COUNT <= INLINE_THRESHOLD`
   - otherwise apply checkpoint-based routing
 
 **Pattern A:** init_agent_tracking → capture `EXPECTED_BASE=$(git rev-parse HEAD)` → spawn Task(subagent_type="gsd-executor", model=executor_model) with prompt: execute plan at [path], autonomous, all tasks + SUMMARY + commit, follow deviation/auth rules, report: plan name, tasks, SUMMARY path, commit hash → track agent_id → wait → update tracking → report. **Include `isolation="worktree"` only if `workflow.use_worktrees` is not `false`** (read via `config-get workflow.use_worktrees`). **When using `isolation="worktree"`, include a `<worktree_branch_check>` block in the prompt** instructing the executor to run `git merge-base HEAD {EXPECTED_BASE}` and, if the result differs from `{EXPECTED_BASE}`, hard-reset the branch with `git reset --hard {EXPECTED_BASE}` before starting work (safe — runs before any agent work), then verify with `[ "$(git rev-parse HEAD)" != "{EXPECTED_BASE}" ] && exit 1`. This corrects a known issue where `EnterWorktree` creates branches from `main` instead of the feature branch HEAD (affects all platforms).
