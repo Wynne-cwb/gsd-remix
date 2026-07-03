@@ -19,6 +19,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
+import { join } from 'node:path';
 import { GSDError } from '../errors.js';
 import { planningPaths, resolvePathUnderProject } from './helpers.js';
 import type { QueryHandler } from './utils.js';
@@ -227,6 +228,22 @@ export const checkCommit: QueryHandler = async (_args, projectDir) => {
 
 // ─── commitToSubrepo ─────────────────────────────────────────────────────
 
+interface SubrepoResult {
+  committed: boolean;
+  hash: string | null;
+  files: string[];
+  reason?: string;
+  error?: string;
+}
+
+/**
+ * Route files to their sub-repos and commit inside each one.
+ *
+ * Mirrors commands.cjs cmdCommitToSubrepo: groups files by sub-repo prefix,
+ * stages/commits inside projectDir/<repo>, and returns per-repo hashes in
+ * the shape gsd-executor.md expects: { committed, repos: { name: { hash, files } } }.
+ * Reads sub_repos from top-level config or the planning.sub_repos section.
+ */
 export const commitToSubrepo: QueryHandler = async (args, projectDir) => {
   const filesIdx = args.indexOf('--files');
   const endIdx = filesIdx >= 0 ? filesIdx : args.length;
@@ -247,7 +264,8 @@ export const commitToSubrepo: QueryHandler = async (args, projectDir) => {
   } catch {
     /* no config */
   }
-  const subRepos = config.sub_repos as string[] | undefined;
+  const planning = config.planning as Record<string, unknown> | undefined;
+  const subRepos = (config.sub_repos ?? planning?.sub_repos) as string[] | undefined;
   if (!subRepos || subRepos.length === 0) {
     return {
       data: { committed: false, reason: 'no sub_repos configured in .planning/config.json' },
@@ -275,26 +293,62 @@ export const commitToSubrepo: QueryHandler = async (args, projectDir) => {
       }
     }
 
-    const fileArgs = files.length > 0 ? files : ['.'];
-    const addResult = spawnSync('git', ['-C', projectDir, 'add', ...fileArgs], { stdio: 'pipe', encoding: 'utf-8' });
-    if (addResult.status !== 0) {
-      return { data: { committed: false, reason: addResult.stderr || 'git add failed' } };
+    // Group files by sub-repo prefix
+    const grouped: Record<string, string[]> = {};
+    const unmatched: string[] = [];
+    for (const file of files) {
+      const match = subRepos.find(repo => file.startsWith(repo + '/'));
+      if (match) {
+        (grouped[match] ??= []).push(file);
+      } else {
+        unmatched.push(file);
+      }
     }
 
-    const commitResult = spawnSync(
-      'git', ['-C', projectDir, 'commit', '-m', sanitized],
-      { stdio: 'pipe', encoding: 'utf-8' },
-    );
-    if (commitResult.status !== 0) {
-      return { data: { committed: false, reason: commitResult.stderr || 'commit failed' } };
+    const repos: Record<string, SubrepoResult> = {};
+    for (const [repo, repoFiles] of Object.entries(grouped)) {
+      const repoCwd = join(projectDir, repo);
+
+      // Stage files (strip sub-repo prefix for paths relative to that repo)
+      let addError: string | null = null;
+      for (const file of repoFiles) {
+        const addResult = execGit(repoCwd, ['add', file.slice(repo.length + 1)]);
+        if (addResult.exitCode !== 0) {
+          addError = addResult.stderr || `failed to stage ${file}`;
+          break;
+        }
+      }
+      if (addError) {
+        repos[repo] = { committed: false, hash: null, files: repoFiles, reason: 'error', error: addError };
+        continue;
+      }
+
+      const commitResult = execGit(repoCwd, ['commit', '-m', sanitized]);
+      if (commitResult.exitCode !== 0) {
+        if (commitResult.stdout.includes('nothing to commit') || commitResult.stderr.includes('nothing to commit')) {
+          repos[repo] = { committed: false, hash: null, files: repoFiles, reason: 'nothing_to_commit' };
+          continue;
+        }
+        repos[repo] = { committed: false, hash: null, files: repoFiles, reason: 'error', error: commitResult.stderr };
+        continue;
+      }
+
+      const hashResult = execGit(repoCwd, ['rev-parse', '--short', 'HEAD']);
+      repos[repo] = {
+        committed: true,
+        hash: hashResult.exitCode === 0 ? hashResult.stdout : null,
+        files: repoFiles,
+      };
     }
 
-    const hashResult = spawnSync(
-      'git', ['-C', projectDir, 'rev-parse', '--short', 'HEAD'],
-      { encoding: 'utf-8' },
-    );
-    const hash = hashResult.stdout.trim();
-    return { data: { committed: true, hash, message: sanitized } };
+    return {
+      data: {
+        committed: Object.values(repos).some(r => r.committed),
+        repos,
+        message: sanitized,
+        ...(unmatched.length > 0 ? { unmatched } : {}),
+      },
+    };
   } catch (err) {
     return { data: { committed: false, reason: String(err) } };
   }

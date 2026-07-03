@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, writeFile, mkdir, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execSync } from 'node:child_process';
 
@@ -198,5 +198,159 @@ describe('checkCommit', () => {
     );
     const result = await checkCommit([], tmpDir);
     expect((result.data as { can_commit: boolean }).can_commit).toBe(true);
+  });
+});
+
+// ─── commitToSubrepo ───────────────────────────────────────────────────────
+
+interface SubrepoData {
+  committed: boolean;
+  repos?: Record<string, { committed: boolean; hash: string | null; files: string[]; reason?: string }>;
+  unmatched?: string[];
+  reason?: string;
+}
+
+async function makeSubrepo(root: string, name: string, files: Record<string, string>): Promise<void> {
+  const dir = join(root, name);
+  await mkdir(dir, { recursive: true });
+  execSync('git init', { cwd: dir, stdio: 'pipe' });
+  execSync('git config user.email "test@test.com"', { cwd: dir, stdio: 'pipe' });
+  execSync('git config user.name "Test User"', { cwd: dir, stdio: 'pipe' });
+  for (const [rel, content] of Object.entries(files)) {
+    await mkdir(join(dir, dirname(rel)), { recursive: true });
+    await writeFile(join(dir, rel), content);
+  }
+}
+
+describe('commitToSubrepo', () => {
+  it('commits a cross-repo change inside each sub-repo and returns per-repo hashes', async () => {
+    const { commitToSubrepo } = await import('./commit.js');
+    await writeFile(
+      join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ sub_repos: ['backend', 'frontend'], commit_docs: false }),
+    );
+    await makeSubrepo(tmpDir, 'backend', { 'src/app.js': 'console.log("api")\n' });
+    await makeSubrepo(tmpDir, 'frontend', { 'src/index.js': 'console.log("ui")\n' });
+
+    const result = await commitToSubrepo(
+      ['feat(01-01): cross-repo change', '--files', 'backend/src/app.js', 'frontend/src/index.js'],
+      tmpDir,
+    );
+    const data = result.data as SubrepoData;
+
+    expect(data.committed).toBe(true);
+    expect(data.repos?.backend.committed).toBe(true);
+    expect(data.repos?.backend.hash).toBeTruthy();
+    expect(data.repos?.backend.files).toEqual(['backend/src/app.js']);
+    expect(data.repos?.frontend.committed).toBe(true);
+    expect(data.repos?.frontend.hash).toBeTruthy();
+
+    // Commits landed inside each sub-repo, with the sub-repo-relative path
+    const backendLog = execSync('git log -1 --format=%s', { cwd: join(tmpDir, 'backend'), encoding: 'utf-8' }).trim();
+    expect(backendLog).toBe('feat(01-01): cross-repo change');
+    const backendFiles = execSync('git show --name-only --format=', { cwd: join(tmpDir, 'backend'), encoding: 'utf-8' }).trim();
+    expect(backendFiles).toBe('src/app.js');
+    const frontendLog = execSync('git log -1 --format=%s', { cwd: join(tmpDir, 'frontend'), encoding: 'utf-8' }).trim();
+    expect(frontendLog).toBe('feat(01-01): cross-repo change');
+
+    // Root repo untouched: no commits, nothing staged
+    expect(() => execSync('git log -1', { cwd: tmpDir, stdio: 'pipe' })).toThrow();
+    const rootStaged = execSync('git diff --cached --name-only', { cwd: tmpDir, encoding: 'utf-8' }).trim();
+    expect(rootStaged).toBe('');
+  });
+
+  it('reads sub_repos from the planning section when top-level key is absent', async () => {
+    const { commitToSubrepo } = await import('./commit.js');
+    await writeFile(
+      join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ planning: { sub_repos: ['backend'] } }),
+    );
+    await makeSubrepo(tmpDir, 'backend', { 'main.go': 'package main\n' });
+
+    const result = await commitToSubrepo(['fix: backend only', '--files', 'backend/main.go'], tmpDir);
+    const data = result.data as SubrepoData;
+
+    expect(data.committed).toBe(true);
+    expect(data.repos?.backend.hash).toBeTruthy();
+  });
+
+  it('reports unmatched files and does not commit them at the root', async () => {
+    const { commitToSubrepo } = await import('./commit.js');
+    await writeFile(
+      join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ sub_repos: ['backend'] }),
+    );
+    await makeSubrepo(tmpDir, 'backend', { 'main.go': 'package main\n' });
+    await writeFile(join(tmpDir, 'rootfile.txt'), 'not in any sub-repo\n');
+
+    const result = await commitToSubrepo(
+      ['feat: mixed paths', '--files', 'backend/main.go', 'rootfile.txt'],
+      tmpDir,
+    );
+    const data = result.data as SubrepoData;
+
+    expect(data.committed).toBe(true);
+    expect(data.repos?.backend.committed).toBe(true);
+    expect(data.unmatched).toEqual(['rootfile.txt']);
+    // Unmatched file was not committed anywhere
+    expect(() => execSync('git log -1', { cwd: tmpDir, stdio: 'pipe' })).toThrow();
+  });
+
+  it('returns committed:false with unmatched list when no file matches any sub-repo', async () => {
+    const { commitToSubrepo } = await import('./commit.js');
+    await writeFile(
+      join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ sub_repos: ['backend'] }),
+    );
+    await makeSubrepo(tmpDir, 'backend', {});
+    await writeFile(join(tmpDir, 'rootfile.txt'), 'root\n');
+
+    const result = await commitToSubrepo(['feat: nothing matches', '--files', 'rootfile.txt'], tmpDir);
+    const data = result.data as SubrepoData;
+
+    expect(data.committed).toBe(false);
+    expect(data.repos).toEqual({});
+    expect(data.unmatched).toEqual(['rootfile.txt']);
+  });
+
+  it('marks a repo nothing_to_commit when its files are already committed', async () => {
+    const { commitToSubrepo } = await import('./commit.js');
+    await writeFile(
+      join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ sub_repos: ['backend'] }),
+    );
+    await makeSubrepo(tmpDir, 'backend', { 'main.go': 'package main\n' });
+
+    const first = await commitToSubrepo(['feat: initial', '--files', 'backend/main.go'], tmpDir);
+    expect((first.data as SubrepoData).committed).toBe(true);
+
+    const second = await commitToSubrepo(['feat: repeat', '--files', 'backend/main.go'], tmpDir);
+    const data = second.data as SubrepoData;
+    expect(data.committed).toBe(false);
+    expect(data.repos?.backend.reason).toBe('nothing_to_commit');
+  });
+
+  it('rejects paths that escape the project directory', async () => {
+    const { commitToSubrepo } = await import('./commit.js');
+    await writeFile(
+      join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ sub_repos: ['backend'] }),
+    );
+    await makeSubrepo(tmpDir, 'backend', {});
+
+    const result = await commitToSubrepo(['feat: escape', '--files', '../outside.txt'], tmpDir);
+    const data = result.data as SubrepoData;
+    expect(data.committed).toBe(false);
+    expect(data.reason).toContain('escapes');
+  });
+
+  it('returns committed:false when no sub_repos are configured', async () => {
+    const { commitToSubrepo } = await import('./commit.js');
+    await writeFile(join(tmpDir, '.planning', 'config.json'), JSON.stringify({ commit_docs: true }));
+
+    const result = await commitToSubrepo(['feat: no subrepos', '--files', 'a.txt'], tmpDir);
+    const data = result.data as SubrepoData;
+    expect(data.committed).toBe(false);
+    expect(data.reason).toContain('no sub_repos');
   });
 });
