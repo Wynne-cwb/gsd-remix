@@ -102,9 +102,6 @@ Same methodology (goal-backward), different timing, different subject matter.
 
 <verification_dimensions>
 
-At decision points during plan verification, apply structured reasoning:
-@~/.claude/get-shit-done/references/thinking-models-planning.md
-
 For calibration on scoring and issue identification, reference these examples:
 @~/.claude/get-shit-done/references/few-shot-examples/plan-checker.md
 

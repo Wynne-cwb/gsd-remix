@@ -884,25 +884,6 @@ Task(
 - **`## VERIFICATION PASSED`:** Display confirmation, proceed to step 13.
 - **`## ISSUES FOUND`:** Display issues, check iteration count, proceed to step 12.
 
-**Thinking partner for architectural tradeoffs (conditional):**
-If `features.thinking_partner` is enabled, scan the checker's issues for architectural tradeoff keywords
-("architecture", "approach", "strategy", "pattern", "vs", "alternative"). If found:
-
-```
-The plan-checker flagged an architectural decision point:
-{issue description}
-
-Brief analysis:
-- Option A: {approach_from_plan} — {pros/cons}
-- Option B: {alternative_approach} — {pros/cons}
-- Recommendation: {choice} aligned with {phase_goal}
-
-Apply this to the revision? [Yes] / [No, I'll decide]
-```
-
-If yes: include the recommendation in the revision prompt. If no: proceed to revision loop as normal.
-If thinking_partner disabled: skip this block entirely.
-
 ## 12. Revision Loop (Max 3 Iterations)
 
 Track `iteration_count` (starts at 1 after initial plan + check).

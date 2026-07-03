@@ -43,7 +43,6 @@ describe('isValidConfigKey', () => {
   it('accepts wildcard features.* patterns', async () => {
     const { isValidConfigKey } = await import('./config-mutation.js');
     expect(isValidConfigKey('features.global_learnings').valid).toBe(true);
-    expect(isValidConfigKey('features.thinking_partner').valid).toBe(true);
   });
 
   it('rejects unknown keys with suggestion', async () => {

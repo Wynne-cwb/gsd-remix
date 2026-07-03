@@ -937,13 +937,14 @@ cat "$phase_dir"/*-DISCOVERY.md 2>/dev/null  # From mandatory discovery
 
 **If RESEARCH.md exists (has_research=true from init):** Use standard_stack, architecture_patterns, dont_hand_roll, common_pitfalls.
 
+**[NEEDS DECISION] protocol:** Before finalizing the plan, read ALL `[NEEDS DECISION]` items and LOW-confidence recommendations from RESEARCH.md/SUMMARY.md. For each: either (a) create a `checkpoint:decision` task to resolve it, or (b) document why the risk is acceptable in the plan's deviation notes. LOW-confidence items that are silently accepted become undocumented technical debt.
+
+**Gap-closure root cause rule (--gaps plans):** Before writing a fix plan, apply a single "why" round: Why did this gap occur? Was it a plan deficiency (wrong task), an execution miss (correct task, wrong implementation), or a changed assumption (environment/dependency shift)? The fix plan must target the root cause category, not just the symptom.
+
 **Architectural Responsibility Map sanity check:** If RESEARCH.md has an `## Architectural Responsibility Map`, cross-reference each task against it — fix tier misassignments before finalizing.
 </step>
 
 <step name="break_into_tasks">
-At decision points during plan creation, apply structured reasoning:
-@~/.claude/get-shit-done/references/thinking-models-planning.md
-
 Decompose phase into tasks. **Think dependencies first, not sequence.**
 
 For each task:

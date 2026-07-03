@@ -110,9 +110,6 @@ grep -n "type=\"checkpoint" [plan-path]
 </step>
 
 <step name="execute_tasks">
-At execution decision points, apply structured reasoning:
-@~/.claude/get-shit-done/references/thinking-models-execution.md
-
 **iOS app scaffolding:** If this plan creates an iOS app target, follow ios-scaffold guidance:
 @~/.claude/get-shit-done/references/ios-scaffold.md
 

@@ -233,9 +233,9 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 
 ---
 
-## References (46 shipped)
+## References (40 shipped)
 
-Full roster at `get-shit-done/references/*.md`. References are shared knowledge documents that workflows and agents `@-reference`. The groupings below match [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#references-get-shit-donereferencesmd) — core, workflow, thinking-model clusters, and the modular planner decomposition.
+Full roster at `get-shit-done/references/*.md`. References are shared knowledge documents that workflows and agents `@-reference`. The groupings below match [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#references-get-shit-donereferencesmd) — core, workflow clusters, and the modular planner decomposition.
 
 ### Core References
 
@@ -272,7 +272,6 @@ Full roster at `get-shit-done/references/*.md`. References are shared knowledge 
 | `artifact-types.md` | Planning artifact type definitions. |
 | `phase-argument-parsing.md` | Phase argument parsing conventions. |
 | `decimal-phase-calculation.md` | Decimal sub-phase numbering rules. |
-| `thinking-partner.md` | Conditional thinking-partner activation at decision points. |
 | `autonomous-smart-discuss.md` | Smart-discuss logic for autonomous mode. |
 | `ios-scaffold.md` | iOS application scaffolding patterns. |
 | `ai-evals.md` | AI evaluation design reference for `/gsd-ai-integration-phase`. |
@@ -289,18 +288,6 @@ References consumed by the `/gsd-sketch` workflow and its wrap-up companion.
 | `sketch-theme-system.md` | Shared CSS theme variable system for cross-sketch consistency. |
 | `sketch-tooling.md` | Floating toolbar utilities included in every sketch. |
 | `sketch-variant-patterns.md` | Multi-variant HTML patterns (tabs, side-by-side, overlays). |
-
-### Thinking-Model References
-
-References for integrating thinking-class models (o3, o4-mini, Gemini 2.5 Pro) into GSD workflows.
-
-| Reference | Role |
-|-----------|------|
-| `thinking-models-debug.md` | Thinking-model patterns for debug workflows. |
-| `thinking-models-execution.md` | Thinking-model patterns for execution agents. |
-| `thinking-models-planning.md` | Thinking-model patterns for planning agents. |
-| `thinking-models-research.md` | Thinking-model patterns for research agents. |
-| `thinking-models-verification.md` | Thinking-model patterns for verification agents. |
 
 ### Modular Planner Decomposition
 

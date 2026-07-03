@@ -290,7 +290,7 @@ These toggle external search integrations. Auto-detected at project creation whe
 
 ### Features Fields
 
-Set via `features.*` namespace (e.g., `"features": { "thinking_partner": true }`).
+Set via `features.*` namespace (e.g., `"features": { "global_learnings": true }`).
 
 | Key | Type | Default | Allowed Values | Description |
 |-----|------|---------|----------------|-------------|
