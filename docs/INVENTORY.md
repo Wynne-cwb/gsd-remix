@@ -50,7 +50,7 @@ Full roster at `agents/gsd-*.md`. The "Primary doc" column flags whether [`docs/
 
 ---
 
-## Commands (80 shipped)
+## Commands (76 shipped)
 
 Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md` section order; each row carries the command name, a one-line role derived from the command's frontmatter `description:`, and a link to the source file. `tests/command-count-sync.test.cjs` locks the count against the filesystem.
 
@@ -59,9 +59,6 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 | Command | Role | Source |
 |---------|------|--------|
 | `/gsd-new-project` | Initialize a new project with deep context gathering and PROJECT.md. | [commands/gsd/new-project.md](../commands/gsd/new-project.md) |
-| `/gsd-new-workspace` | Create an isolated workspace with repo copies and independent `.planning/`. | [commands/gsd/new-workspace.md](../commands/gsd/new-workspace.md) |
-| `/gsd-list-workspaces` | List active GSD workspaces and their status. | [commands/gsd/list-workspaces.md](../commands/gsd/list-workspaces.md) |
-| `/gsd-remove-workspace` | Remove a GSD workspace and clean up worktrees. | [commands/gsd/remove-workspace.md](../commands/gsd/remove-workspace.md) |
 | `/gsd-discuss-phase` | Gather phase context through adaptive questioning before planning. | [commands/gsd/discuss-phase.md](../commands/gsd/discuss-phase.md) |
 | `/gsd-spec-phase` | Socratic spec refinement producing a SPEC.md with falsifiable requirements. | [commands/gsd/spec-phase.md](../commands/gsd/spec-phase.md) |
 | `/gsd-ai-integration-phase` | Generate AI design contract (AI-SPEC.md) via framework selection, research, and eval planning. | [commands/gsd/ai-integration-phase.md](../commands/gsd/ai-integration-phase.md) |
@@ -102,7 +99,6 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 | `/gsd-milestone-summary` | Generate a comprehensive project summary from milestone artifacts. | [commands/gsd/milestone-summary.md](../commands/gsd/milestone-summary.md) |
 | `/gsd-cleanup` | Archive accumulated phase directories from completed milestones. | [commands/gsd/cleanup.md](../commands/gsd/cleanup.md) |
 | `/gsd-manager` | Interactive command center for managing multiple phases from one terminal. | [commands/gsd/manager.md](../commands/gsd/manager.md) |
-| `/gsd-workstreams` | Manage parallel workstreams — list, create, switch, status, progress, complete, resume. | [commands/gsd/workstreams.md](../commands/gsd/workstreams.md) |
 | `/gsd-autonomous` | Run all remaining phases autonomously — discuss → plan → execute per phase. | [commands/gsd/autonomous.md](../commands/gsd/autonomous.md) |
 | `/gsd-undo` | Safe git revert — roll back phase or plan commits using the phase manifest. | [commands/gsd/undo.md](../commands/gsd/undo.md) |
 
@@ -166,7 +162,7 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 
 ---
 
-## Workflows (78 shipped)
+## Workflows (75 shipped)
 
 Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators that commands reference internally; most are not read directly by end users. Rows below map each workflow file to its role (derived from the `<purpose>` block) and, where applicable, to the command that invokes it.
 
@@ -208,13 +204,11 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 | `ingest-docs.md` | Scan a repo for mixed planning docs; classify, synthesize, and bootstrap or merge into `.planning/` with a conflicts report. | `/gsd-ingest-docs` |
 | `insert-phase.md` | Insert a decimal phase for urgent work discovered mid-milestone. | `/gsd-insert-phase` |
 | `list-phase-assumptions.md` | Surface Claude's assumptions about a phase before planning. | `/gsd-list-phase-assumptions` |
-| `list-workspaces.md` | List all GSD workspaces found in `~/gsd-workspaces/` with their status. | `/gsd-list-workspaces` |
 | `manager.md` | Interactive milestone command center — dashboard, inline discuss, background plan/execute. | `/gsd-manager` |
 | `map-codebase.md` | Orchestrate parallel codebase mapper agents to produce `.planning/codebase/` docs. | `/gsd-map-codebase` |
 | `milestone-summary.md` | Milestone summary synthesis — onboarding and review artifact from milestone artifacts. | `/gsd-milestone-summary` |
 | `new-milestone.md` | Start a new milestone cycle — load project context, gather goals, update PROJECT.md/STATE.md. | `/gsd-new-milestone` |
 | `new-project.md` | Unified new-project flow — questioning, research (optional), requirements, roadmap. | `/gsd-new-project` |
-| `new-workspace.md` | Create an isolated workspace with repo worktrees/clones and an independent `.planning/`. | `/gsd-new-workspace` |
 | `next.md` | Detect current project state and automatically advance to the next logical step. | `/gsd-next` |
 | `node-repair.md` | Autonomous repair operator for failed task verification; invoked by `execute-plan`. | `execute-plan.md` (recovery) |
 | `note.md` | Zero-friction idea capture — one Write call, one confirmation line. | `/gsd-note` |
@@ -227,7 +221,6 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 | `progress.md` | Progress rendering — project context, position, and next-action routing. | `/gsd-progress` |
 | `quick.md` | Quick-task execution with GSD guarantees (atomic commits, state tracking). | `/gsd-quick` |
 | `remove-phase.md` | Remove a future phase from the roadmap and renumber subsequent phases. | `/gsd-remove-phase` |
-| `remove-workspace.md` | Remove a GSD workspace and clean up worktrees. | `/gsd-remove-workspace` |
 | `research-phase.md` | Standalone phase research workflow (usually invoked via `plan-phase`). | `/gsd-research-phase` |
 | `resume-project.md` | Resume work — restore full context from STATE.md, HANDOFF.json, and artifacts. | `/gsd-resume-work` |
 | `review.md` | Cross-AI plan review via external CLIs; produces REVIEWS.md. | `/gsd-review` |
@@ -243,7 +236,7 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 | `spike-wrap-up.md` | Curate spike findings and package them as a persistent `spike-findings-[project]` skill. | `/gsd-spike-wrap-up` |
 | `stats.md` | Project statistics rendering — phases, plans, requirements, git metrics. | `/gsd-stats` |
 | `sync-skills.md` | Cross-runtime GSD skill sync — diff and apply `gsd-*` skill directories across runtime roots. | `/gsd-sync-skills` |
-| `transition.md` | Phase-boundary transition workflow — workstream checks, state advancement. | `execute-phase.md`, `/gsd-next` |
+| `transition.md` | Phase-boundary transition workflow — state advancement. | `execute-phase.md`, `/gsd-next` |
 | `ultraplan-phase.md` | [BETA] Offload planning to Claude Code's ultraplan cloud; drafts remotely and imports back via `/gsd-import`. | `/gsd-ultraplan-phase` |
 | `undo.md` | Safe git revert — phase or plan commits using the phase manifest. | `/gsd-undo` |
 | `update.md` | Update GSD to latest version with changelog display. | `/gsd-update` |
@@ -255,7 +248,7 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 
 ---
 
-## References (48 shipped)
+## References (47 shipped)
 
 Full roster at `get-shit-done/references/*.md`. References are shared knowledge documents that workflows and agents `@-reference`. The groupings below match [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#references-get-shit-donereferencesmd) — core, workflow, thinking-model clusters, and the modular planner decomposition.
 
@@ -294,7 +287,6 @@ Full roster at `get-shit-done/references/*.md`. References are shared knowledge 
 | `artifact-types.md` | Planning artifact type definitions. |
 | `phase-argument-parsing.md` | Phase argument parsing conventions. |
 | `decimal-phase-calculation.md` | Decimal sub-phase numbering rules. |
-| `workstream-flag.md` | Workstream active-pointer conventions (`--ws`). |
 | `thinking-partner.md` | Conditional thinking-partner activation at decision points. |
 | `autonomous-smart-discuss.md` | Smart-discuss logic for autonomous mode. |
 | `ios-scaffold.md` | iOS application scaffolding patterns. |
@@ -342,7 +334,7 @@ The `gsd-planner` agent is decomposed into a core agent plus reference modules t
 
 ---
 
-## CLI Modules (25 shipped)
+## CLI Modules (24 shipped)
 
 Full listing: `get-shit-done/bin/lib/*.cjs`.
 
@@ -372,7 +364,6 @@ Full listing: `get-shit-done/bin/lib/*.cjs`.
 | `template.cjs` | Template selection and filling with variable substitution |
 | `uat.cjs` | UAT file parsing, verification debt tracking, audit-uat support |
 | `verify.cjs` | Plan structure, phase completeness, reference, commit validation |
-| `workstream.cjs` | Workstream CRUD, migration, session-scoped active pointer |
 
 [`docs/CLI-TOOLS.md`](CLI-TOOLS.md) may describe a subset of these modules; when it disagrees with the filesystem, this table and the directory listing are authoritative.
 

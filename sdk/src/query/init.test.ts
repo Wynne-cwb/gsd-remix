@@ -21,9 +21,6 @@ import {
   initTodos,
   initMilestoneOp,
   initMapCodebase,
-  initNewWorkspace,
-  initListWorkspaces,
-  initRemoveWorkspace,
   initIngestDocs,
 } from './init.js';
 
@@ -457,46 +454,6 @@ describe('initMapCodebase', () => {
     expect(Array.isArray(data.existing_maps)).toBe(true);
     expect(data.codebase_dir).toBe('.planning/codebase');
     expect(data.project_root).toBe(tmpDir);
-  });
-});
-
-describe('initNewWorkspace', () => {
-  it('returns flat JSON with workspace info', async () => {
-    const result = await initNewWorkspace([], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(data.default_workspace_base).toBeDefined();
-    expect(typeof data.worktree_available).toBe('boolean');
-    expect(data.project_root).toBe(tmpDir);
-  });
-
-  it('detects git availability', async () => {
-    const result = await initNewWorkspace([], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    // worktree_available depends on whether git is installed
-    expect(typeof data.worktree_available).toBe('boolean');
-  });
-});
-
-describe('initListWorkspaces', () => {
-  it('returns flat JSON with workspaces array', async () => {
-    const result = await initListWorkspaces([], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(Array.isArray(data.workspaces)).toBe(true);
-    expect(data.workspace_count).toBeGreaterThanOrEqual(0);
-  });
-});
-
-describe('initRemoveWorkspace', () => {
-  it('returns error when name arg missing', async () => {
-    const result = await initRemoveWorkspace([], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(data.error).toBeDefined();
-  });
-
-  it('rejects path separator in workspace name (T-14-01)', async () => {
-    const result = await initRemoveWorkspace(['../../bad'], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(data.error).toBeDefined();
   });
 });
 

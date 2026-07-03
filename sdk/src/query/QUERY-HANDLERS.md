@@ -125,11 +125,9 @@ From `read-only-parity.integration.test.ts` (full `toEqual` on this repo):
 | `verify.artifacts` | Plan path. |
 | `verify.commits` | Two git SHAs (`HEAD~1` / `HEAD` or fallback). |
 | `websearch` | Limited query (may hit network — test uses small limit). |
-| `workstream.get` / `workstream.list` / `workstream.status` | Default workstream where applicable (`status` uses full CJS shape when the workstream dir exists). |
 | `learnings.list` | No args. |
 | `intel.status` | No args. |
 | `intel.diff` / `intel.validate` / `intel.query` | When intel is disabled, disabled payload matches CJS (including message text). |
-| `init.list-workspaces` | No args. |
 | `agent-skills` | No agent type → JSON `""` (same as CJS). |
 | `summary.extract` | Fixture `sdk/src/golden/fixtures/summary-extract-sample.md`; uses `extractFrontmatterLeading` (first `---` block) for parity with `frontmatter.cjs`. |
 | `history.digest` | No args; aggregate over `.planning/phases` + archived milestone phase dirs (`commands.cjs` `cmdHistoryDigest`). |
@@ -296,7 +294,6 @@ Disposition: **Registered** = handled in `createRegistry()` under the listed SDK
 | `summary-extract`                                                                                                                       | `summary.extract`, `summary extract`, `history-digest`, …                 | Alias                   |                                                                           |
 | `websearch`                                                                                                                             | `websearch`                                                               | Registered              |                                                                           |
 | `generate-claude-md` | same kebab-case name | Registered | |
-| `workstream`                                                                                                                            | `workstream.get`, `workstream.list`, …                                    | Registered              |                                                                           |
 | `intel`                                                                                                                                 | `intel.status`, `intel.diff`, `intel.update`, …                           | Registered              | `**intel.update**`: JSON parity with CJS spawn hint / disabled payload (see **Intel: intel.update**).                                     |
 | `graphify`                                                                                                                              | —                                                                         | CLI-only                | See **CLI-only** table.                                                   |
 | `docs-init`                                                                                                                             | `docs-init`                                                               | Registered              | Golden: normalized compare (see above).                                   |

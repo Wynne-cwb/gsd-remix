@@ -183,7 +183,6 @@ const commands = require('./lib/commands.cjs');
 const init = require('./lib/init.cjs');
 const frontmatter = require('./lib/frontmatter.cjs');
 const claudeMd = require('./lib/claude-md.cjs');
-const workstream = require('./lib/workstream.cjs');
 const docs = require('./lib/docs.cjs');
 const learnings = require('./lib/learnings.cjs');
 
@@ -886,17 +885,8 @@ async function runCommand(command, args, cwd, raw, defaultValue) {
         case 'manager':
           init.cmdInitManager(cwd, raw);
           break;
-        case 'new-workspace':
-          init.cmdInitNewWorkspace(cwd, raw);
-          break;
-        case 'list-workspaces':
-          init.cmdInitListWorkspaces(cwd, raw);
-          break;
-        case 'remove-workspace':
-          init.cmdInitRemoveWorkspace(cwd, args[2], raw);
-          break;
         default:
-          error(`Unknown init workflow: ${workflow}\nAvailable: execute-phase, plan-phase, new-project, new-milestone, quick, resume, verify-work, phase-op, todos, milestone-op, map-codebase, progress, manager, new-workspace, list-workspaces, remove-workspace`);
+          error(`Unknown init workflow: ${workflow}\nAvailable: execute-phase, plan-phase, new-project, new-milestone, quick, resume, verify-work, phase-op, todos, milestone-op, map-codebase, progress, manager`);
       }
       break;
     }
@@ -938,33 +928,6 @@ async function runCommand(command, args, cwd, raw, defaultValue) {
       const autoFlag = args.includes('--auto');
       const forceFlag = args.includes('--force');
       claudeMd.cmdGenerateClaudeMd(cwd, { output: outputPath, auto: autoFlag, force: forceFlag }, raw);
-      break;
-    }
-
-    case 'workstream': {
-      const subcommand = args[1];
-      if (subcommand === 'create') {
-        const migrateNameIdx = args.indexOf('--migrate-name');
-        const noMigrate = args.includes('--no-migrate');
-        workstream.cmdWorkstreamCreate(cwd, args[2], {
-          migrate: !noMigrate,
-          migrateName: migrateNameIdx !== -1 ? args[migrateNameIdx + 1] : null,
-        }, raw);
-      } else if (subcommand === 'list') {
-        workstream.cmdWorkstreamList(cwd, raw);
-      } else if (subcommand === 'status') {
-        workstream.cmdWorkstreamStatus(cwd, args[2], raw);
-      } else if (subcommand === 'complete') {
-        workstream.cmdWorkstreamComplete(cwd, args[2], {}, raw);
-      } else if (subcommand === 'set') {
-        workstream.cmdWorkstreamSet(cwd, args[2], raw);
-      } else if (subcommand === 'get') {
-        workstream.cmdWorkstreamGet(cwd, raw);
-      } else if (subcommand === 'progress') {
-        workstream.cmdWorkstreamProgress(cwd, raw);
-      } else {
-        error('Unknown workstream subcommand. Available: create, list, status, complete, set, get, progress');
-      }
       break;
     }
 

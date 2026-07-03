@@ -38,24 +38,4 @@ describe('command files: gsd-tools path references (#1766)', () => {
       'Violations:\n' + violations.join('\n'));
   });
 
-  test('workstreams.md documents gsd-remix-sdk query or legacy gsd-tools.cjs', () => {
-    const content = fs.readFileSync(
-      path.join(COMMANDS_DIR, 'workstreams.md'), 'utf-8'
-    );
-
-    assert.ok(
-      /gsd-remix-sdk\s+query/.test(content) || /gsd-tools\.cjs/.test(content),
-      'workstreams.md should document gsd-remix-sdk query or gsd-tools.cjs'
-    );
-
-    const lines = content.split('\n');
-    for (const line of lines) {
-      if (/node\s/.test(line)) {
-        assert.ok(
-          line.includes('gsd-tools.cjs'),
-          'Each node invocation must reference gsd-tools.cjs, got: ' + line.trim()
-        );
-      }
-    }
-  });
 });

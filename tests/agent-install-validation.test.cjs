@@ -214,7 +214,7 @@ describe('checkAgentsInstalled: Copilot .agent.md format (#1512)', () => {
     assert.ok(output.missing.length > 0, 'missing must be non-empty when some agents are absent');
   });
 
-  test('init new-workspace includes agents_installed=true with Copilot .agent.md files', () => {
+  test('init execute-phase includes agents_installed=true with Copilot .agent.md files', () => {
     // Use an isolated dir with ONLY .agent.md files (no .md fallback)
     const agentsDir = path.join(tmpDir, 'copilot-agents');
     fs.mkdirSync(agentsDir, { recursive: true });
@@ -225,7 +225,7 @@ describe('checkAgentsInstalled: Copilot .agent.md format (#1512)', () => {
       );
     }
 
-    const result = runGsdTools('init new-workspace --raw', tmpDir, { GSD_AGENTS_DIR: agentsDir });
+    const result = runGsdTools('init execute-phase 1 --raw', tmpDir, { GSD_AGENTS_DIR: agentsDir });
     assert.ok(result.success, `Command failed: ${result.error}`);
 
     const output = JSON.parse(result.output);

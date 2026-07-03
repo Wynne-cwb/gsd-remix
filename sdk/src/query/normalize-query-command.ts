@@ -18,7 +18,6 @@ const MERGE_FIRST_WITH_SUBCOMMAND = new Set<string>([
   'requirements',
   'validate',
   'init',
-  'workstream',
   'intel',
   'learnings',
   'uat',

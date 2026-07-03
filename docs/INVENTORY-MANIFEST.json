@@ -69,13 +69,11 @@
       "/gsd-intel",
       "/gsd-join-discord",
       "/gsd-list-phase-assumptions",
-      "/gsd-list-workspaces",
       "/gsd-manager",
       "/gsd-map-codebase",
       "/gsd-milestone-summary",
       "/gsd-new-milestone",
       "/gsd-new-project",
-      "/gsd-new-workspace",
       "/gsd-next",
       "/gsd-note",
       "/gsd-pause-work",
@@ -88,7 +86,6 @@
       "/gsd-quick",
       "/gsd-reapply-patches",
       "/gsd-remove-phase",
-      "/gsd-remove-workspace",
       "/gsd-research-phase",
       "/gsd-resume-work",
       "/gsd-review",
@@ -111,8 +108,7 @@
       "/gsd-undo",
       "/gsd-update",
       "/gsd-validate-phase",
-      "/gsd-verify-work",
-      "/gsd-workstreams"
+      "/gsd-verify-work"
     ],
     "workflows": [
       "add-phase.md",
@@ -151,13 +147,11 @@
       "ingest-docs.md",
       "insert-phase.md",
       "list-phase-assumptions.md",
-      "list-workspaces.md",
       "manager.md",
       "map-codebase.md",
       "milestone-summary.md",
       "new-milestone.md",
       "new-project.md",
-      "new-workspace.md",
       "next.md",
       "node-repair.md",
       "note.md",
@@ -170,7 +164,6 @@
       "progress.md",
       "quick.md",
       "remove-phase.md",
-      "remove-workspace.md",
       "research-phase.md",
       "resume-project.md",
       "review.md",
@@ -241,8 +234,7 @@
       "ui-brand.md",
       "universal-anti-patterns.md",
       "verification-overrides.md",
-      "verification-patterns.md",
-      "workstream-flag.md"
+      "verification-patterns.md"
     ],
     "cli_modules": [
       "artifacts.cjs",
@@ -268,8 +260,7 @@
       "state.cjs",
       "template.cjs",
       "uat.cjs",
-      "verify.cjs",
-      "workstream.cjs"
+      "verify.cjs"
     ],
     "hooks": [
       "gsd-check-update-worker.js",

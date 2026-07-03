@@ -49,7 +49,7 @@ import {
 import {
   initExecutePhase, initPlanPhase, initNewMilestone, initQuick,
   initResume, initVerifyWork, initPhaseOp, initTodos, initMilestoneOp,
-  initMapCodebase, initNewWorkspace, initListWorkspaces, initRemoveWorkspace,
+  initMapCodebase,
   initIngestDocs,
 } from './init.js';
 import { initNewProject, initProgress, initManager } from './init-complex.js';
@@ -65,10 +65,6 @@ import { milestoneComplete } from './phase-lifecycle.js';
 import { summaryExtract, historyDigest } from './summary.js';
 import { contextHistory } from './context-history.js';
 import { commitToSubrepo } from './commit.js';
-import {
-  workstreamGet, workstreamList, workstreamCreate, workstreamSet, workstreamStatus,
-  workstreamComplete, workstreamProgress,
-} from './workstream.js';
 import { docsInit } from './docs-init.js';
 import { uatRenderCheckpoint, auditUat } from './uat.js';
 import { websearch } from './websearch.js';
@@ -146,8 +142,6 @@ export const QUERY_MUTATION_COMMANDS = new Set<string>([
   'requirements.mark-complete', 'requirements mark-complete',
   'todo.complete', 'todo complete',
   'milestone.complete', 'milestone complete',
-  'workstream.create', 'workstream.set', 'workstream.complete', 'workstream.progress',
-  'workstream create', 'workstream set', 'workstream complete', 'workstream progress',
   'docs-init',
   'learnings.copy', 'learnings copy',
   'learnings.prune', 'learnings prune',
@@ -433,9 +427,6 @@ export function createRegistry(
   registry.register('init.todos', initTodos);
   registry.register('init.milestone-op', initMilestoneOp);
   registry.register('init.map-codebase', initMapCodebase);
-  registry.register('init.new-workspace', initNewWorkspace);
-  registry.register('init.list-workspaces', initListWorkspaces);
-  registry.register('init.remove-workspace', initRemoveWorkspace);
   registry.register('init.ingest-docs', initIngestDocs);
   // Space-delimited aliases for CJS compatibility
   registry.register('init execute-phase', initExecutePhase);
@@ -448,9 +439,6 @@ export function createRegistry(
   registry.register('init todos', initTodos);
   registry.register('init milestone-op', initMilestoneOp);
   registry.register('init map-codebase', initMapCodebase);
-  registry.register('init new-workspace', initNewWorkspace);
-  registry.register('init list-workspaces', initListWorkspaces);
-  registry.register('init remove-workspace', initRemoveWorkspace);
   registry.register('init ingest-docs', initIngestDocs);
 
   // Complex init handlers
@@ -500,20 +488,6 @@ export function createRegistry(
   registry.register('progress bar', progressBar);
   registry.register('progress.table', progressTable);
   registry.register('progress table', progressTable);
-  registry.register('workstream.get', workstreamGet);
-  registry.register('workstream get', workstreamGet);
-  registry.register('workstream.list', workstreamList);
-  registry.register('workstream list', workstreamList);
-  registry.register('workstream.create', workstreamCreate);
-  registry.register('workstream create', workstreamCreate);
-  registry.register('workstream.set', workstreamSet);
-  registry.register('workstream set', workstreamSet);
-  registry.register('workstream.status', workstreamStatus);
-  registry.register('workstream status', workstreamStatus);
-  registry.register('workstream.complete', workstreamComplete);
-  registry.register('workstream complete', workstreamComplete);
-  registry.register('workstream.progress', workstreamProgress);
-  registry.register('workstream progress', workstreamProgress);
   registry.register('docs-init', docsInit);
   registry.register('websearch', websearch);
   registry.register('learnings.copy', learningsCopy);

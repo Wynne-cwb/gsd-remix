@@ -19,10 +19,6 @@ import { todoMatchPhase, statsJson, progressBar } from './progress.js';
 import { milestoneComplete } from './phase-lifecycle.js';
 import { summaryExtract, historyDigest } from './summary.js';
 import { commitToSubrepo } from './commit.js';
-import {
-  workstreamList, workstreamCreate, workstreamSet,
-  workstreamStatus, workstreamComplete,
-} from './workstream.js';
 import { docsInit } from './docs-init.js';
 import { websearch } from './websearch.js';
 
@@ -204,49 +200,6 @@ describe('historyDigest', () => {
 });
 
 // ─── workstream.ts ───────────────────────────────────────────────────────
-
-describe('workstream handlers', () => {
-  it('workstreamList returns workstreams array', async () => {
-    const result = await workstreamList([], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(Array.isArray(data.workstreams)).toBe(true);
-  });
-
-  it('workstreamCreate creates a directory', async () => {
-    const result = await workstreamCreate(['my-ws'], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(typeof data.created).toBe('boolean');
-  });
-
-  it('workstreamCreate rejects path traversal', async () => {
-    const result = await workstreamCreate(['../../bad'], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(data.created).toBe(false);
-  });
-
-  it('workstreamSet returns set=true for existing workstream', async () => {
-    await mkdir(join(tmpDir, '.planning', 'workstreams', 'backend'), { recursive: true });
-    const result = await workstreamSet(['backend'], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(data.set).toBe(true);
-    expect(data.active).toBe('backend');
-  });
-
-  it('workstreamStatus returns found boolean', async () => {
-    const result = await workstreamStatus(['nonexistent'], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(typeof data.found).toBe('boolean');
-  });
-
-  it('workstreamComplete archives existing workstream', async () => {
-    await mkdir(join(tmpDir, '.planning', 'workstreams', 'my-ws', 'phases'), { recursive: true });
-    await writeFile(join(tmpDir, '.planning', 'workstreams', 'my-ws', 'STATE.md'), '# State\n');
-    const result = await workstreamComplete(['my-ws'], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(data.completed).toBe(true);
-    expect(data.archived_to).toBeDefined();
-  });
-});
 
 // ─── init.ts ─────────────────────────────────────────────────────────────
 
