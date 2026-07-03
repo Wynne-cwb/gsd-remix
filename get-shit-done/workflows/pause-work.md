@@ -17,21 +17,13 @@ Determine what kind of work is being paused and set the handoff destination acco
 # Check for active phase
 phase=$(( ls -lt .planning/phases/*/PLAN.md 2>/dev/null || true ) | head -1 | grep -oP 'phases/\K[^/]+' || true)
 
-# Check for active spike
-spike=$(( ls -lt .planning/spikes/*/SPIKE.md .planning/spikes/*/DESIGN.md .planning/spikes/*/README.md 2>/dev/null || true ) | head -1 | grep -oP 'spikes/\K[^/]+' || true)
-
-# Check for active sketch
-sketch=$(( ls -lt .planning/sketches/*/README.md .planning/sketches/*/index.html 2>/dev/null || true ) | head -1 | grep -oP 'sketches/\K[^/]+' || true)
-
 # Check for active deliberation
 deliberation=$(ls .planning/deliberations/*.md 2>/dev/null | head -1 || true)
 ```
 
 - **Phase work**: active phase directory → handoff to `.planning/phases/XX-name/.continue-here.md`
-- **Spike work**: active spike directory or spike-related files (no active phase) → handoff to `.planning/spikes/SPIKE-NNN/.continue-here.md` (create directory if needed)
-- **Sketch work**: active sketch directory (no active phase/spike) → handoff to `.planning/sketches/.continue-here.md`
-- **Deliberation work**: active deliberation file (no phase/spike/sketch) → handoff to `.planning/deliberations/.continue-here.md`
-- **Research work**: research notes exist but no phase/spike/sketch/deliberation → handoff to `.planning/.continue-here.md`
+- **Deliberation work**: active deliberation file (no active phase) → handoff to `.planning/deliberations/.continue-here.md`
+- **Research work**: research notes exist but no phase/deliberation → handoff to `.planning/.continue-here.md`
 - **Default**: no detectable context → handoff to `.planning/.continue-here.md`, note the ambiguity in `<current_state>`
 
 If phase is detected, proceed with phase handoff path. Otherwise use the first matching non-phase path above.
@@ -106,11 +98,11 @@ timestamp=$(gsd-remix-sdk query current-timestamp full --raw)
 </step>
 
 <step name="write">
-**Write handoff to the path determined in the detect step** (e.g. `.planning/phases/XX-name/.continue-here.md`, `.planning/spikes/SPIKE-NNN/.continue-here.md`, or `.planning/.continue-here.md`):
+**Write handoff to the path determined in the detect step** (e.g. `.planning/phases/XX-name/.continue-here.md` or `.planning/.continue-here.md`):
 
 ```markdown
 ---
-context: [phase|spike|sketch|deliberation|research|default]
+context: [phase|deliberation|research|default]
 phase: XX-name
 task: 3
 total_tasks: 7
@@ -183,7 +175,7 @@ Completed Tasks:
 - [service/env]: [current state]
 
 ## Pre-Execution Critique Required
-<!-- Fill in ONLY if pausing between design and execution (e.g. spike design done, not yet run) -->
+<!-- Fill in ONLY if pausing between design and execution (design done, not yet run) -->
 - Design artifact: [path]
 - Critique focus: [key questions the critic should probe]
 - Gate: Do NOT begin execution until critique is complete and design is revised
@@ -219,7 +211,7 @@ gsd-remix-sdk query commit "wip: [context-name] paused at [X]/[Y]" [handoff-path
 
 Current state:
 
-- Context: [phase|spike|deliberation|research]
+- Context: [phase|deliberation|research]
 - Location: [XX-name or SPIKE-NNN]
 - Task: [X] of [Y]
 - Status: [in_progress/blocked]
@@ -234,7 +226,7 @@ To resume: /gsd-resume-work
 </process>
 
 <success_criteria>
-- [ ] Context detected (phase/spike/deliberation/research/default)
+- [ ] Context detected (phase/deliberation/research/default)
 - [ ] .continue-here.md created at correct path for detected context
 - [ ] Required Reading, Anti-Patterns, and Infrastructure State sections filled
 - [ ] Pre-Execution Critique section filled if pausing between design and execution

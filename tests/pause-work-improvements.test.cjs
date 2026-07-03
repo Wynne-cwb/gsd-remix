@@ -12,14 +12,14 @@ describe('pause-work improvements', () => {
     pauseContent = fs.readFileSync(p, 'utf-8');
   });
 
-  test('#1489: pause-work detects non-phase contexts (spike, deliberation, research)', () => {
+  test('#1489: pause-work detects non-phase contexts (deliberation, research)', () => {
     pauseContent = pauseContent || fs.readFileSync(
       path.join(__dirname, '..', 'get-shit-done', 'workflows', 'pause-work.md'), 'utf-8'
     );
-    assert.ok(pauseContent.includes('spike') || pauseContent.includes('Spike'),
-      'pause-work should handle spike context');
-    assert.ok(pauseContent.includes('deliberation') || pauseContent.includes('research'),
-      'pause-work should handle deliberation/research context');
+    assert.ok(pauseContent.includes('deliberation'),
+      'pause-work should handle deliberation context');
+    assert.ok(pauseContent.includes('research'),
+      'pause-work should handle research context');
   });
 
   test('#1489: pause-work writes to non-phase paths when appropriate', () => {

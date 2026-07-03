@@ -396,40 +396,9 @@ Structure the extracted information:
 When escalating, read only the specific `path` returned by `context-history` for the relevant phase. Do not fall back to bulk-reading every prior CONTEXT.md file.
 If `counts.omitted_phases > 0` and the current gray area still feels underdetermined after reviewing the brief, rerun `context-history` with a higher `--limit` before reading many full source files.
 
-**Step 4: Load spike/sketch findings (if they exist)**
-```bash
-# Check for spike/sketch findings skills (project-local)
-SPIKE_FINDINGS=$(ls ./.claude/skills/spike-findings-*/SKILL.md 2>/dev/null | head -1)
-SKETCH_FINDINGS=$(ls ./.claude/skills/sketch-findings-*/SKILL.md 2>/dev/null | head -1)
-
-# Also check for raw spikes/sketches not yet wrapped up
-RAW_SPIKES=$(ls .planning/spikes/MANIFEST.md 2>/dev/null)
-RAW_SKETCHES=$(ls .planning/sketches/MANIFEST.md 2>/dev/null)
-```
-
-If spike/sketch findings skills exist, read their SKILL.md and reference files. Extract:
-- **Validated patterns** — what was proven to work (use these, don't re-explore)
-- **Landmines** — what was proven NOT to work (avoid these)
-- **Constraints** — hard limits discovered (rate limits, API gaps, library limitations)
-- **Design decisions** — winning visual directions, CSS patterns, layout choices
-
-Add to `<prior_decisions>`:
-```
-## From Spike Experiments
-- [Validated pattern or constraint from spike findings]
-
-## From Design Sketches
-- [Design decision or visual direction from sketch findings]
-```
-
-If raw spikes/sketches exist but no findings skill, note in output:
-```
-⚠ Unpackaged spikes/sketches detected — run `/gsd-spike-wrap-up` or `/gsd-sketch-wrap-up` to make findings available to planning agents.
-```
-
 **Usage in subsequent steps:**
-- `analyze_phase`: Skip gray areas already decided in prior phases or validated by spikes/sketches
-- `present_gray_areas`: Annotate options with prior decisions ("You chose X in Phase 5") and spike/sketch findings ("Spike 002 validated this approach")
+- `analyze_phase`: Skip gray areas already decided in prior phases
+- `present_gray_areas`: Annotate options with prior decisions ("You chose X in Phase 5")
 - `discuss_areas`: Pre-fill answers or flag conflicts ("This contradicts Phase 3 — same here or different?")
 
 **If `context-history` fails or returns no usable data:** Fall back to the legacy approach for reliability:

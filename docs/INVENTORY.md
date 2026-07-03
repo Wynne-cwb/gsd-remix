@@ -45,7 +45,7 @@ Full roster at `agents/gsd-*.md`. The "Primary doc" column flags whether [`docs/
 
 ---
 
-## Commands (65 shipped)
+## Commands (60 shipped)
 
 Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md` section order; each row carries the command name, a one-line role derived from the command's frontmatter `description:`, and a link to the source file. `tests/command-count-sync.test.cjs` locks the count against the filesystem.
 
@@ -59,8 +59,6 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 | `/gsd-ai-integration-phase` | Generate AI design contract (AI-SPEC.md) via framework selection, research, and eval planning. | [commands/gsd/ai-integration-phase.md](../commands/gsd/ai-integration-phase.md) |
 | `/gsd-plan-phase` | Create detailed phase plan (PLAN.md) with verification loop. | [commands/gsd/plan-phase.md](../commands/gsd/plan-phase.md) |
 | `/gsd-plan-review-convergence` | Cross-AI plan convergence loop — replan with review feedback until no HIGH concerns remain (max 3 cycles). | [commands/gsd/plan-review-convergence.md](../commands/gsd/plan-review-convergence.md) |
-| `/gsd-spike` | Rapidly spike an idea with throwaway experiments to validate feasibility before planning. | [commands/gsd/spike.md](../commands/gsd/spike.md) |
-| `/gsd-sketch` | Rapidly sketch UI/design ideas using throwaway HTML mockups with multi-variant exploration. | [commands/gsd/sketch.md](../commands/gsd/sketch.md) |
 | `/gsd-research-phase` | Research how to implement a phase (standalone). | [commands/gsd/research-phase.md](../commands/gsd/research-phase.md) |
 | `/gsd-execute-phase` | Execute all plans in a phase with wave-based parallelization. | [commands/gsd/execute-phase.md](../commands/gsd/execute-phase.md) |
 | `/gsd-verify-work` | Validate built features through conversational UAT with auto-diagnosis. | [commands/gsd/verify-work.md](../commands/gsd/verify-work.md) |
@@ -104,7 +102,6 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 | `/gsd-session-report` | Generate a session report with token usage estimates, work summary, outcomes. | [commands/gsd/session-report.md](../commands/gsd/session-report.md) |
 | `/gsd-pause-work` | Create context handoff when pausing work mid-phase. | [commands/gsd/pause-work.md](../commands/gsd/pause-work.md) |
 | `/gsd-resume-work` | Resume work from previous session with full context restoration. | [commands/gsd/resume-work.md](../commands/gsd/resume-work.md) |
-| `/gsd-explore` | Socratic ideation and idea routing — think through ideas before committing. | [commands/gsd/explore.md](../commands/gsd/explore.md) |
 | `/gsd-do` | Route freeform text to the right GSD command automatically. | [commands/gsd/do.md](../commands/gsd/do.md) |
 | `/gsd-note` | Zero-friction idea capture — append, list, or promote notes to todos. | [commands/gsd/note.md](../commands/gsd/note.md) |
 | `/gsd-add-todo` | Capture idea or task as todo from current conversation context. | [commands/gsd/add-todo.md](../commands/gsd/add-todo.md) |
@@ -136,8 +133,6 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 
 | Command | Role | Source |
 |---------|------|--------|
-| `/gsd-spike-wrap-up` | Package spike findings into a persistent project skill for future build conversations. | [commands/gsd/spike-wrap-up.md](../commands/gsd/spike-wrap-up.md) |
-| `/gsd-sketch-wrap-up` | Package sketch design findings into a persistent project skill for future build conversations. | [commands/gsd/sketch-wrap-up.md](../commands/gsd/sketch-wrap-up.md) |
 | `/gsd-settings` | Configure GSD workflow toggles and model profile. | [commands/gsd/settings.md](../commands/gsd/settings.md) |
 | `/gsd-pr-branch` | Create a clean PR branch by filtering out `.planning/` commits. | [commands/gsd/pr-branch.md](../commands/gsd/pr-branch.md) |
 | `/gsd-update` | Update GSD to latest version with changelog display. | [commands/gsd/update.md](../commands/gsd/update.md) |
@@ -146,7 +141,7 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 
 ---
 
-## Workflows (69 shipped)
+## Workflows (64 shipped)
 
 Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators that commands reference internally; most are not read directly by end users. Rows below map each workflow file to its role (derived from the `<purpose>` block) and, where applicable, to the command that invokes it.
 
@@ -175,7 +170,6 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 | `eval-review.md` | Retroactive audit of an implemented AI phase's evaluation coverage. | `/gsd-eval-review` |
 | `execute-phase.md` | Execute all plans in a phase using wave-based parallel execution. | `/gsd-execute-phase` |
 | `execute-plan.md` | Execute a phase prompt (PLAN.md) and create the outcome summary (SUMMARY.md). | `execute-phase.md` (per-plan subagent) |
-| `explore.md` | Socratic ideation — guide the developer through probing questions. | `/gsd-explore` |
 | `extract_learnings.md` | Extract decisions, lessons, patterns, and surprises from completed phase artifacts. | `/gsd-extract-learnings` |
 | `fast.md` | Execute a trivial task inline without subagent overhead. | `/gsd-fast` |
 | `forensics.md` | Forensics investigation of failed workflows — git, artifacts, and state analysis. | `/gsd-forensics` |
@@ -209,11 +203,7 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 | `session-report.md` | Session report — token usage, work summary, outcomes. | `/gsd-session-report` |
 | `settings.md` | Configure GSD workflow toggles and model profile. | `/gsd-settings` |
 | `ship.md` | Create PR, run review, and prepare for merge after verification. | `/gsd-ship` |
-| `sketch.md` | Explore design directions through throwaway HTML mockups with 2-3 variants per sketch. | `/gsd-sketch` |
-| `sketch-wrap-up.md` | Curate sketch findings and package them as a persistent `sketch-findings-[project]` skill. | `/gsd-sketch-wrap-up` |
 | `spec-phase.md` | Socratic spec refinement with ambiguity scoring; produces SPEC.md. | `/gsd-spec-phase` |
-| `spike.md` | Rapid feasibility validation through focused, throwaway experiments. | `/gsd-spike` |
-| `spike-wrap-up.md` | Curate spike findings and package them as a persistent `spike-findings-[project]` skill. | `/gsd-spike-wrap-up` |
 | `stats.md` | Project statistics rendering — phases, plans, requirements, git metrics. | `/gsd-stats` |
 | `transition.md` | Phase-boundary transition workflow — state advancement. | `execute-phase.md`, `/gsd-next` |
 | `undo.md` | Safe git revert — phase or plan commits using the phase manifest. | `/gsd-undo` |
@@ -226,7 +216,7 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 
 ---
 
-## References (40 shipped)
+## References (36 shipped)
 
 Full roster at `get-shit-done/references/*.md`. References are shared knowledge documents that workflows and agents `@-reference`. The groupings below match [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#references-get-shit-donereferencesmd) — core, workflow clusters, and the modular planner decomposition.
 
@@ -270,17 +260,6 @@ Full roster at `get-shit-done/references/*.md`. References are shared knowledge 
 | `ai-evals.md` | AI evaluation design reference for `/gsd-ai-integration-phase`. |
 | `ai-frameworks.md` | AI framework decision-matrix reference for `gsd-framework-selector`. |
 | `executor-examples.md` | Worked examples for the gsd-executor agent. |
-
-### Sketch References
-
-References consumed by the `/gsd-sketch` workflow and its wrap-up companion.
-
-| Reference | Role |
-|-----------|------|
-| `sketch-interactivity.md` | Rules for making HTML sketches feel interactive and alive. |
-| `sketch-theme-system.md` | Shared CSS theme variable system for cross-sketch consistency. |
-| `sketch-tooling.md` | Floating toolbar utilities included in every sketch. |
-| `sketch-variant-patterns.md` | Multi-variant HTML patterns (tabs, side-by-side, overlays). |
 
 ### Modular Planner Decomposition
 
