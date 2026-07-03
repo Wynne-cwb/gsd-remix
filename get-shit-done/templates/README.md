@@ -43,7 +43,6 @@ These files live inside a phase directory. They are NOT checked by W019 (which o
 | `NN-RESEARCH.md` | `research.md` | `/gsd-research-phase`, `/gsd-plan-phase` | Technical research for the phase |
 | `NN-UAT.md` | `UAT.md` | `/gsd-validate-phase` | User acceptance test results |
 | `NN-PATTERNS.md` | *(inline)* | `/gsd-plan-phase` (pattern mapper) | Analog file mapping for the phase |
-| `NN-AI-SPEC.md` | `AI-SPEC.md` | `/gsd-ai-integration-phase` | AI integration spec with eval strategy |
 | `NN-DEBUG.md` | `DEBUG.md` | `/gsd-debug` | Debug session log |
 
 ---

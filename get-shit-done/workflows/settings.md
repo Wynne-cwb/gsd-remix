@@ -39,7 +39,6 @@ Parse current values (default to `true` if not present):
 - `workflow.research` — spawn researcher during plan-phase
 - `workflow.plan_check` — spawn plan checker during plan-phase
 - `workflow.verifier` — spawn verifier during execute-phase
-- `workflow.ai_integration_phase` — framework selection + eval strategy for AI phases (default: true if absent)
 - `model_profile` — which model each agent uses (default: `balanced`)
 - `git.branching_strategy` — branching approach (default: `"none"`)
 - `workflow.use_worktrees` — whether parallel executor agents run in worktree isolation (default: `true`)
@@ -97,15 +96,6 @@ AskUserQuestion([
     options: [
       { label: "No (Recommended)", description: "Manual /clear + paste between stages" },
       { label: "Yes", description: "Chain stages via Task() subagents (same isolation)" }
-    ]
-  },
-  {
-    question: "Enable AI Phase? (framework selection + eval strategy for AI phases)",
-    header: "AI Phase",
-    multiSelect: false,
-    options: [
-      { label: "Yes (Recommended)", description: "Run /gsd-ai-phase before planning AI system phases. Surfaces the right framework, researches its docs, and designs the evaluation strategy." },
-      { label: "No", description: "Skip AI design contract. Good for non-AI phases or when framework is already decided." }
     ]
   },
   {
@@ -170,7 +160,6 @@ Merge new settings into existing config.json:
     "plan_check": true/false,
     "verifier": true/false,
     "auto_advance": true/false,
-    "ai_integration_phase": true/false,
     "text_mode": true/false,
     "research_before_questions": true/false,
     "discuss_mode": "discuss" | "assumptions",
@@ -229,7 +218,6 @@ Write `~/.gsd/defaults.json` with:
     "plan_check": <current>,
     "verifier": <current>,
     "auto_advance": <current>,
-    "ai_integration_phase": <current>,
     "skip_discuss": <current>
   }
 }

@@ -55,10 +55,10 @@ describe('READING: agents with reading blocks use <required_reading>', () => {
     return content.includes('required_reading') || content.includes('files_to_read');
   });
 
-  test('at least 15 agents have reading instructions', () => {
+  test('at least 12 agents have reading instructions', () => {
     assert.ok(
-      AGENTS_WITH_READING.length >= 15,
-      `Expected at least 15 agents with reading instructions, found ${AGENTS_WITH_READING.length}`
+      AGENTS_WITH_READING.length >= 12,
+      `Expected at least 12 agents with reading instructions, found ${AGENTS_WITH_READING.length}`
     );
   });
 

@@ -99,7 +99,7 @@ function buildNewProjectConfig(userChoices) {
       auto_advance: false,
       node_repair: true,
       node_repair_budget: 2,
-      ai_integration_phase: true,
+      ai_integration_phase: false,
       tdd_mode: false,
       text_mode: false,
       research_before_questions: false,

@@ -18,7 +18,6 @@ describe('project skills awareness', () => {
     'gsd-security-auditor',
     'gsd-codebase-mapper',
     'gsd-roadmapper',
-    'gsd-eval-auditor',
   ];
 
   for (const agentName of agentsRequiringSkills) {

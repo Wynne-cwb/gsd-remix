@@ -22,7 +22,6 @@ const AUDIT_AGENTS = [
   'gsd-code-reviewer.md',
   'gsd-security-auditor.md',
   'gsd-verifier.md',
-  'gsd-eval-auditor.md',
   'gsd-integration-checker.md',
 ];
 

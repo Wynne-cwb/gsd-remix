@@ -261,7 +261,7 @@ ls ${phase_dir}/*-SPEC.md 2>/dev/null | grep -v AI-SPEC | head -1 || true
 
 **If no SPEC.md is found:** Continue to `check_existing` with `spec_loaded = false` (default behavior unchanged).
 
-**Note:** SPEC.md files named `AI-SPEC.md` (from `/gsd-ai-integration-phase`) are excluded — those serve a different purpose.
+**Note:** SPEC.md files named `AI-SPEC.md` (legacy AI design contracts) are excluded — those serve a different purpose.
 </step>
 
 <step name="check_existing">

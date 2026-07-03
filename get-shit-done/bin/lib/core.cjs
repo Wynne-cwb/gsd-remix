@@ -251,7 +251,7 @@ const CONFIG_DEFAULTS = {
   plan_checker: true,
   verifier: true,
   nyquist_validation: false,
-  ai_integration_phase: true,
+  ai_integration_phase: false,
   parallelization: true,
   brave_search: false,
   firecrawl: false,
