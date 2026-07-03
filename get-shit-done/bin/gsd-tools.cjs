@@ -145,7 +145,6 @@
  *   init progress                      All context for progress workflow
  *
  * Documentation:
- *   docs-init                            Project context for docs-update workflow
  *
  * Learnings:
  *   learnings list                       List all global learnings (JSON)
@@ -174,7 +173,6 @@ const commands = require('./lib/commands.cjs');
 const init = require('./lib/init.cjs');
 const frontmatter = require('./lib/frontmatter.cjs');
 const claudeMd = require('./lib/claude-md.cjs');
-const docs = require('./lib/docs.cjs');
 const learnings = require('./lib/learnings.cjs');
 
 // ─── Arg parsing helpers ──────────────────────────────────────────────────────
@@ -309,7 +307,7 @@ async function main() {
   const command = args[0];
 
   if (!command) {
-    error('Usage: gsd-tools <command> [args] [--raw] [--pick <field>] [--cwd <path>] [--ws <name>]\nCommands: state, resolve-model, find-phase, commit, verify-summary, verify, frontmatter, template, generate-slug, current-timestamp, list-todos, verify-path-exists, config-ensure-section, config-new-project, init, workstream, docs-init');
+    error('Usage: gsd-tools <command> [args] [--raw] [--pick <field>] [--cwd <path>] [--ws <name>]\nCommands: state, resolve-model, find-phase, commit, verify-summary, verify, frontmatter, template, generate-slug, current-timestamp, list-todos, verify-path-exists, config-ensure-section, config-new-project, init');
   }
 
   // Reject flags that are never valid for any gsd-tools command. AI agents
@@ -919,14 +917,6 @@ async function runCommand(command, args, cwd, raw, defaultValue) {
       const autoFlag = args.includes('--auto');
       const forceFlag = args.includes('--force');
       claudeMd.cmdGenerateClaudeMd(cwd, { output: outputPath, auto: autoFlag, force: forceFlag }, raw);
-      break;
-    }
-
-    // ─── Intel ────────────────────────────────────────────────────────────
-
-
-    case 'docs-init': {
-      docs.cmdDocsInit(cwd, raw);
       break;
     }
 

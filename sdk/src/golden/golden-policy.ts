@@ -19,7 +19,7 @@ export function isMutationCanonicalCmd(canonical: string): boolean {
 }
 
 const MUTATION_DEFERRED_REASON =
-  'Listed in QUERY_MUTATION_COMMANDS — mutates `.planning/`, git, or profile files. Subprocess golden vs gsd-tools.cjs is covered where a tmp fixture or `--dry-run` exists in golden.integration.test.ts; otherwise handler parity lives in sdk/src/query/*-mutation.test.ts, commit.test.ts, phase-lifecycle.test.ts, profile.test.ts, template.test.ts, docs-init.ts, or uat.test.ts as applicable.';
+  'Listed in QUERY_MUTATION_COMMANDS — mutates `.planning/`, git, or profile files. Subprocess golden vs gsd-tools.cjs is covered where a tmp fixture or `--dry-run` exists in golden.integration.test.ts; otherwise handler parity lives in sdk/src/query/*-mutation.test.ts, commit.test.ts, phase-lifecycle.test.ts, profile.test.ts, template.test.ts, or uat.test.ts as applicable.';
 
 /** Registry commands with no `gsd-tools.cjs` analogue — cannot have subprocess JSON parity. */
 const NO_CJS_SUBPROCESS_REASON: Record<string, string> = {

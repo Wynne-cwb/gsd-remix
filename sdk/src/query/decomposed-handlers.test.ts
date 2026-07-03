@@ -19,7 +19,6 @@ import { todoMatchPhase, statsJson, progressBar } from './progress.js';
 import { milestoneComplete } from './phase-lifecycle.js';
 import { summaryExtract, historyDigest } from './summary.js';
 import { commitToSubrepo } from './commit.js';
-import { docsInit } from './docs-init.js';
 import { websearch } from './websearch.js';
 
 let tmpDir: string;
@@ -202,22 +201,6 @@ describe('historyDigest', () => {
 // ─── workstream.ts ───────────────────────────────────────────────────────
 
 // ─── init.ts ─────────────────────────────────────────────────────────────
-
-describe('docsInit', () => {
-  it('returns docs context matching gsd-tools docs-init', async () => {
-    const result = await docsInit([], tmpDir);
-    const data = result.data as Record<string, unknown>;
-    expect(typeof data.planning_exists).toBe('boolean');
-    expect(data.project_root).toBe(tmpDir);
-    expect(typeof data.doc_writer_model).toBe('string');
-    expect(Array.isArray(data.existing_docs)).toBe(true);
-    expect(data.project_type).toBeDefined();
-    expect(data.doc_tooling).toBeDefined();
-    expect(Array.isArray(data.monorepo_workspaces)).toBe(true);
-    expect(typeof data.agents_installed).toBe('boolean');
-    expect(Array.isArray(data.missing_agents)).toBe(true);
-  });
-});
 
 // ─── websearch.ts ────────────────────────────────────────────────────────
 

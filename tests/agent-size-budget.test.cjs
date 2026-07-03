@@ -36,7 +36,6 @@ const XL_AGENTS = new Set([
 const LARGE_AGENTS = new Set([
   'gsd-phase-researcher',
   'gsd-verifier',
-  'gsd-doc-writer',
   'gsd-plan-checker',
   'gsd-executor',
   'gsd-code-fixer',

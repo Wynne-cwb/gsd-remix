@@ -12,18 +12,6 @@ const PROJECT_DIR = resolve(__dirname, '..', '..');
 // Repo root (where .planning/ lives) — needed for commands that read project state
 const REPO_ROOT = resolve(__dirname, '..', '..', '..');
 
-/** Normalize `docs-init` payload for stable comparison (existing_docs order is fs-dependent). */
-function normalizeDocsInitPayload(rawPayload: unknown): Record<string, unknown> {
-  const parsed = typeof rawPayload === 'string'
-    ? JSON.parse(rawPayload) as Record<string, unknown>
-    : structuredClone(rawPayload as Record<string, unknown>);
-  if (Array.isArray(parsed.existing_docs)) {
-    parsed.existing_docs.sort((a: any, b: any) => a.path.localeCompare(b.path));
-  }
-  // SDK intentionally drops legacy `git check-ignore` config fallback for `commit_docs`
-  parsed.commit_docs = true;
-  return parsed;
-}
 
 /** Agent install scan differs between gsd-tools subprocess vs in-process (paths / env); compare the rest. */
 function omitAgentInstallFields(data: Record<string, unknown>): Record<string, unknown> {
@@ -342,21 +330,6 @@ describe('Golden file tests', () => {
       const registry = createRegistry();
       const sdkResult = await registry.dispatch('detect-custom-files', args, PROJECT_DIR);
       expect(sdkResult.data).toEqual(gsdOutput);
-    });
-  });
-
-  // ─── docs-init ─────────────────────────────────────────────────────────
-
-  describe('docs-init', () => {
-    it('SDK output matches gsd-tools.cjs (normalized existing_docs order)', async () => {
-      const gsdOutput = await captureGsdToolsOutput('docs-init', [], REPO_ROOT) as Record<string, unknown>;
-      const registry = createRegistry();
-      const sdkResult = await registry.dispatch('docs-init', [], REPO_ROOT);
-      expect(
-        omitAgentInstallFields(normalizeDocsInitPayload(sdkResult.data as Record<string, unknown>)),
-      ).toEqual(
-        omitAgentInstallFields(normalizeDocsInitPayload(gsdOutput)),
-      );
     });
   });
 

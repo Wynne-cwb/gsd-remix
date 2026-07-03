@@ -20,7 +20,6 @@ describe('project skills awareness', () => {
     'gsd-codebase-mapper',
     'gsd-roadmapper',
     'gsd-eval-auditor',
-    'gsd-doc-writer',
   ];
 
   for (const agentName of agentsRequiringSkills) {
@@ -38,11 +37,4 @@ describe('project skills awareness', () => {
     });
   }
 
-  test('gsd-doc-writer has security note about doc_assignment user data', () => {
-    const content = readAgent('gsd-doc-writer');
-    assert.ok(
-      content.includes('doc_assignment') && content.includes('SECURITY'),
-      'gsd-doc-writer missing security note for doc_assignment block'
-    );
-  });
 });

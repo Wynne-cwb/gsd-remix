@@ -8,7 +8,6 @@ export const GOLDEN_INTEGRATION_MAIN_FILE_CANONICALS: readonly string[] = [
   'config-set',
   'current-timestamp',
   'detect-custom-files',
-  'docs-init',
   'find-phase',
   'frontmatter.get',
   'frontmatter.validate',

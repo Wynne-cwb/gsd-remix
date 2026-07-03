@@ -50,7 +50,6 @@ import {
   initExecutePhase, initPlanPhase, initNewMilestone, initQuick,
   initResume, initVerifyWork, initPhaseOp, initTodos, initMilestoneOp,
   initMapCodebase,
-  initIngestDocs,
 } from './init.js';
 import { initNewProject, initProgress, initManager } from './init-complex.js';
 import { agentSkills } from './skills.js';
@@ -65,7 +64,6 @@ import { milestoneComplete } from './phase-lifecycle.js';
 import { summaryExtract, historyDigest } from './summary.js';
 import { contextHistory } from './context-history.js';
 import { commitToSubrepo } from './commit.js';
-import { docsInit } from './docs-init.js';
 import { uatRenderCheckpoint, auditUat } from './uat.js';
 import { websearch } from './websearch.js';
 import {
@@ -138,7 +136,6 @@ export const QUERY_MUTATION_COMMANDS = new Set<string>([
   'requirements.mark-complete', 'requirements mark-complete',
   'todo.complete', 'todo complete',
   'milestone.complete', 'milestone complete',
-  'docs-init',
   'learnings.copy', 'learnings copy',
   'learnings.prune', 'learnings prune',
   'learnings.delete', 'learnings delete',
@@ -236,7 +233,7 @@ function buildMutationEvent(
     } as GSDStateMutationEvent;
   }
 
-  // roadmap, requirements, todo, milestone, learnings, docs-init
+  // roadmap, requirements, todo, milestone, learnings
   return {
     ...base,
     type: GSDEventType.StateMutation,
@@ -422,7 +419,6 @@ export function createRegistry(
   registry.register('init.todos', initTodos);
   registry.register('init.milestone-op', initMilestoneOp);
   registry.register('init.map-codebase', initMapCodebase);
-  registry.register('init.ingest-docs', initIngestDocs);
   // Space-delimited aliases for CJS compatibility
   registry.register('init execute-phase', initExecutePhase);
   registry.register('init plan-phase', initPlanPhase);
@@ -434,7 +430,6 @@ export function createRegistry(
   registry.register('init todos', initTodos);
   registry.register('init milestone-op', initMilestoneOp);
   registry.register('init map-codebase', initMapCodebase);
-  registry.register('init ingest-docs', initIngestDocs);
 
   // Complex init handlers
   registry.register('init.new-project', initNewProject);
@@ -483,7 +478,6 @@ export function createRegistry(
   registry.register('progress bar', progressBar);
   registry.register('progress.table', progressTable);
   registry.register('progress table', progressTable);
-  registry.register('docs-init', docsInit);
   registry.register('websearch', websearch);
   registry.register('learnings.copy', learningsCopy);
   registry.register('learnings copy', learningsCopy);
