@@ -23,6 +23,8 @@ All named profiles (`quality` / `balanced` / `budget` / `adaptive`) resolve to t
 
 Agents not in the table (e.g. gsd-advisor-researcher) resolve to `sonnet` via the default fallback.
 
+**Security reviewer special tier:** the execute-phase `security_review_gate` overrides the model per trigger — **Opus** when the review fires via a hard rule (`.env*`/Dockerfile/CI diff) or `workflow.security_review: "always"`, **Sonnet** when it fires via `auto` semantic judgment. Low-frequency, high-value path; the override is passed at spawn time and does not live in the profile table.
+
 ## Profile Philosophy
 
 **Unified allocation** (all named profiles)

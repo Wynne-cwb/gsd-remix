@@ -98,6 +98,8 @@ After all tasks complete, create SUMMARY.md:
 **One-liner must be substantive:** "JWT auth with refresh rotation using jose library" not "Authentication implemented"
 
 **Include:** task completion, deviation documentation, auth gates (if any), blocked items.
+
+**Security-relevant surface:** if any changed file introduces new endpoints, auth paths, user input handling, secrets access, or outbound requests, add a `## Security-Relevant Surface` section listing `{file}: {one-line description}` per item. Omit if none.
 </summary_creation>
 
 <success_criteria>

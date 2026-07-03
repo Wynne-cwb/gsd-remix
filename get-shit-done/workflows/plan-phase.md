@@ -810,6 +810,32 @@ Display: `Max iterations reached. {N} issues remain:` + issue list
 
 Offer: 1) Force proceed, 2) Provide guidance and retry, 3) Abandon
 
+## 12.5. Security Design Review (Advisory)
+
+Runs after plans pass the checker, before the coverage gate. Never blocks planning flow.
+
+**1. Config gate:**
+```bash
+SECURITY_REVIEW=$(gsd-remix-sdk query config-get workflow.security_review 2>/dev/null || echo "auto")
+```
+If `"off"`: display `Security design review skipped: workflow.security_review=off` and continue to step 13.
+
+**2. Trigger decision (on the plan surface, not code):**
+- `"always"` → trigger.
+- `"auto"` → read the plans' objectives, tasks, and `files_modified` lists and judge whether the planned work touches: auth/authz/session design; secrets/crypto handling; new endpoints or public interfaces; user input/upload/deserialization paths; permissions/CORS/Cookie policy; outbound request patterns (SSRF surface); multi-tenant data boundaries; webhook/callback contracts; logging of sensitive data; redirects. Hint items (lean toward triggering, never auto-trigger): plans that add new dependencies, touch rate limiting/abuse protection, audit logging/admin paths, or billing/entitlement gating.
+- **If not triggered:** display one line — `Security design review skipped: {short reason}` — and continue to step 13.
+
+**3. Invoke (company skill first, inline fallback second):**
+
+Try the company skill via try-invoke-and-catch (no filesystem probing):
+```
+Skill(skill="security-design-review", args="{PHASE_DIR} plan files")
+```
+
+If the Skill invocation fails or the skill does not exist, perform a brief inline design pass yourself: for each triggered signal, note in one or two sentences what the plan should specify (e.g., "new endpoint POST /webhooks — plan does not state signature verification; add to task acceptance"). Present the notes to the user as advisory output.
+
+**4.** Regardless of outcome or errors, continue to step 13.
+
 ## 13. Requirements Coverage Gate
 
 After plans pass the checker (or checker is skipped), verify that all phase requirements are covered by at least one plan.

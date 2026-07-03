@@ -473,6 +473,16 @@ Or: "None - plan executed exactly as written."
 
 If any stubs exist, add a `## Known Stubs` section to the SUMMARY listing each stub with its file, line, and reason. These are tracked for the verifier to catch. Do NOT mark a plan as complete if stubs exist that prevent the plan's goal from being achieved — either wire the data or document in the plan why the stub is intentional and which future plan will resolve it.
 
+**Security-relevant surface:** Before writing the SUMMARY, check if any files created/modified introduce security-relevant surface — new network endpoints, auth paths, user input handling, secrets access, outbound requests, or schema changes at trust boundaries. If found, add:
+
+```markdown
+## Security-Relevant Surface
+
+- {file}: {one-line description of the new surface}
+```
+
+Omit the section if nothing found. This feeds the execute-phase security review trigger — one line per item is enough.
+
 </summary_creation>
 
 <self_check>

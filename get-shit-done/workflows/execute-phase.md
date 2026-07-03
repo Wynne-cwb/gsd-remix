@@ -43,6 +43,7 @@ Always use the exact name from this list — do not fall back to 'general-purpos
 - gsd-debugger — Diagnoses and fixes issues
 - gsd-codebase-mapper — Maps project structure and dependencies
 - gsd-integration-checker — Checks cross-phase integration
+- gsd-security-auditor — Diff-scoped security review (fallback when no company security skill)
 </available_agent_types>
 
 <process>
@@ -997,7 +998,56 @@ Code review found issues. Consider running:
 
 **Error handling:** If the Skill invocation fails or throws, catch the error, display "Code review encountered an error (non-blocking): {error}" and proceed to next step. Review failures must never block execution.
 
-Regardless of review result, ALWAYS proceed to close_parent_artifacts → regression_gate → verify_phase_goal.
+Regardless of review result, ALWAYS proceed to security_review_gate → close_parent_artifacts → regression_gate → verify_phase_goal.
+</step>
+
+<step name="security_review_gate" required="true">
+**Advisory security review anchored on the phase's real diff.** Never blocks execution flow.
+
+**1. Config gate:**
+```bash
+SECURITY_REVIEW=$(gsd-remix-sdk query config-get workflow.security_review 2>/dev/null || echo "auto")
+```
+
+If `SECURITY_REVIEW` is `"off"`: display `Security review skipped: workflow.security_review=off` and proceed to next step.
+
+**2. Resolve changed-file scope (reuse, don't recompute):** resolution order is `--files` argument > aggregated `files_modified` from this phase's SUMMARY.md files > `git diff --name-only` against the phase's starting commit.
+```bash
+CHANGED_FILES=$(grep -h "^- " "${PHASE_DIR}"/*-SUMMARY.md 2>/dev/null | grep -oE '[^ ]+\.[a-zA-Z]+' | sort -u)
+[ -z "$CHANGED_FILES" ] && CHANGED_FILES=$(git diff --name-only "${PHASE_START_COMMIT:-HEAD~10}" 2>/dev/null)
+```
+
+**3. Trigger decision:**
+
+- If `SECURITY_REVIEW` is `"always"` → trigger. Reviewer model: **opus**.
+- If `SECURITY_REVIEW` is `"auto"`:
+  - **Hard rules (no AI judgment — low-frequency files only):** trigger if any changed file matches `.env*`, `Dockerfile*`, or CI config (`.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `cloudbuild.*`, `.circleci/`). Reviewer model: **opus**.
+  - **Otherwise, AI judgment:** read the changed-file list and each plan's SUMMARY (including any `## Security-Relevant Surface` section) and decide whether the change plausibly touches: auth/authz/session handling; secrets or crypto; user input, deserialization, or file upload; new network endpoints; path/SQL/command string concatenation; permissions/CORS/Cookie config; XSS or unsafe HTML rendering; SSRF (outbound requests from BFF/server); PII or credentials in logs; redirects.
+    Lean toward triggering when the diff **adds a new dependency** (package.json/lockfile changes are NOT a hard rule — they are a hint). Additional hints (hint only, never auto-trigger): tenant/account/org boundary changes; webhook signature verification or callbacks; rate limiting/abuse protection; audit logging or admin-privilege paths; billing/entitlement gating.
+    Reviewer model when triggered via semantic signal: **sonnet**.
+  - **If not triggered:** you MUST display one line — `Security review skipped: {short reason, e.g. "docs-only diff, no security-relevant surface"}` — then proceed to next step. Silent skips are not allowed.
+
+**4. Invoke review (company skill first, generic fallback second):**
+
+Try the company skill via try-invoke-and-catch (do NOT probe the filesystem for skills — plugin-provided skills are not discoverable that way):
+```
+Skill(skill="security-code-review", args="{changed file list}")
+```
+
+If the Skill invocation fails or the skill does not exist, fall back to the bundled generic reviewer:
+```
+Task(
+  subagent_type="gsd-security-auditor",
+  model="{opus for hard-rule/always triggers, sonnet for auto semantic triggers}",
+  prompt="<changed_files>{list}</changed_files>
+<diff>run: git diff {phase start ref} -- {changed files}</diff>
+<trigger_reason>{hard rule | semantic signal | always}</trigger_reason>
+<summary_surface>{## Security-Relevant Surface content from SUMMARYs, if any}</summary_surface>",
+  description="Security review: phase {N} diff"
+)
+```
+
+**5. Relay findings.** Display the reviewer's findings table to the user. Critical/high findings deserve a suggestion to fix before shipping — but this gate is advisory: regardless of findings or errors, ALWAYS proceed to close_parent_artifacts. If the review itself errors, display `Security review encountered an error (non-blocking): {error}` and proceed.
 </step>
 
 <step name="close_parent_artifacts">
