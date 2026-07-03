@@ -473,16 +473,6 @@ Configure workflow toggles and model profile interactively.
 
 Usage: `/gsd-settings`
 
-**`/gsd-set-profile <profile>`**
-Quick switch model profile for GSD agents.
-
-- `quality` — Opus everywhere except verification
-- `balanced` — Opus for planning, Sonnet for execution (default)
-- `budget` — Sonnet for writing, Haiku for research/verification
-- `inherit` — Use current session model for all agents (OpenCode `/model`)
-
-Usage: `/gsd-set-profile budget`
-
 ### Utility Commands
 
 **`/gsd-cleanup`**
@@ -508,14 +498,6 @@ Update GSD to latest version with changelog preview.
 - Better than raw `npx get-shit-done-cc`
 
 Usage: `/gsd-update`
-
-**`/gsd-join-discord`**
-Join the GSD Discord community.
-
-- Get help, share what you're building, stay updated
-- Connect with other GSD users
-
-Usage: `/gsd-join-discord`
 
 ## Files & Structure
 
