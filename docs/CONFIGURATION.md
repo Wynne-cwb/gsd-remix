@@ -38,13 +38,11 @@ GSD stores project settings in `.planning/config.json`. Created during `/gsd-new
     "use_worktrees": true,
     "code_review": true,
     "code_review_depth": "standard",
-    "code_review_command": null,
     "security_enforcement": false,
     "security_review": "auto"
   },
   "hooks": {
-    "context_warnings": true,
-    "workflow_guard": false
+    "context_warnings": true
   },
   "parallelization": {
     "enabled": true,
@@ -125,7 +123,7 @@ All workflow toggles follow the **absent = enabled** pattern. If a key is missin
 | `workflow.plan_check` | boolean | `true` | Plan verification loop (up to 3 iterations) |
 | `workflow.verifier` | boolean | `true` | Post-execution verification against phase goals |
 | `workflow.auto_advance` | boolean | `false` | Auto-chain discuss → plan → execute without stopping |
-| `workflow.nyquist_validation` | boolean | `false` | Test coverage mapping during plan-phase research (keep the key explicit — absent is treated as enabled by some readers) |
+| `workflow.nyquist_validation` | boolean | `false` | Legacy validation-gate switch. The feature was removed; keep the key explicitly `false` — absent is treated as enabled by some readers |
 | `workflow.node_repair` | boolean | `true` | Autonomous task repair on verification failure |
 | `workflow.node_repair_budget` | number | `2` | Max repair attempts per failed task |
 | `workflow.research_before_questions` | boolean | `false` | Run research before discussion questions instead of after |
@@ -135,9 +133,8 @@ All workflow toggles follow the **absent = enabled** pattern. If a key is missin
 | `workflow.use_worktrees` | boolean | `true` | When `false`, disables git worktree isolation for parallel execution. Users who prefer sequential execution or whose environment does not support worktrees can disable this. Added in v1.31 |
 | `workflow.code_review` | boolean | `true` | Enable `/gsd-code-review` and `/gsd-code-review-fix` commands. When `false`, the commands exit with a configuration gate message. Added in v1.34 |
 | `workflow.code_review_depth` | string | `standard` | Default review depth for `/gsd-code-review`: `quick` (pattern-matching only), `standard` (per-file analysis), or `deep` (cross-file with import graphs). Can be overridden per-run with `--depth=`. Added in v1.34 |
-| `workflow.code_review_command` | string | (none) | Shell command for external code review integration in `/gsd-ship`. Receives changed file paths via stdin. Non-zero exit blocks the ship workflow. Added in v1.36 |
 | `workflow.tdd_mode` | boolean | `false` | Enable TDD pipeline as a first-class execution mode. When `true`, the planner aggressively applies `type: tdd` to eligible tasks (business logic, APIs, validations, algorithms) and the executor enforces RED/GREEN/REFACTOR gate sequence. An end-of-phase collaborative review checkpoint verifies gate compliance. Added in v1.36 |
-| `workflow.ai_integration_phase` | boolean | `true` | Enable the `/gsd-ai-integration-phase` command. When `false`, the command exits with a configuration gate message |
+| `workflow.ai_integration_phase` | boolean | `false` | Legacy AI-phase switch. The feature was removed; the key is kept for config compatibility |
 | `workflow.auto_prune_state` | boolean | `false` | When `true`, automatically prune stale entries from STATE.md at phase boundaries instead of prompting |
 | `workflow.pattern_mapper` | boolean | `true` | Run the `gsd-pattern-mapper` agent between research and planning to map new files to existing codebase analogs |
 | `workflow.subagent_timeout` | number | `600` | Timeout in seconds for individual subagent invocations. Increase for long-running research or execution phases |
@@ -172,7 +169,6 @@ If `.planning/` is in `.gitignore`, `commit_docs` is automatically `false` regar
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | `hooks.context_warnings` | boolean | `true` | Show context window usage warnings via context monitor hook |
-| `hooks.workflow_guard` | boolean | `false` | Warn when file edits happen outside GSD workflow context (advises using `/gsd-quick` or `/gsd-fast`) |
 
 The prompt injection guard hook (`gsd-prompt-guard.js`) is always active and cannot be disabled — it's a security feature, not a workflow toggle.
 
@@ -223,8 +219,6 @@ Any GSD agent type can receive skills. Common types:
 - `gsd-debugger` -- diagnostic agents
 - `gsd-codebase-mapper` -- codebase analysis
 - `gsd-advisor` -- discuss-phase advisors
-- `gsd-ui-researcher` -- UI design contract creation
-- `gsd-ui-checker` -- UI spec verification
 - `gsd-roadmapper` -- roadmap creation
 - `gsd-synthesizer` -- research synthesis
 
@@ -260,15 +254,7 @@ Toggle optional capabilities via the `features.*` config namespace. Feature flag
 |---------|------|---------|-------------|
 | `features.global_learnings` | boolean | `false` | Enable cross-project learnings pipeline (auto-copy at phase completion, planner injection) |
 | `learnings.max_inject` | number | `10` | Maximum number of cross-project learnings injected into each planner prompt. Lower values reduce prompt size; higher values provide broader historical context |
-| `intel.enabled` | boolean | `false` | Enable queryable codebase intelligence system. When `true`, `/gsd-intel` commands build and query a JSON index in `.planning/intel/`. Added in v1.34 |
-
-<a id="graphify-settings"></a>
-### Graphify Settings
-
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| `graphify.enabled` | boolean | `false` | Enable the project knowledge graph. When `true`, `/gsd-graphify` builds and queries a graph in `.planning/graphs/`. Added in v1.36 |
-| `graphify.build_timeout` | number (seconds) | `300` | Maximum seconds allowed for a `/gsd-graphify build` run before it aborts. Added in v1.36 |
+| `intel.enabled` | boolean | `false` | Legacy key for the removed codebase intelligence system. Accepted for config compatibility; has no effect |
 
 ### Usage
 
@@ -277,7 +263,7 @@ Toggle optional capabilities via the `features.*` config namespace. Feature flag
 gsd-remix-sdk query config-set features.global_learnings true
 
 # Disable a feature
-gsd-remix-sdk query config-set features.thinking_partner false
+gsd-remix-sdk query config-set features.global_learnings false
 ```
 
 The `features.*` namespace is a dynamic key pattern — new feature flags can be added without modifying `VALID_CONFIG_KEYS`. Any key matching `features.<name>` is accepted by the config system.
@@ -385,39 +371,9 @@ These keys live under `workflow.*` — that is where the workflows and installer
 
 ---
 
-## Review Settings
-
-Configure per-CLI model selection for `/gsd-review`. When set, overrides the CLI's default model for that reviewer.
-
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| `review.models.gemini` | string | (CLI default) | Model used when `--gemini` reviewer is invoked |
-| `review.models.claude` | string | (CLI default) | Model used when `--claude` reviewer is invoked |
-| `review.models.codex` | string | (CLI default) | Model used when `--codex` reviewer is invoked |
-| `review.models.opencode` | string | (CLI default) | Model used when `--opencode` reviewer is invoked |
-| `review.models.qwen` | string | (CLI default) | Model used when `--qwen` reviewer is invoked |
-| `review.models.cursor` | string | (CLI default) | Model used when `--cursor` reviewer is invoked |
-
-### Example
-
-```json
-{
-  "review": {
-    "models": {
-      "gemini": "gemini-2.5-pro",
-      "qwen": "qwen-max"
-    }
-  }
-}
-```
-
-Falls back to each CLI's configured default when a key is absent. Added in v1.35.0 (#1849).
-
----
-
 ## Manager Passthrough Flags
 
-Configure per-step flags that `/gsd-manager` appends to each dispatched command. This allows customizing how the manager runs discuss, plan, and execute steps without manual flag entry.
+Legacy keys retained for config compatibility (the `/gsd-manager` command was removed). When present, they define per-step flags appended to dispatched discuss, plan, and execute commands.
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
@@ -447,28 +403,24 @@ Invalid flag tokens are sanitized and logged as warnings. Only recognized GSD fl
 
 ### Profile Definitions
 
-| Agent | `quality` | `balanced` | `budget` | `inherit` |
-|-------|-----------|------------|----------|-----------|
-| gsd-planner | Opus | Opus | Sonnet | Inherit |
-| gsd-roadmapper | Opus | Sonnet | Sonnet | Inherit |
-| gsd-executor | Opus | Sonnet | Sonnet | Inherit |
-| gsd-phase-researcher | Opus | Sonnet | Haiku | Inherit |
-| gsd-project-researcher | Opus | Sonnet | Haiku | Inherit |
-| gsd-research-synthesizer | Sonnet | Sonnet | Haiku | Inherit |
-| gsd-debugger | Opus | Sonnet | Sonnet | Inherit |
-| gsd-codebase-mapper | Sonnet | Haiku | Haiku | Inherit |
-| gsd-verifier | Sonnet | Sonnet | Haiku | Inherit |
-| gsd-plan-checker | Sonnet | Sonnet | Haiku | Inherit |
-| gsd-integration-checker | Sonnet | Sonnet | Haiku | Inherit |
-| gsd-nyquist-auditor | Sonnet | Sonnet | Haiku | Inherit |
-| gsd-pattern-mapper | Sonnet | Sonnet | Haiku | Inherit |
-| gsd-ui-researcher | Opus | Sonnet | Haiku | Inherit |
-| gsd-ui-checker | Sonnet | Sonnet | Haiku | Inherit |
-| gsd-ui-auditor | Sonnet | Sonnet | Haiku | Inherit |
-| gsd-doc-writer | Opus | Sonnet | Haiku | Inherit |
-| gsd-doc-verifier | Sonnet | Sonnet | Haiku | Inherit |
+All named profiles (`quality`, `balanced`, `budget`) now resolve to a single allocation — Opus where reasoning quality matters most, Sonnet everywhere else. The profile names remain valid config values for compatibility. `inherit` makes every agent follow the current session model instead.
 
-> **Fallback semantics for unlisted agents.** The profiles table above covers 18 of 31 shipped agents. Agents without an explicit profile row (`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-security-auditor`, `gsd-user-profiler`, and the nine advanced agents — `gsd-ai-researcher`, `gsd-domain-researcher`, `gsd-eval-planner`, `gsd-eval-auditor`, `gsd-framework-selector`, `gsd-code-reviewer`, `gsd-code-fixer`, `gsd-debug-session-manager`, `gsd-intel-updater`) inherit the runtime default model for the selected profile. To pin a specific model for any of these agents, use `model_overrides` (next section) — `model_overrides` accepts any shipped agent name regardless of whether it has a profile row here. The authoritative profile table lives in `get-shit-done/bin/lib/model-profiles.cjs`; the authoritative 31-agent roster lives in [`docs/INVENTORY.md`](INVENTORY.md).
+| Agent | Model (all named profiles) | `inherit` |
+|-------|----------------------------|-----------|
+| gsd-planner | Opus | Inherit |
+| gsd-roadmapper | Opus | Inherit |
+| gsd-phase-researcher | Opus | Inherit |
+| gsd-project-researcher | Opus | Inherit |
+| gsd-debugger | Opus | Inherit |
+| gsd-executor | Sonnet | Inherit |
+| gsd-research-synthesizer | Sonnet | Inherit |
+| gsd-codebase-mapper | Sonnet | Inherit |
+| gsd-verifier | Sonnet | Inherit |
+| gsd-plan-checker | Sonnet | Inherit |
+| gsd-integration-checker | Sonnet | Inherit |
+| gsd-pattern-mapper | Sonnet | Inherit |
+
+> **Fallback semantics for unlisted agents.** The profiles table above covers 12 of 18 shipped agents. Agents without an explicit profile row (`gsd-advisor-researcher`, `gsd-assumptions-analyzer`, `gsd-security-auditor`, `gsd-code-reviewer`, `gsd-code-fixer`, `gsd-debug-session-manager`) resolve to Sonnet. To pin a specific model for any of these agents, use `model_overrides` (next section) — `model_overrides` accepts any shipped agent name regardless of whether it has a profile row here. The authoritative profile table lives in `get-shit-done/bin/lib/model-profiles.cjs`; the authoritative 18-agent roster lives in [`docs/INVENTORY.md`](INVENTORY.md).
 
 ### Per-Agent Overrides
 
@@ -527,9 +479,7 @@ The intent is the same as the Claude profile tiers -- use a stronger model for p
 
 | Profile | Philosophy | When to Use |
 |---------|-----------|-------------|
-| `quality` | Opus for all decision-making, Sonnet for verification | Quota available, critical architecture work |
-| `balanced` | Opus for planning only, Sonnet for everything else | Normal development (default) |
-| `budget` | Sonnet for code-writing, Haiku for research/verification | High-volume work, less critical phases |
+| `quality` / `balanced` / `budget` | Opus for planning, research, and debugging; Sonnet for everything else (all three names resolve identically) | Normal development (default: `balanced`) |
 | `inherit` | All agents use current session model | Dynamic model switching, **non-Anthropic providers** (OpenRouter, local models) |
 
 ---
@@ -542,7 +492,7 @@ The intent is the same as the Claude profile tiers -- use a stronger model for p
 | `GEMINI_API_KEY` | Detected by context monitor to switch hook event name |
 | `WSL_DISTRO_NAME` | Detected by installer for WSL path handling |
 | `GSD_SKIP_SCHEMA_CHECK` | Skip schema drift detection during execute-phase (v1.31) |
-| `GSD_PROJECT` | Override project root for multi-project workspace support (v1.32) |
+| `GSD_PROJECT` | Override the project root GSD operates on (v1.32) |
 
 ---
 

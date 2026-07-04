@@ -129,3 +129,11 @@ This lets the remix stay close to upstream usage patterns while still making opi
 - **Rationale:** Keep the statusline readable in narrow terminals while surfacing rate-budget pressure directly in the user-facing status bar
 - **Key files:** [hooks/gsd-statusline.js](../hooks/gsd-statusline.js)
 - **Compatibility impact:** Low. The hook remains backward compatible; it only changes the rendered statusline text when phase or rate-limit data is available.
+
+### 2026-05-20 — Minimal Statusline
+
+- **Area:** Hook behavior / developer UX
+- **Change:** Remove update prompts, current todo task, and GSD phase/state text from `gsd-statusline.js`; keep only model, directory, context usage, and runtime-provided rate limits
+- **Rationale:** Reduce statusline noise and keep the bar focused on stable runtime signals instead of workflow/task narration
+- **Key files:** [hooks/gsd-statusline.js](../hooks/gsd-statusline.js)
+- **Compatibility impact:** Low. Update checks still run in the background, but their results are no longer rendered in the statusline.

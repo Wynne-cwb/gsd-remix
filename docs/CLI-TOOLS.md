@@ -61,9 +61,7 @@ Use this when authoring workflows, not when you only need the command list below
 
 **SDK state reads:** `gsd-remix-sdk query state json` / `state.json` and `gsd-remix-sdk query state load` / `state.load` currently share one native handler (rebuilt STATE.md frontmatter — CJS `cmdStateJson`). The legacy CJS `state load` payload (`config`, `state_raw`, existence flags) is still **CLI-only** via `node …/gsd-tools.cjs state load` until a separate registry handler exists. Full routing and golden rules: [QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md).
 
-**CLI-only (not in registry):** e.g. **graphify**, **from-gsd2** / **gsd2-import** — call `gsd-tools.cjs` until registered.
-
-**Mutation events (SDK):** `QUERY_MUTATION_COMMANDS` in `sdk/src/query/index.ts` lists commands that may emit structured events after a successful dispatch. Exceptions called out in QUERY-HANDLERS: `state validate` (read-only), `skill-manifest` (writes only with `--write`), `intel update` (stub).
+**Mutation events (SDK):** `QUERY_MUTATION_COMMANDS` in `sdk/src/query/index.ts` lists commands that may emit structured events after a successful dispatch. Exceptions called out in QUERY-HANDLERS: `state validate` (read-only), `skill-manifest` (writes only with `--write`).
 
 **Golden parity:** Policy and CJS↔SDK test categories are documented under **Golden parity** in [QUERY-HANDLERS.md](../sdk/src/query/QUERY-HANDLERS.md).
 
@@ -207,7 +205,7 @@ node gsd-tools.cjs resolve-model <agent-name>
 # Returns: opus | sonnet | haiku | inherit
 ```
 
-Agent names: `gsd-planner`, `gsd-executor`, `gsd-phase-researcher`, `gsd-project-researcher`, `gsd-research-synthesizer`, `gsd-verifier`, `gsd-plan-checker`, `gsd-integration-checker`, `gsd-roadmapper`, `gsd-debugger`, `gsd-codebase-mapper`, `gsd-nyquist-auditor`
+Agent names: `gsd-planner`, `gsd-executor`, `gsd-phase-researcher`, `gsd-project-researcher`, `gsd-research-synthesizer`, `gsd-verifier`, `gsd-plan-checker`, `gsd-integration-checker`, `gsd-roadmapper`, `gsd-debugger`, `gsd-codebase-mapper`, `gsd-pattern-mapper`
 
 ---
 
@@ -408,9 +406,6 @@ node gsd-tools.cjs audit-uat
 # Cross-artifact audit queue — scan `.planning/` for unresolved audit items
 node gsd-tools.cjs audit-open [--json]
 
-# Reverse-migrate a GSD-2 project into the current structure (backs `/gsd-from-gsd2`)
-node gsd-tools.cjs from-gsd2 [--path <dir>] [--force] [--dry-run]
-
 # Git commit with config checks
 node gsd-tools.cjs commit <message> [--files f1 f2] [--amend] [--no-verify]
 ```
@@ -423,31 +418,6 @@ node gsd-tools.cjs websearch <query> [--limit N] [--freshness day|week|month]
 
 ---
 
-## Graphify
-
-Build, query, and inspect the project knowledge graph in `.planning/graphs/`. Requires `graphify.enabled: true` in `config.json` (see [Configuration Reference](CONFIGURATION.md#graphify-settings)). Graphify is **CJS-only**: `gsd-remix-sdk query` does not yet register graphify handlers — always use `node gsd-tools.cjs graphify …`.
-
-```bash
-# Build or rebuild the knowledge graph
-node gsd-tools.cjs graphify build
-
-# Search the graph for a term
-node gsd-tools.cjs graphify query <term>
-
-# Show graph freshness and statistics
-node gsd-tools.cjs graphify status
-
-# Show changes since the last build
-node gsd-tools.cjs graphify diff
-
-# Write a named snapshot of the current graph
-node gsd-tools.cjs graphify snapshot [name]
-```
-
-User-facing entry point: `/gsd-graphify` (see [Command Reference](COMMANDS.md#gsd-graphify)).
-
----
-
 ## Module Architecture
 
 | Module | File | Exports |
@@ -457,6 +427,7 @@ User-facing entry point: `/gsd-graphify` (see [Command Reference](COMMANDS.md#gs
 | Phase | `lib/phase.cjs` | Phase CRUD, `find-phase`, `phase-plan-index`, `phases list` |
 | Roadmap | `lib/roadmap.cjs` | Roadmap parsing, phase extraction, progress updates |
 | Config | `lib/config.cjs` | Config read/write, section initialization |
+| Config Schema | `lib/config-schema.cjs` | `VALID_CONFIG_KEYS`, dynamic key patterns |
 | Verify | `lib/verify.cjs` | All verification and validation commands |
 | Template | `lib/template.cjs` | Template selection and variable filling |
 | Frontmatter | `lib/frontmatter.cjs` | YAML frontmatter CRUD |
@@ -465,13 +436,12 @@ User-facing entry point: `/gsd-graphify` (see [Command Reference](COMMANDS.md#gs
 | Commands | `lib/commands.cjs` | Misc: slug, timestamp, todos, scaffold, stats, websearch |
 | Model Profiles | `lib/model-profiles.cjs` | Profile resolution table |
 | UAT | `lib/uat.cjs` | Cross-phase UAT/verification audit |
-| Profile Output | `lib/profile-output.cjs` | Developer profile formatting |
-| Profile Pipeline | `lib/profile-pipeline.cjs` | Session analysis pipeline |
-| Graphify | `lib/graphify.cjs` | Knowledge graph build/query/status/diff/snapshot (backs `/gsd-graphify`) |
-| Learnings | `lib/learnings.cjs` | Extract learnings from phases/SUMMARY artifacts (backs `/gsd-extract-learnings`) |
+| Learnings | `lib/learnings.cjs` | Global learnings queries (`learnings list/query/copy/prune/delete`) |
 | Audit | `lib/audit.cjs` | Phase/milestone audit queue handlers; `audit-open` helper |
-| GSD2 Import | `lib/gsd2-import.cjs` | Reverse-migration importer from GSD-2 projects (backs `/gsd-from-gsd2`) |
-| Intel | `lib/intel.cjs` | Queryable codebase intelligence index (backs `/gsd-intel`) |
+| Artifacts | `lib/artifacts.cjs` | Planning artifact helpers |
+| CLAUDE.md | `lib/claude-md.cjs` | CLAUDE.md assembly and managed-section writes |
+| Schema Detect | `lib/schema-detect.cjs` | Schema drift detection |
+| Security | `lib/security.cjs` | Path validation, prompt-injection scanning |
 
 ---
 

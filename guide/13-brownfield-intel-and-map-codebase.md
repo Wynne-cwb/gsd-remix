@@ -1,17 +1,16 @@
 ---
 aliases:
-  - GSD Brownfield Intel And Map Codebase
+  - GSD Brownfield And Map Codebase
   - GSD Brownfield 初始化链
 tags:
   - gsd
   - guide
   - brownfield
-  - intel
   - map-codebase
   - obsidian
 ---
 
-# 13. Brownfield, Intel, And Map-Codebase
+# 13. Brownfield 与 Map-Codebase
 
 > [!INFO]
 > 上一章：[[12-discuss-spec-and-context-capture]]
@@ -31,16 +30,15 @@ tags:
 
 - 检测目录里是不是已有代码
 - 需不需要先做 codebase map
-- 需不需要维护 machine-queryable intel
 
 所以这一章真正要回答的是：
 
 - GSD 如何进入一个既有仓库？
-- `.planning/codebase/` 和 `.planning/intel/` 分别解决什么问题？
+- `.planning/codebase/` 解决什么问题，又怎么反过来影响后续规划？
 
 一句话先说结论：
 
-> GSD 对 brownfield 的策略是“双记忆层”。`.planning/codebase/` 提供给人和 planner 阅读的代码地图，`.planning/intel/` 提供给 query handler 和命令快速查询的结构化索引。前者偏可读，后者偏可算。
+> GSD 对 brownfield 的策略是先建立一份可读的代码地图。`.planning/codebase/` 提供给人和 planner 阅读的结构化理解，让旧仓库不必被当成白纸重新规划。
 
 ## 关键源码入口
 
@@ -48,13 +46,8 @@ tags:
 - [`../get-shit-done/workflows/new-project.md`](../get-shit-done/workflows/new-project.md)
 - [`../commands/gsd/map-codebase.md`](../commands/gsd/map-codebase.md)
 - [`../get-shit-done/workflows/map-codebase.md`](../get-shit-done/workflows/map-codebase.md)
-- [`../commands/gsd/scan.md`](../commands/gsd/scan.md)
-- [`../get-shit-done/workflows/scan.md`](../get-shit-done/workflows/scan.md)
-- [`../commands/gsd/intel.md`](../commands/gsd/intel.md)
 - [`../agents/gsd-codebase-mapper.md`](../agents/gsd-codebase-mapper.md)
-- [`../agents/gsd-intel-updater.md`](../agents/gsd-intel-updater.md)
 - [`../sdk/src/query/init-complex.ts`](../sdk/src/query/init-complex.ts)
-- [`../sdk/src/query/intel.ts`](../sdk/src/query/intel.ts)
 
 ## 先看总图
 
@@ -65,10 +58,6 @@ flowchart TD
     C -->|是| D["/gsd-map-codebase"]
     D --> E[".planning/codebase/*.md"]
     E --> F["new-project / plan-phase / execute-phase"]
-
-    B --> G["/gsd-intel refresh"]
-    G --> H[".planning/intel/*.json + arch.md"]
-    H --> I["gsd-remix-sdk query intel.*"]
 ```
 
 这张图里要记住的是：
@@ -186,39 +175,13 @@ flowchart TD
 
 这类信息用 Markdown 比 JSON 更合适。
 
-## 3. `/gsd-scan`：轻量版地图，不做全套
-
-`scan` 可以看成 `map-codebase` 的缩小版。
-
-它不是 4 个 mapper 并发，而是：
-
-- 1 个 mapper
-- 只针对一个 focus
-
-例如：
-
-- `tech`
-- `arch`
-- `quality`
-- `concerns`
-- `tech+arch`
-
-这很说明问题：
-
-- GSD 并不认为每次都必须重建完整 codebase map
-- 它也支持“我现在只想补这一块认知”
-
-所以 `scan` 更像：
-
-- partial remap
-
-## 4. brownfield map 会怎样反过来影响 `new-project`
+## 3. brownfield map 会怎样反过来影响 `new-project`
 
 new-project workflow 不是把 codebase map 当旁支工具，而是真会消费它。
 
 从 workflow 可以看到至少两层影响：
 
-### 4.1 它会影响 requirements 初始化
+### 3.1 它会影响 requirements 初始化
 
 workflow 明确写了：
 
@@ -229,7 +192,7 @@ workflow 明确写了：
 - 旧代码已经实现了一部分东西
 - 某些 requirements 在当前里程碑里其实是已存在基础
 
-### 4.2 它会影响 roadmap 和后续 planning 的 groundedness
+### 3.2 它会影响 roadmap 和后续 planning 的 groundedness
 
 有 codebase map 时，roadmapper 和后续 planner 不需要每次重新读整库才能知道：
 
@@ -240,97 +203,21 @@ workflow 明确写了：
 
 所以 brownfield map 的真正价值，是把“进入既有代码库”的门槛显著压低。
 
-## 5. `.planning/intel/` 完全是另一套东西
+## 4. 为什么这层记忆用专题 Markdown 而不是机器索引
 
-如果说 `.planning/codebase/` 是给人看的地图，那么 `.planning/intel/` 更像给命令和 query handler 用的本地索引。
+这其实是这一章最值得想清楚的取舍。
 
-### 5.1 `/gsd-intel` 先做 config gate
+### 4.1 它服务的消费者是人和 planner
 
-[`../commands/gsd/intel.md`](../commands/gsd/intel.md) 开头最醒目的部分就是：
+| 维度 | `.planning/codebase/` |
+| --- | --- |
+| 主要消费者 | 人、planner、executor |
+| 主要格式 | Markdown |
+| 主要目标 | 理解代码模式和布局 |
+| 生产方式 | mapper agent 直接写专题文档 |
+| 典型问题 | “代码应该放哪？” |
 
-- 先读 `.planning/config.json`
-- 只有 `intel.enabled === true` 才继续
-
-这说明 intel 在系统里不是默认必开，而是一套显式启用的增强能力。
-
-### 5.2 `/gsd-intel` 把操作拆成两类
-
-第一类是 inline query：
-
-- `query <term>`
-- `status`
-- `diff`
-
-第二类才是真正重建索引：
-
-- `refresh`
-
-而 `refresh` 会 spawn：
-
-- `gsd-intel-updater`
-
-这说明 intel 命令本身像一个壳：
-
-- 简单读操作直接走 query
-- 重活交给专门 agent
-
-### 5.3 intel-updater 写的是结构化索引，不是说明文
-
-`gsd-intel-updater` 的输出 schema 很明确：
-
-- `stack.json`
-- `files.json`
-- `apis.json`
-- `deps.json`
-- `arch.md`
-
-而且要求：
-
-- JSON 里带 `_meta.updated_at`
-- `files.json` 里的 exports 必须是真实 symbol
-- `deps.json` 里要有 `used_by`
-
-这类要求说明 intel 的设计目标不是“概览”，而是：
-
-- 机器可验证
-- 机器可查询
-- 机器可 diff
-
-## 6. `sdk/src/query/intel.ts` 说明它真的是“可算”的
-
-如果你只看命令层，可能会觉得 intel 只是另一批文件。
-
-但 [`../sdk/src/query/intel.ts`](../sdk/src/query/intel.ts) 会让你看清楚：
-
-- intel 有 `status`
-- 有 `diff`
-- 有 `snapshot`
-- 有 `validate`
-- 有 `query`
-- 还有 `extract-exports` / `patch-meta`
-
-这说明 intel 不只是静态缓存，而是一套被 registry 正式接管的 query 子系统。
-
-换句话说：
-
-- `.planning/codebase/` 更像 agent-readable docs
-- `.planning/intel/` 更像 query runtime 的本地知识库
-
-## 7. 所以为什么系统同时保留 codebase map 和 intel
-
-这是这一章最重要的问题。
-
-### 7.1 两者服务的消费者不同
-
-| 维度 | `.planning/codebase/` | `.planning/intel/` |
-| --- | --- | --- |
-| 主要消费者 | 人、planner、executor | query handler、命令、结构化检查 |
-| 主要格式 | Markdown | JSON + 少量 Markdown |
-| 主要目标 | 理解代码模式和布局 | 快速查询、校验、diff |
-| 生产方式 | mapper agent 直接写专题文档 | intel-updater 写 schema 化索引 |
-| 典型问题 | “代码应该放哪？” | “这个符号/依赖/API 在哪？” |
-
-### 7.2 两者代表的是两种不同的压缩方式
+### 4.2 它压缩的是“解释性知识”
 
 `map-codebase` 压的是：
 
@@ -338,15 +225,11 @@ workflow 明确写了：
 - 约定和模式
 - 人类可消费的专题理解
 
-`intel` 压的是：
+换句话说，它不是要做一份可以被程序精确检索的符号表，而是要给下游“怎么在这个代码库里正确地加东西”提供判断依据。
 
-- 检索性知识
-- 路径、导出、依赖、接口
-- 程序可消费的结构化状态
+正因为目标是解释而不是检索，Markdown 才是更合适的载体。
 
-这两个方向不能完全互相替代。
-
-## 8. 这条 brownfield 初始化链最值得学的地方
+## 5. 这条 brownfield 初始化链最值得学的地方
 
 ### 1. 它从一开始就承认“既有仓库需要先建立模型”
 
@@ -356,35 +239,30 @@ workflow 明确写了：
 
 这是很实用的工程设计。
 
-### 3. 它同时保留人类可读和机器可查两种知识层
-
-这是很多 agent 系统没有做到的。
-
-### 4. brownfield 支持不是单一命令，而是会反向影响 requirements 和 roadmap
+### 3. brownfield 支持不是单一命令，而是会反向影响 requirements 和 roadmap
 
 说明它不是边角功能。
 
-## 9. 但它的代价也很明显
+## 6. 但它的代价也很明显
 
-### 1. codebase map 和 intel 之间天然会有漂移风险
+### 1. codebase map 会随代码演进而漂移
 
-因为它们是两套不同产物、不同更新路径。
+它是一次性快照，代码继续改之后，需要重新跑 `/gsd-map-codebase` 才能保持准确。
 
 ### 2. brownfield 入口会让初始化流程更长
 
 先 map，再 new-project，再 research，再 requirements，再 roadmap，对轻量项目来说会显得重。
 
-### 3. intel 不是默认开启，所以使用者很容易不知道它的价值
+### 3. 它是可读地图，不是可算索引
 
-这意味着它更像一套高级能力，而不是主线默认体验。
+好处是人和 agent 都能直接理解，代价是命令层无法像查数据库一样对它做结构化检索。
 
-## 10. 看完这章后，你应该记住什么
+## 7. 看完这章后，你应该记住什么
 
 - `new-project` 从 init 阶段就会检测 brownfield 状态，而不是后面才补救。
 - `.planning/codebase/` 是给人和 planner 读的专题地图，核心由 `gsd-codebase-mapper` 生成。
-- `.planning/intel/` 是给 query handler 和命令用的结构化索引，核心由 `gsd-intel-updater` 维护。
-- `scan` 是局部重绘，`map-codebase` 是全量建图，`intel refresh` 是结构化重建。
-- 这三者合起来，构成了 GSD 进入既有代码库时的认知基础设施。
+- `map-codebase` 会并行 spawn 4 个 mapper，产出 7 份专题文档，主编排器只收确认。
+- 这份地图会反向影响 requirements 初始化和 roadmap 的 groundedness，是 GSD 进入既有代码库时的认知基础设施。
 
 ## 相关笔记
 

@@ -86,24 +86,24 @@ flowchart TD
    把 `statusLine`、`SessionStart`、`PreToolUse`、`PostToolUse` 这一层拆开，讲清楚 hook 如何被构造、如何挂到 runtime 事件上，以及它们如何承担上下文预警、注入扫描和流程守卫。
 11. [11-agent-family-map.md](./11-agent-family-map.md)
    Obsidian: [[11-agent-family-map]]
-   把 33 个 agent 压成几类稳定角色家族，重点看它们在流水线里的位置、交付的工件、拿到的工具预算。
+   把 18 个 agent 压成几类稳定角色家族，重点看它们在流水线里的位置、交付的工件、拿到的工具预算。
 12. [12-discuss-spec-and-context-capture.md](./12-discuss-spec-and-context-capture.md)
    Obsidian: [[12-discuss-spec-and-context-capture]]
    解释 `SPEC.md` 和 `CONTEXT.md` 这两段式意图固化链，讲清楚 `spec-phase`、`discuss-phase`、advisor / assumptions / power 模式如何把用户意图压成可规划工件。
 13. [13-brownfield-intel-and-map-codebase.md](./13-brownfield-intel-and-map-codebase.md)
    Obsidian: [[13-brownfield-intel-and-map-codebase]]
-   单独拆 brownfield 进入路径，讲清楚 `map-codebase`、`scan`、`intel` 三者分别在建什么记忆层。
+   单独拆 brownfield 进入路径，讲清楚 `map-codebase` 如何为既有仓库建立可读的代码地图记忆层。
 14. [14-architecture-strengths-and-debts.md](./14-architecture-strengths-and-debts.md)
    Obsidian: [[14-architecture-strengths-and-debts]]
    对整套系统做收束，回答真正值得学什么、主要历史债在哪里、哪些结构应该借、哪些不要照抄。
 
 ## 这次先确认的仓库快照
 
-- `commands/gsd/`: 83 个命令入口
-- `get-shit-done/workflows/`: 81 个 workflow 定义
-- `agents/`: 33 个专用 agent
-- `hooks/`: 11 个 hook
-- `sdk/src/`: 161 个 TypeScript 源文件
+- `commands/gsd/`: 37 个命令入口
+- `get-shit-done/workflows/`: 42 个 workflow 定义
+- `agents/`: 18 个专用 agent
+- `hooks/`: 8 个 hook
+- `sdk/src/`: 155 个 TypeScript 源文件
 
 这些数字的意义不是“越多越好”，而是说明这个仓库已经不是一个小型提示词仓库了，它其实长成了一个小型运行时系统。
 
@@ -121,10 +121,9 @@ flowchart TD
 
 如果后面还继续扩展，我会更建议走专题篇，而不是再补主线：
 
-- AI integration 专题
-- UI phase / UI audit 专题
-- docs / ingest / verifier 专题
-- debug / repair / review 专题
+- code-review / code-fix 专题
+- debug / repair 专题
+- milestone / backlog / todo 管理专题
 
 ## Obsidian 导航
 

@@ -79,7 +79,7 @@ flowchart TD
 - `state update`
 - `phase complete`
 - `init execute-phase`
-- `workstream create`
+- `roadmap update-plan-progress`
 
 这是一种非常经典的 CLI 设计：
 
@@ -151,7 +151,7 @@ flowchart TD
 - `state.load`
 - `state.begin-phase`
 - `init.plan-phase`
-- `workstream.status`
+- `roadmap.update-plan-progress`
 
 但它又为了兼容旧世界，注册了很多 space-delimited alias：
 
@@ -385,19 +385,19 @@ flowchart TD
 它明确区分了几类情况：
 
 - native handler 已注册，追求和 CJS JSON parity
-- 某些命令明确不注册，保留 CLI-only
-- 某些是 SDK-only，还没有 CJS mirror
+- 某些命令是 SDK-only，还没有 CJS mirror
+- 某些能力反过来只在 CJS 侧存在，注册表命中不了就会 fallback
 
-### 7.1 明确保留的 CLI-only 能力
+### 7.1 fallback 本身就是“CLI-only 能力”的兜底
 
-文档里直接点名了：
+`QUERY-HANDLERS.md` 没有把 native registry 当成能力全集。它明确写了：
 
-- `graphify`
-- `from-gsd2` / `gsd2-import`
+- 如果 argv 命中不了任何已注册 handler
+- 且 `GSD_QUERY_FALLBACK` 不是 `off`
 
-这些不是“还没做”，而是：
+CLI 就会 shell 到 `gsd-tools.cjs`，用归一后的 token 派生出 CJS 风格 argv。
 
-- 产品决策上就暂时留在 CLI-only
+也就是说，那些还没迁进 registry 的旧命令，并不需要在文档里逐条点名——它们自然落进 fallback 兜底路径，仍然可用。
 
 ### 7.2 也有反过来的 SDK-only 能力
 

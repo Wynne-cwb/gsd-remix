@@ -23,7 +23,7 @@ Paste this document (or `@sdk/HANDOVER-QUERY-LAYER.md`) at the start of a new se
 
 ### 1. Parity documentation (`QUERY-HANDLERS.md`)
 
-- **”Golden parity: coverage and exceptions”** — How `golden.integration.test.ts` compares SDK vs `gsd-tools.cjs` (full `toEqual`, subset, normalized `docs-init`, `intel.update` CJS parity, time-dependent fields, etc.).
+- **”Golden parity: coverage and exceptions”** — How `golden.integration.test.ts` compares SDK vs `gsd-tools.cjs` (full `toEqual`, subset, normalized comparisons such as `audit-open`, time-dependent fields, etc.).
 - **”CJS command surface vs SDK registry”** — Naming aliases, CLI-only rows, SDK-only rows, and a **top-level `gsd-tools` command → SDK** matrix.
 - `docs/CLI-TOOLS.md` — Short “Parity & registry” pointer into those sections.
 - `HANDOVER-GOLDEN-PARITY.md` — One paragraph linking to the same sections.
@@ -58,7 +58,6 @@ Previously `state.json` and `state.load` were easy to confuse: CJS has two diffe
 | Status                   | Surface                                                                                          |
 | ------------------------ | ------------------------------------------------------------------------------------------------ |
 | **Registered**           | Essentially all `gsd-tools.cjs` `runCommand` surfaces, including `phase.add-batch`.          |
-| **CLI-only (by design)** | `graphify`, `from-gsd2` — not in `createRegistry()`; documented in `QUERY-HANDLERS.md`.  |
 | **SDK-only extra**       | `phases.archive` — no `gsd-tools phases archive` subcommand (CJS has `list` / `clear` only). |
 
 
@@ -141,7 +140,7 @@ Source: `.planning/research/decision-routing-audit.md` §3. **Tier** = priority 
 
 1. ~~**Golden test for `phase.add-batch`**~~ — Done: `sdk/src/golden/mutation-subprocess.integration.test.ts` (`phase.add-batch` JSON parity vs CJS).
 2. ~~**Re-export `normalizeQueryCommand`**~~ — Done: exported from `sdk/src/query/index.ts` and `sdk/src/index.ts` (`@gsd-remix/sdk`).
-3. **Issue #2302 follow-ups** — Runner alignment (`GSDTools` → registry where appropriate). **`configGet`** now uses `dispatchNativeJson` with canonical `config-get` (fixes subprocess argv vs real `gsd-tools.cjs`, which has no `config` + `get` top-level). Keep `graphify` / `from-gsd2` out of scope unless product reopens.
+3. **Issue #2302 follow-ups** — Runner alignment (`GSDTools` → registry where appropriate). **`configGet`** now uses `dispatchNativeJson` with canonical `config-get` (fixes subprocess argv vs real `gsd-tools.cjs`, which has no `config` + `get` top-level).
 4. **Drift check** — When adding CJS commands, update `QUERY-HANDLERS.md` matrix and golden docs in the same PR.
 
 ---
@@ -163,7 +162,7 @@ npx vitest run src/golden/golden.integration.test.ts --project integration
 
 - Parity expectations and CJS↔SDK matrix documented in one place (`QUERY-HANDLERS.md`).
 - `gsd-remix-sdk query` understands two-token command patterns like `gsd-tools`.
-- `phase add-batch` implemented and registered; **only** intentional CLI-only gaps remain (**graphify**, **from-gsd2**).
+- `phase add-batch` implemented and registered; no intentional CLI-only gaps remain.
 
 ---
 

@@ -140,7 +140,7 @@ Specialized agent definitions with frontmatter specifying:
 - `tools` — Allowed tool access (Read, Write, Edit, Bash, Grep, Glob, WebSearch, etc.)
 - `color` — Terminal output color for visual distinction
 
-**Total agents:** 33
+**Total agents:** 18
 
 ### References (`get-shit-done/references/*.md`)
 
@@ -151,7 +151,6 @@ Shared knowledge documents that workflows and agents `@-reference` (see [`docs/I
 - `checkpoints.md` — Checkpoint type definitions and interaction patterns
 - `gates.md` — 4 canonical gate types (Confirm, Quality, Safety, Transition) wired into plan-checker and verifier
 - `model-profiles.md` — Per-agent model tier assignments
-- `model-profile-resolution.md` — Model resolution algorithm documentation
 - `verification-patterns.md` — How to verify different artifact types
 - `verification-overrides.md` — Per-artifact verification override rules
 - `planning-config.md` — Full config schema and behavior
@@ -174,26 +173,12 @@ Shared knowledge documents that workflows and agents `@-reference` (see [`docs/I
 - `artifact-types.md` — Planning artifact type definitions
 - `phase-argument-parsing.md` — Phase argument parsing conventions
 - `decimal-phase-calculation.md` — Decimal sub-phase numbering rules
-- `workstream-flag.md` — Workstream active pointer conventions
-- `user-profiling.md` — User behavioral profiling methodology
-- `thinking-partner.md` — Conditional thinking partner activation at decision points
-
-**Thinking model references:**
-
-References for integrating thinking-class models (o3, o4-mini, Gemini 2.5 Pro) into GSD workflows:
-
-- `thinking-models-debug.md` — Thinking model patterns for debugging workflows
-- `thinking-models-execution.md` — Thinking model patterns for execution agents
-- `thinking-models-planning.md` — Thinking model patterns for planning agents
-- `thinking-models-research.md` — Thinking model patterns for research agents
-- `thinking-models-verification.md` — Thinking model patterns for verification agents
 
 **Modular planner decomposition:**
 
 The planner agent (`agents/gsd-planner.md`) was decomposed from a single monolithic file into a core agent plus reference modules to stay under the 50K character limit imposed by some runtimes:
 
 - `planner-gap-closure.md` — Gap closure mode behavior (reads VERIFICATION.md, targeted replanning)
-- `planner-reviews.md` — Cross-AI review integration (reads REVIEWS.md from `/gsd-review`)
 - `planner-revision.md` — Plan revision patterns for iterative refinement
 
 ### Templates (`get-shit-done/templates/`)
@@ -203,7 +188,7 @@ Markdown templates for all planning artifacts. Used by `gsd-remix-sdk query temp
 - `phase-prompt.md` — Phase execution prompt template
 - `summary.md` (+ `summary-minimal.md`, `summary-standard.md`, `summary-complex.md`) — Granularity-aware summary templates
 - `DEBUG.md` — Debug session tracking template
-- `UI-SPEC.md`, `UAT.md`, `VALIDATION.md` — Specialized verification templates
+- `UAT.md` — Specialized verification template
 - `discussion-log.md` — Discussion audit trail template
 - `codebase/` — Brownfield mapping templates (stack, architecture, conventions, concerns, structure, testing, integrations)
 - `research-project/` — Research output templates (SUMMARY, STACK, FEATURES, ARCHITECTURE, PITFALLS)
@@ -214,7 +199,7 @@ Runtime hooks that integrate with the host AI agent:
 
 | Hook | Event | Purpose |
 |------|-------|---------|
-| `gsd-statusline.js` | `statusLine` | Displays model, task, directory, and context usage bar |
+| `gsd-statusline.js` | `statusLine` | Displays model, directory, context usage bar, and runtime-provided rate limits |
 | `gsd-context-monitor.js` | `PostToolUse` / `AfterTool` | Injects agent-facing context warnings at 35%/25% remaining |
 | `gsd-check-update.js` | `SessionStart` | Foreground trigger for the background update check |
 | `gsd-check-update-worker.js` | (helper) | Background worker spawned by `gsd-check-update.js`; no direct event registration |
@@ -248,12 +233,8 @@ Node.js CLI utility (`gsd-tools.cjs`) with domain modules split across `get-shit
 | `commands.cjs`         | Misc commands (slug, timestamp, todos, scaffolding, stats)                                          |
 | `model-profiles.cjs`   | Model profile resolution table                                                                      |
 | `security.cjs`         | Path traversal prevention, prompt injection detection, safe JSON parsing, shell argument validation |
-| `uat.cjs`              | UAT file parsing, verification debt tracking, audit-uat support                                     |
-| `docs.cjs`             | Docs-update workflow init, Markdown scanning, monorepo detection                                    |
-| `workstream.cjs`       | Workstream CRUD, migration, session-scoped active pointer                                           |
+| `uat.cjs`              | UAT file parsing, verification debt tracking                                                        |
 | `schema-detect.cjs`    | Schema-drift detection for ORM patterns (Prisma, Drizzle, etc.)                                     |
-| `profile-pipeline.cjs` | User behavioral profiling data pipeline, session file scanning                                      |
-| `profile-output.cjs`   | Profile rendering, USER-PROFILE.md and dev-preferences.md generation                                |
 
 
 ---
@@ -284,22 +265,21 @@ Orchestrator (workflow .md)
 
 ### Primary Agent Spawn Categories
 
-Conceptual spawn-pattern taxonomy for the 21 primary agents. For the authoritative 31-agent roster (including the 10 advanced/specialized agents such as `gsd-pattern-mapper`, `gsd-code-reviewer`, `gsd-code-fixer`, `gsd-ai-researcher`, `gsd-domain-researcher`, `gsd-eval-planner`, `gsd-eval-auditor`, `gsd-framework-selector`, `gsd-debug-session-manager`, `gsd-intel-updater`), see [`docs/INVENTORY.md`](INVENTORY.md#agents-31-shipped).
+Conceptual spawn-pattern taxonomy for the 18 agents. For the authoritative roster, see [`docs/INVENTORY.md`](INVENTORY.md#agents).
 
 
 | Category         | Agents                                                                                  | Parallelism                                                                               |
 | ---------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **Researchers**  | gsd-project-researcher, gsd-phase-researcher, gsd-ui-researcher, gsd-advisor-researcher | 4 parallel (stack, features, architecture, pitfalls); advisor spawns during discuss-phase |
+| **Researchers**  | gsd-project-researcher, gsd-phase-researcher, gsd-advisor-researcher | 4 parallel (stack, features, architecture, pitfalls); advisor spawns during discuss-phase |
 | **Synthesizers** | gsd-research-synthesizer                                                                | Sequential (after researchers complete)                                                   |
 | **Planners**     | gsd-planner, gsd-roadmapper                                                             | Sequential                                                                                |
-| **Checkers**     | gsd-plan-checker, gsd-integration-checker, gsd-ui-checker, gsd-nyquist-auditor          | Sequential (verification loop, max 3 iterations)                                          |
+| **Checkers**     | gsd-plan-checker, gsd-integration-checker                                               | Sequential (verification loop, max 3 iterations)                                          |
 | **Executors**    | gsd-executor                                                                            | Parallel within waves, sequential across waves                                            |
 | **Verifiers**    | gsd-verifier                                                                            | Sequential (after all executors complete)                                                 |
-| **Mappers**      | gsd-codebase-mapper                                                                     | 4 parallel (tech, arch, quality, concerns)                                                |
-| **Debuggers**    | gsd-debugger                                                                            | Sequential (interactive)                                                                  |
-| **Auditors**     | gsd-ui-auditor, gsd-security-auditor                                                    | Sequential                                                                                |
-| **Doc Writers**  | gsd-doc-writer, gsd-doc-verifier                                                        | Sequential (writer then verifier)                                                         |
-| **Profilers**    | gsd-user-profiler                                                                       | Sequential                                                                                |
+| **Mappers**      | gsd-codebase-mapper, gsd-pattern-mapper                                                 | 4 parallel (tech, arch, quality, concerns)                                                |
+| **Debuggers**    | gsd-debugger, gsd-debug-session-manager                                                 | Sequential (interactive)                                                                  |
+| **Reviewers**    | gsd-code-reviewer, gsd-code-fixer                                                       | Sequential                                                                                |
+| **Auditors**     | gsd-security-auditor                                                                    | Sequential                                                                                |
 | **Analyzers**    | gsd-assumptions-analyzer                                                                | Sequential (during discuss-phase)                                                         |
 
 
@@ -377,9 +357,6 @@ User approval → STATE.md initialized
 discuss-phase → CONTEXT.md (user preferences)
     │
     ▼
-ui-phase → UI-SPEC.md (design contract, optional)
-    │
-    ▼
 plan-phase
     ├── Research gate (blocks if RESEARCH.md has unresolved open questions)
     ├── Phase Researcher → RESEARCH.md
@@ -398,9 +375,6 @@ execute-phase (context reduction: truncated prompts, cache-friendly ordering)
     │
     ▼
 verify-work → UAT.md (user acceptance testing)
-    │
-    ▼
-ui-review → UI-REVIEW.md (visual audit, optional)
 ```
 
 ### Context Propagation
@@ -416,7 +390,6 @@ CONTEXT.md (per phase) ───────────────────
 RESEARCH.md (per phase) ───────────────────────────────► Planner, Plan Checker
 PLAN.md (per plan) ────────────────────────────────────► Executor, Plan Checker
 SUMMARY.md (per plan) ─────────────────────────────────► Verifier, State tracking
-UI-SPEC.md (per phase) ────────────────────────────────► Executor, UI Auditor
 ```
 
 ---
@@ -481,9 +454,6 @@ Equivalent paths for other runtimes:
 │       ├── XX-YY-PLAN.md       # Execution plans
 │       ├── XX-YY-SUMMARY.md    # Execution outcomes
 │       ├── XX-VERIFICATION.md  # Post-execution verification
-│       ├── XX-VALIDATION.md    # Nyquist test coverage mapping
-│       ├── XX-UI-SPEC.md       # UI design contract (from ui-phase)
-│       ├── XX-UI-REVIEW.md     # Visual audit scores (from ui-review)
 │       └── XX-UAT.md           # User acceptance test results
 ├── quick/                  # Quick task tracking
 │   └── YYMMDD-xxx-slug/
@@ -492,13 +462,10 @@ Equivalent paths for other runtimes:
 ├── todos/
 │   ├── pending/            # Captured ideas
 │   └── done/               # Completed todos
-├── threads/               # Persistent context threads (from /gsd-thread)
-├── seeds/                 # Forward-looking ideas (from /gsd-plant-seed)
 ├── debug/                  # Active debug sessions
 │   ├── *.md                # Active sessions
 │   ├── resolved/           # Archived sessions
 │   └── knowledge-base.md   # Persistent debug learnings
-├── ui-reviews/             # Screenshots from /gsd-ui-review (gitignored)
 └── continue-here.md        # Context handoff (from pause-work)
 ```
 

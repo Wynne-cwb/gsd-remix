@@ -106,11 +106,10 @@ GSD fixes that. It's the context engineering layer that makes Claude Code reliab
 
 People who want to describe what they want and have it built correctly — without pretending they're running a 50-person engineering org.
 
-Built-in quality gates catch real problems: schema drift detection flags ORM changes missing migrations, security enforcement anchors verification to threat models, and scope reduction detection prevents the planner from silently dropping your requirements.
+Built-in quality gates catch real problems: schema drift detection flags ORM changes missing migrations, a diff-scoped security review gate runs during execution, and scope reduction detection prevents the planner from silently dropping your requirements.
 
 ### v1.37.0 Highlights
 
-- **Spiking & sketching** — `/gsd-spike` runs 2–5 focused experiments with Given/When/Then verdicts; `/gsd-sketch` produces 2–3 interactive HTML mockup variants per design question — both store artifacts in `.planning/` and pair with wrap-up commands to package findings into project-local skills
 - **Agent size-budget enforcement** — Tiered line-count limits (XL: 1 600, Large: 1 000, Default: 500) keep agent prompts lean; violations surface in CI
 - **Shared boilerplate extraction** — Mandatory-initial-read and project-skills-discovery logic extracted to reference files, reducing duplication across a dozen agents
 - **Runtime health checks** — `discuss-phase`, `plan-phase`, and `execute-phase` now run deterministic runtime preflight checks up front; `/gsd-health --runtime` diagnoses install/runtime drift and `/gsd-health --runtime --repair` rebuilds the bundled SDK
@@ -429,14 +428,13 @@ If everything passes, you move on. If something's broken, you don't manually deb
 
 ---
 
-### 6. Repeat → Ship → Complete → Next Milestone
+### 6. Repeat → Complete → Next Milestone
 
 ```
 /gsd-discuss-phase 2
 /gsd-plan-phase 2
 /gsd-execute-phase 2
 /gsd-verify-work 2
-/gsd-ship 2                  # Create PR from verified work
 ...
 /gsd-complete-milestone
 /gsd-new-milestone
@@ -448,7 +446,7 @@ Or let GSD figure out the next step automatically:
 /gsd-next                    # Auto-detect and run next step
 ```
 
-Loop **discuss → plan → execute → verify → ship** until milestone complete.
+Loop **discuss → plan → execute → verify** until milestone complete.
 
 If you want faster intake during discussion, use `/gsd-discuss-phase <n> --batch` to answer a small grouped set of questions at once instead of one-by-one. Use `--chain` to auto-chain discuss into plan+execute without stopping between steps.
 
@@ -511,8 +509,6 @@ GSD handles it for you:
 | `PLAN.md` | Atomic task with XML structure, verification steps |
 | `SUMMARY.md` | What happened, what changed, committed to history |
 | `todos/` | Captured ideas and tasks for later work |
-| `threads/` | Persistent context threads for cross-session work |
-| `seeds/` | Forward-looking ideas that surface at the right milestone |
 
 Size limits based on where Claude's quality degrades. Stay under, get consistent excellence.
 
@@ -586,50 +582,13 @@ You're never locked in. The system adapts.
 |---------|--------------|
 | `/gsd-new-project [--auto]` | Full initialization: questions → research → requirements → roadmap |
 | `/gsd-discuss-phase [N] [--auto] [--analyze] [--chain]` | Capture implementation decisions before planning (`--analyze` adds trade-off analysis, `--chain` auto-chains into plan+execute) |
-| `/gsd-plan-phase [N] [--auto] [--reviews]` | Research + plan + verify for a phase (`--reviews` loads codebase review findings) |
+| `/gsd-plan-phase [N] [--auto]` | Research + plan + verify for a phase |
 | `/gsd-execute-phase <N>` | Execute all plans in parallel waves, verify when complete |
 | `/gsd-verify-work [N]` | Manual user acceptance testing ¹ |
-| `/gsd-ship [N] [--draft]` | Create PR from verified phase work with auto-generated body |
 | `/gsd-next` | Automatically advance to the next logical workflow step |
 | `/gsd-fast <text>` | Inline trivial tasks — skips planning entirely, executes immediately |
-| `/gsd-audit-milestone` | Verify milestone achieved its definition of done |
 | `/gsd-complete-milestone` | Archive milestone, tag release |
 | `/gsd-new-milestone [name]` | Start next version: questions → research → requirements → roadmap |
-| `/gsd-forensics [desc]` | Post-mortem investigation of failed workflow runs (diagnoses stuck loops, missing artifacts, git anomalies) |
-| `/gsd-milestone-summary [version]` | Generate comprehensive project summary for team onboarding and review |
-
-### Workstreams
-
-| Command | What it does |
-|---------|--------------|
-| `/gsd-workstreams list` | Show all workstreams and their status |
-| `/gsd-workstreams create <name>` | Create a namespaced workstream for parallel milestone work |
-| `/gsd-workstreams switch <name>` | Switch active workstream |
-| `/gsd-workstreams complete <name>` | Complete and merge a workstream |
-
-### Multi-Project Workspaces
-
-| Command | What it does |
-|---------|--------------|
-| `/gsd-new-workspace` | Create isolated workspace with repo copies (worktrees or clones) |
-| `/gsd-list-workspaces` | Show all GSD workspaces and their status |
-| `/gsd-remove-workspace` | Remove workspace and clean up worktrees |
-
-### Spiking & Sketching
-
-| Command | What it does |
-|---------|--------------|
-| `/gsd-spike [idea] [--quick]` | Throwaway experiments to validate feasibility before planning — no project init required |
-| `/gsd-sketch [idea] [--quick]` | Throwaway HTML mockups with multi-variant exploration — no project init required |
-| `/gsd-spike-wrap-up` | Package spike findings into a project-local skill for future build conversations |
-| `/gsd-sketch-wrap-up` | Package sketch design findings into a project-local skill for future builds |
-
-### UI Design
-
-| Command | What it does |
-|---------|--------------|
-| `/gsd-ui-phase [N]` | Generate UI design contract (UI-SPEC.md) for frontend phases |
-| `/gsd-ui-review [N]` | Retroactive 6-pillar visual audit of implemented frontend code |
 
 ### Navigation
 
@@ -639,15 +598,12 @@ You're never locked in. The system adapts.
 | `/gsd-next` | Auto-detect state and run the next step |
 | `/gsd-help` | Show all commands and usage guide |
 | `/gsd-update` | Update GSD with changelog preview |
-| `/gsd-join-discord` | Join the GSD Discord community |
-| `/gsd-manager` | Interactive command center for managing multiple phases |
 
 ### Brownfield
 
 | Command | What it does |
 |---------|--------------|
 | `/gsd-map-codebase [area]` | Analyze existing codebase before new-project |
-| `/gsd-ingest-docs [dir]` | Scan a repo of mixed ADRs, PRDs, SPECs, and DOCs and bootstrap or merge the full `.planning/` setup in one pass — parallel classification, synthesis with precedence rules, and a three-bucket conflicts report |
 
 ### Phase Management
 
@@ -656,8 +612,6 @@ You're never locked in. The system adapts.
 | `/gsd-add-phase` | Append phase to roadmap |
 | `/gsd-insert-phase [N]` | Insert urgent work between phases |
 | `/gsd-remove-phase [N]` | Remove future phase, renumber |
-| `/gsd-list-phase-assumptions [N]` | See Claude's intended approach before planning |
-| `/gsd-plan-milestone-gaps` | Create phases to close gaps from audit |
 
 ### Session
 
@@ -665,39 +619,27 @@ You're never locked in. The system adapts.
 |---------|--------------|
 | `/gsd-pause-work` | Create handoff when stopping mid-phase (writes HANDOFF.json) |
 | `/gsd-resume-work` | Restore from last session |
-| `/gsd-session-report` | Generate session summary with work performed and outcomes |
-
-### Workstreams
-
-| Command | What it does |
-|---------|--------------|
-| `/gsd-workstreams` | Manage parallel workstreams (list, create, switch, status, progress, complete) |
 
 ### Code Quality
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd-review` | Cross-AI peer review of current phase or branch |
-| `/gsd-secure-phase [N]` | Security enforcement with threat-model-anchored verification |
+| `/gsd-code-review [N]` | Review phase-changed source files for bugs, security issues, and quality problems |
+| `/gsd-code-review-fix [N]` | Auto-fix issues found by code review, one atomic commit per fix |
 | `/gsd-pr-branch` | Create clean PR branch filtering `.planning/` commits |
-| `/gsd-audit-uat` | Audit verification debt — find phases missing UAT |
-| `/gsd-docs-update` | Verified documentation generation with doc-writer and doc-verifier agents |
 
-### Backlog & Threads
+### Backlog
 
 | Command | What it does |
 |---------|--------------|
-| `/gsd-plant-seed <idea>` | Capture forward-looking ideas with trigger conditions — surfaces at the right milestone |
 | `/gsd-add-backlog <desc>` | Add idea to backlog parking lot (999.x numbering, outside active sequence) |
 | `/gsd-review-backlog` | Review and promote backlog items to active milestone or remove stale entries |
-| `/gsd-thread [name]` | Persistent context threads — lightweight cross-session knowledge for work spanning multiple sessions |
 
 ### Utilities
 
 | Command | What it does |
 |---------|--------------|
 | `/gsd-settings` | Configure model profile and workflow agents |
-| `/gsd-set-profile <profile>` | Switch model profile (quality/balanced/budget/inherit) |
 | `/gsd-add-todo [desc]` | Capture idea for later |
 | `/gsd-check-todos` | List pending todos |
 | `/gsd-debug [desc]` | Systematic debugging with persistent state |
@@ -705,8 +647,6 @@ You're never locked in. The system adapts.
 | `/gsd-note <text>` | Zero-friction idea capture — append, list, or promote notes to todos |
 | `/gsd-quick [--full] [--validate] [--discuss] [--research]` | Execute ad-hoc task with GSD guarantees (`--full` enables all phases, `--validate` adds plan-checking and verification, `--discuss` gathers context first, `--research` investigates approaches before planning) |
 | `/gsd-health [--runtime] [--repair]` | Validate `.planning/` integrity, auto-repair planning issues, confirm runtime identity, or rebuild `gsd-remix-sdk` with `--runtime --repair` |
-| `/gsd-stats` | Display project statistics — phases, plans, requirements, git metrics |
-| `/gsd-profile-user [--questionnaire] [--refresh]` | Generate developer behavioral profile from session analysis for personalized responses |
 
 <sup>¹ Contributed by reddit user OracleGreyBeard</sup>
 
@@ -726,23 +666,16 @@ GSD stores project settings in `.planning/config.json`. Configure during `/gsd-n
 
 ### Model Profiles
 
-Control which Claude model each agent uses. Balance quality vs token spend.
+Control which Claude model each agent uses. All named profiles (`quality`, `balanced`, `budget`) resolve to the same unified allocation — Opus for planning, roadmapping, research, and debugging agents; Sonnet for execution, verification, checking, and mapping agents. The profile keys are kept for config compatibility.
 
-| Profile | Planning | Execution | Verification |
-|---------|----------|-----------|--------------|
-| `quality` | Opus | Opus | Sonnet |
-| `balanced` (default) | Opus | Sonnet | Sonnet |
-| `budget` | Sonnet | Sonnet | Haiku |
-| `inherit` | Inherit | Inherit | Inherit |
-
-Switch profiles:
-```
-/gsd-set-profile budget
-```
+| Profile | Planning / Research / Debugging | Everything else |
+|---------|--------------------------------|-----------------|
+| named profiles | Opus | Sonnet |
+| `inherit` | Inherit | Inherit |
 
 Use `inherit` when using non-Anthropic providers (OpenRouter, local models) or to follow the current runtime model selection (e.g. OpenCode `/model`).
 
-Or configure via `/gsd-settings`.
+Configure via `/gsd-settings`.
 
 ### Workflow Agents
 

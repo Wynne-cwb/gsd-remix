@@ -512,7 +512,7 @@
             <div class="callout">
               读后目标应该升级成：<strong>先复刻骨架，再补高级能力。</strong> 第一版先做
               <span class="mono">command → workflow → context → plan → execute → state update → next</span>，
-              AI-SPEC、UI-SPEC、Nyquist、bounce、seeds、hooks 全量护栏都可以后置。
+              schema push、code review、hooks 全量护栏都可以后置。
             </div>
 
             <div class="stack" style="margin-top: 16px;">
@@ -911,9 +911,8 @@
                 <div>
                   <strong>planning 前置 gate</strong><br>
                   这里不是直接起 planner，而是连续过门：<span class="mono">--prd</span> 可以直接把 PRD 转成
-                  <span class="mono">CONTEXT.md</span>；没有 <span class="mono">CONTEXT.md</span> 会提示先跑 discuss；AI 相关 phase 会检查
-                  <span class="mono">AI-SPEC.md</span>；research 根据现有 <span class="mono">RESEARCH.md</span> 和 flags 决定是否复用；然后还有
-                  Nyquist、security threat model、UI-SPEC、schema push 这些专门 gate。
+                  <span class="mono">CONTEXT.md</span>；没有 <span class="mono">CONTEXT.md</span> 会提示先跑 discuss；research 根据现有 <span class="mono">RESEARCH.md</span> 和 flags 决定是否复用；然后还有
+                  schema push 这类专门 gate。
                 </div>
               </div>
 

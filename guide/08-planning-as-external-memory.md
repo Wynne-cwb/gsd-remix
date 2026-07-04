@@ -62,7 +62,6 @@ flowchart TD
     A --> H["milestones/"]
     A --> I["todos/"]
     A --> J["quick/"]
-    A --> K["workstreams/"]
 
     F --> F1["01-foo/"]
     F1 --> F2["CONTEXT.md"]
@@ -373,37 +372,19 @@ GSD 在这点上是很认真的。
 | `.planning/milestones/` | 已完成 milestone 的归档记忆 | [`../commands/gsd/complete-milestone.md`](../commands/gsd/complete-milestone.md) |
 | `.planning/todos/` | 待处理想法和任务 | [`../commands/gsd/check-todos.md`](../commands/gsd/check-todos.md) |
 | `.planning/quick/` | quick mode 的临时执行记忆 | [`../get-shit-done/workflows/quick.md`](../get-shit-done/workflows/quick.md) |
-| `.planning/workstreams/` | 多工作流分支的 namespaced 记忆 | [`../sdk/src/query/workstream.ts`](../sdk/src/query/workstream.ts) |
 
 这说明 `.planning/` 并不是一个扁平目录，而是在不断长出：
 
 - 面向不同 workflow 的专用记忆空间
 
-## 9. workstream 说明这套记忆是“可命名空间化”的
+## 9. 一个遗留细节：路径解析仍然支持 namespaced 记忆
 
-这点非常关键。
-
-从 [`../sdk/src/workstream-utils.ts`](../sdk/src/workstream-utils.ts) 和 [`../sdk/src/query/workstream.ts`](../sdk/src/query/workstream.ts) 看：
+早期版本有一套面向用户的 workstream 功能，可以把整套记忆分片到 `.planning/workstreams/<name>/` 下。用户入口（`/gsd-workstreams` 等命令）已经被移除，但 [`../sdk/src/workstream-utils.ts`](../sdk/src/workstream-utils.ts) 里的路径解析兼容层还在：
 
 - 默认路径是 `.planning/`
-- 如果启用 workstream，就变成 `.planning/workstreams/<name>/`
+- 传入 workstream 名称时，解析为 `.planning/workstreams/<name>/`
 
-```mermaid
-flowchart TD
-    A["默认模式"] --> B[".planning/STATE.md"]
-    A --> C[".planning/ROADMAP.md"]
-    A --> D[".planning/phases/"]
-
-    E["workstream 模式"] --> F[".planning/workstreams/backend/STATE.md"]
-    E --> G[".planning/workstreams/backend/ROADMAP.md"]
-    E --> H[".planning/workstreams/backend/phases/"]
-```
-
-这意味着 GSD 的“记忆”不是硬编码在一个全局目录里，而是：
-
-- 可以按 workstream 分片
-
-这也是为什么它适合并行推进不同工作流，而不是所有东西都挤在一份 `STATE.md` 里互相踩。
+这个兼容层的存在说明这套记忆结构本身是“可命名空间化”的——它不是硬编码在一个全局目录里，只是当前版本不再把这个能力暴露给用户。
 
 ## 10. 为什么 GSD 不直接上数据库，而要用 Markdown
 
@@ -474,7 +455,7 @@ flowchart TD
 - `REQUIREMENTS.md` 记范围承诺，`ROADMAP.md` 记阶段图，`STATE.md` 记当前位置。
 - `phases/<phase>/` 是阶段级情景记忆，保存上下文、计划、执行和验证工件。
 - query handlers 会把这些 Markdown 当成结构化状态源来读写，所以它更像“文件系统状态机”而不是笔记系统。
-- workstream 机制说明这套记忆还能被 namespaced，而不是只能有一份全局状态。
+- 遗留的 workstream 路径兼容层说明这套记忆结构本身可以被 namespaced，而不是只能有一份全局状态。
 
 ## 相关笔记
 

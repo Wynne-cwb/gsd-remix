@@ -117,11 +117,8 @@ flowchart LR
 
 第一版复刻时可以先不做:
 
-- AI-SPEC / UI-SPEC gate
-- Nyquist validation
-- seeds / milestone archive
+- milestone archive
 - review convergence
-- external bounce
 - hooks 的全部护栏
 - 多 runtime 安装器兼容
 
@@ -2348,7 +2345,7 @@ planner 产物会写到 phase 目录:
 真正复杂的地方在于:
 
 - 什么时候允许继续 plan
-- 什么时候强制你先补 context / AI-SPEC / UI-SPEC
+- 什么时候强制你先补 context
 - 什么时候可以复用现有研究
 - 什么时候要重新规划
 - 什么时候自动推进到 execute
@@ -2393,7 +2390,7 @@ workflow 一上来先声明:
 - `checker_model`
 - `research_enabled`
 - `plan_checker_enabled`
-- `nyquist_validation_enabled`
+- `nyquist_validation_enabled`（遗留字段，功能已移除，固定为 `false`）
 - `commit_docs`
 - `text_mode`
 - `auto_advance`
@@ -2446,14 +2443,9 @@ workflow 一上来先声明:
 
 也就是说, `plan-phase` 不是“只接受一个已经准备好的 phase 目录”, 它可以在 roadmap 已存在时补齐目录层。
 
-#### Step 2.5 / 3: reviews 模式和 roadmap phase 校验
+#### Step 2.5 / 3: roadmap phase 校验
 
-这里还会做两个前置检查:
-
-- `--reviews` 不能和 `--gaps` 同时用
-- 如果传了 `--reviews` 但 phase 目录里没有 `REVIEWS.md`, 直接退出并要求先跑 `/gsd-review`
-
-之后它还会再次通过:
+它会再次通过:
 
 - `gsd-remix-sdk query roadmap.get-phase "${PHASE}"`
 
@@ -2503,14 +2495,6 @@ workflow 不会先要求你跑 discuss-phase, 而是:
 
 这说明 `CONTEXT.md` 在 GSD 里不是可有可无, 而是一个明确的 planning 输入门。
 
-#### Step 4.5: AI-SPEC gate
-
-如果 phase 目标里带有 AI 相关关键字, 且当前 phase 没有 `AI-SPEC.md`, workflow 会提示:
-
-- 要不要先跑 `/gsd-ai-integration-phase`
-
-它不是绝对阻塞, 但会把“AI 系统设计合同缺失”显式暴露出来。
-
 #### Step 5: research gate
 
 research 不是永远跑, 也不是永远跳过。
@@ -2522,31 +2506,6 @@ research 不是永远跑, 也不是永远跳过。
 - 否则询问或自动决定是否起 `gsd-phase-researcher`
 
 所以 RESEARCH.md 在 GSD 里是**可缓存的 phase 工件**, 不是一次性 prompt 文本。
-
-#### Step 5.5: VALIDATION.md / Nyquist
-
-如果启用了 Nyquist validation, workflow 还会从 `RESEARCH.md` 中抽取 validation architecture, 生成:
-
-- `XX-VALIDATION.md`
-
-这说明 planning 阶段不只是拆任务, 也在预先定义“后面如何验证”。
-
-#### Step 5.55: security threat model gate
-
-如果开启 security enforcement, workflow 会要求:
-
-- 每个 `PLAN.md` 都包含 `<threat_model>` block
-
-这不是 executor 阶段再补的, 而是 planner 在生成计划时就必须内嵌安全威胁模型。
-
-#### Step 5.6: UI-SPEC gate
-
-如果 phase 看起来像前端/UI phase, 但没有 `UI-SPEC.md`, workflow 会:
-
-- 在 auto/chain 模式下自动先跑 `gsd-ui-phase`
-- 在手动模式下直接建议你先去生成 UI-SPEC, 然后退出 planning
-
-这说明 GSD 把 UI 设计合同视为 planning 之前的必要输入, 而不是实现时即兴发挥。
 
 #### Step 5.7: schema push gate
 
@@ -2617,7 +2576,7 @@ workflow 还会扫描:
 - 外部 review 反馈
 - 实验性结论
 
-#### Step 7.5 / 7.8: Nyquist artifact 检查和 pattern mapper
+#### Step 7.8: pattern mapper
 
 如果启用了 pattern mapper 且还没有 `PATTERNS.md`, workflow 会额外拉起:
 
@@ -3956,12 +3915,9 @@ flowchart LR
 
 - worktree 并行执行
 - milestone archive
-- seeds
-- AI-SPEC / UI-SPEC gate
 - schema drift gate
 - code review gate
 - hooks / statusline
-- cross-AI delegation
 - review convergence
 
 这些能力本质上都是在给主闭环加:

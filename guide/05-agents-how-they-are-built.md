@@ -156,7 +156,7 @@ agent 文件本身只是角色说明书。
 - 本次 phase 编号和模式
 - `<files_to_read>` 块
 - 需要读哪些 `.planning/` 文件
-- `PATTERNS.md`、`UI-SPEC.md`、`REVIEWS.md` 等可选输入
+- `PATTERNS.md` 等可选输入
 - 本次 `phase_req_ids`
 - 项目技能补丁
 - TDD mode 等附加约束
@@ -328,7 +328,7 @@ GSD 明显不是这样。
 
 - `gsd-phase-researcher`
 - `gsd-project-researcher`
-- `gsd-domain-researcher`
+- `gsd-advisor-researcher`
 
 构造特征：
 
@@ -356,7 +356,7 @@ GSD 明显不是这样。
 - `gsd-plan-checker`
 - `gsd-verifier`
 - `gsd-security-auditor`
-- `gsd-ui-checker`
+- `gsd-integration-checker`
 
 构造特征：
 
@@ -378,7 +378,7 @@ GSD 明显不是这样。
 - 有 deviation / checkpoint / commit 规则
 - 强调遇到计划外问题时怎么处理
 
-这说明 agent 并不是 33 个完全离散的角色，而是若干职责模板的具体化。
+这说明 agent 并不是 18 个完全离散的角色，而是若干职责模板的具体化。
 
 ## 10. SDK 里其实还有一套 headless agent 变体
 

@@ -101,7 +101,7 @@ gsd-remix-sdk query init.plan-phase "$PHASE"
 [`../get-shit-done/bin/lib/init.cjs`](../get-shit-done/bin/lib/init.cjs) 里的 `cmdInitPlanPhase` 会返回一组高度结构化的数据，包括：
 
 - 本次应该用的 `researcher_model`、`planner_model`、`checker_model`
-- workflow 开关：`research_enabled`、`plan_checker_enabled`、`nyquist_validation_enabled`
+- workflow 开关：`research_enabled`、`plan_checker_enabled`（另有遗留字段 `nyquist_validation_enabled`，对应的验证门已移除，配置里固定为 `false`）
 - phase 元数据：`phase_number`、`phase_name`、`phase_slug`、`padded_phase`
 - 现有工件状态：`has_context`、`has_research`、`has_reviews`、`has_plans`
 - 路径信息：`state_path`、`roadmap_path`、`requirements_path`、`context_path`、`research_path`、`verification_path`、`uat_path`、`reviews_path`、`patterns_path`
@@ -134,13 +134,11 @@ flowchart TD
 ```mermaid
 flowchart TD
     A["进入 plan-phase"] --> B["参数规范化"]
-    B --> C["reviews 前置检查"]
-    C --> D["phase 合法性检查"]
+    B --> D["phase 合法性检查"]
     D --> E["PRD express path?"]
     E --> F["CONTEXT.md 是否存在"]
-    F --> G["AI-SPEC gate"]
-    G --> H["Research gate"]
-    H --> I["Validation / Security / UI / Schema gates"]
+    F --> H["Research gate"]
+    H --> I["Schema push gate"]
     I --> J["Existing plans / patterns"]
     J --> K["spawn planner"]
     K --> L["spawn checker"]
@@ -160,8 +158,7 @@ flowchart TD
 
 比如：
 
-- `--reviews` 不能和 `--gaps` 混用
-- 有 `--reviews` 但 phase 目录里没有 `REVIEWS.md` 会直接报错
+- phase 编号解析失败或参数冲突会直接报错
 - phase 不存在于 `ROADMAP.md` 也不能继续
 
 #### 2. 上下文完备性 gate
@@ -169,17 +166,12 @@ flowchart TD
 比如：
 
 - 没有 `CONTEXT.md` 时，要么继续，要么先跑 `discuss-phase`
-- 有 AI 关键词但没有 `AI-SPEC.md` 时会提醒
-- 有 UI 特征但缺少 `UI-SPEC.md` 时，手动模式下甚至会直接终止并建议先跑 `gsd-ui-phase`
 
-#### 3. 研究与验证前置 gate
+#### 3. 研究与前置 gate
 
 比如：
 
 - 是否要 research
-- 是否生成 `VALIDATION.md`
-- Nyquist artifact 缺失时怎么办
-- `security_enforcement` 是否开启
 - schema 相关文件是否触发强制 push task 注入
 
 #### 4. 计划质量 gate
@@ -276,7 +268,7 @@ flowchart TD
     A --> E["CONTEXT.md"]
     A --> F["RESEARCH.md"]
     A --> G["PATTERNS.md"]
-    A --> H["UI-SPEC / REVIEWS / UAT / VERIFICATION 等可选输入"]
+    A --> H["UAT / VERIFICATION 等可选输入"]
     B --> I["gsd-planner"]
     C --> I
     D --> I

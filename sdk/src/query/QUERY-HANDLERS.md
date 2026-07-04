@@ -5,7 +5,6 @@ This document records contracts for the typed query layer consumed by `gsd-remix
 ## Registry coverage vs `gsd-tools.cjs`
 
 - **In scope:** Native handlers are registered in `createRegistry()` (`index.ts`) so SDK output can match `get-shit-done/bin/gsd-tools.cjs` JSON (see `sdk/src/golden/`).
-- **Explicitly not registered** (product decision): `**graphify**`, `**from-gsd2**` / `**gsd2-import**` — remain CLI-only.
 - **CLI name differences** (same behavior, different dispatch string):
   - CJS `**summary-extract**` → SDK `**summary.extract**` / `**summary extract**` / `**history-digest**` (see `index.ts`).
   - CJS top-level `**scaffold <type> ...**` → SDK `**phase.scaffold**` / `**phase scaffold**` with the scaffold type as the first argument (no separate `scaffold` alias on the registry).
@@ -15,7 +14,7 @@ This document records contracts for the typed query layer consumed by `gsd-remix
 1. **`normalizeQueryCommand()`** (`normalize-query-command.ts`) — maps the first argv tokens to the same **command + subcommand** patterns as `gsd-tools` `runCommand()` where needed (e.g. `state json` → `state.json`, `init execute-phase 9` → `init.execute-phase` with args `['9']`, `scaffold …` → `phase.scaffold`). Re-exported from **`@gsd-remix/sdk`** and **`createRegistry`’s module** (`sdk/src/query/index.ts`) so programmatic callers can mirror CLI tokenization without importing a deep path.
 2. **`resolveQueryArgv()`** (`registry.ts`) — **longest-prefix match** on the normalized argv: tries joined keys `a.b.c` then `a b c` for each prefix length, longest first. Example: `state update status X` → handler `state.update` with args `[status, X]`.
 3. **Dotted single token**: one token like `init.new-project` matches the registry; if the first pass finds no handler, a single dotted token is split and matching runs again.
-4. **CJS fallback (CLI)**: if nothing matches a registered handler and `GSD_QUERY_FALLBACK` is not `off`/`never`/`false`/`0`, the CLI shells out to `gsd-tools.cjs` with argv derived from the normalized tokens (dotted commands are split into CJS-style segments). stderr receives a short bridge warning. Set `GSD_QUERY_FALLBACK=off` for strict mode (parity tests). CLI-only commands such as `graphify` rely on this path until native handlers exist.
+4. **CJS fallback (CLI)**: if nothing matches a registered handler and `GSD_QUERY_FALLBACK` is not `off`/`never`/`false`/`0`, the CLI shells out to `gsd-tools.cjs` with argv derived from the normalized tokens (dotted commands are split into CJS-style segments). stderr receives a short bridge warning. Set `GSD_QUERY_FALLBACK=off` for strict mode (parity tests).
 5. **Output**: JSON written to stdout for successful handler results.
 
 **Registered:** `phase.add-batch` / `phase add-batch` — batch append (see `phaseAddBatch` in `phase-lifecycle.ts`).
@@ -139,7 +138,6 @@ From `read-only-parity.integration.test.ts` (full `toEqual` on this repo):
 | SDK / test  | Rule                                                                                                                                                                     |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `audit-open` | `audit-open --json`: `**scanned_at**` stripped before `toEqual` (volatile ISO time). `sanitizeForDisplay` in `audit-open.ts` matches `security.cjs` (CRLF body lines can leave `\r` in `items.todos[].summary`, matching CLI). |
-| `docs-init` | `existing_docs` sorted by `path` before compare; `**agents_installed`** and `**missing_agents**` omitted (subprocess vs in-process path resolution for `~/.claude/...`). |
 
 
 ### Structural, subset, or shape-only parity
@@ -222,15 +220,6 @@ Authoritative CJS entry points: `runCommand` `switch (command)` in `get-shit-don
 - CJS `**summary-extract`** → SDK `**summary.extract**`, `**summary extract**`, `**history-digest**` (history digest helpers).
 - CJS top-level `**scaffold <type> …**` → SDK `**phase.scaffold**` / `**phase scaffold**` (type + options in args).
 
-**CLI-only (no SDK registry handler; intentional unless requirements change):**
-
-
-| CJS surface           | Justification                                                                                  |
-| --------------------- | ---------------------------------------------------------------------------------------------- |
-| `**graphify`**        | Depends on Graphify CLI / Python stack; not ported to the typed query layer.                   |
-| `**from-gsd2**`       | Legacy GSD2 → GSD migration (`gsd2-import.cjs`); CLI-only helper.                              |
-
-
 **SDK-only (registered dispatch without an equivalent `gsd-tools` top-level subcommand):**
 
 
@@ -241,7 +230,7 @@ Authoritative CJS entry points: `runCommand` `switch (command)` in `get-shit-don
 
 ### Matrix: top-level `gsd-tools` command → SDK
 
-Disposition: **Registered** = handled in `createRegistry()` under the listed SDK name(s); **CLI-only** = no registry handler; **Alias** = same behavior, different primary dispatch string.
+Disposition: **Registered** = handled in `createRegistry()` under the listed SDK name(s); **Alias** = same behavior, different primary dispatch string.
 
 
 | CJS `command` (first argv)                                                                                                              | SDK dispatch name(s)                                                      | Disposition             | Notes                                                                     |
@@ -286,11 +275,8 @@ Disposition: **Registered** = handled in `createRegistry()` under the listed SDK
 | `summary-extract`                                                                                                                       | `summary.extract`, `summary extract`, `history-digest`, …                 | Alias                   |                                                                           |
 | `websearch`                                                                                                                             | `websearch`                                                               | Registered              |                                                                           |
 | `generate-claude-md` | same kebab-case name | Registered | |
-| `graphify`                                                                                                                              | —                                                                         | CLI-only                | See **CLI-only** table.                                                   |
-| `docs-init`                                                                                                                             | `docs-init`                                                               | Registered              | Golden: normalized compare (see above).                                   |
 | `learnings`                                                                                                                             | `learnings.list`, `learnings.query`, …                                    | Registered              |                                                                           |
 | `detect-custom-files`                                                                                                                   | `detect-custom-files`                                                     | Registered              | Requires `--config-dir`.                                                  |
-| `from-gsd2`                                                                                                                             | —                                                                         | CLI-only                | See **CLI-only** table.                                                   |
 
 
 ---
@@ -298,4 +284,3 @@ Disposition: **Registered** = handled in `createRegistry()` under the listed SDK
 ## Other registered areas
 
 - `**detect-custom-files`**: requires `--config-dir <path>`; scans installer manifest vs GSD-managed dirs (`detect-custom-files.ts`).
-- `**docs-init**`: docs-update workflow payload (`docs-init.ts`), aligned with `docs.cjs`. Golden tests omit `**agents_installed**` / `**missing_agents**` when comparing SDK vs CLI because the subprocess may resolve `~/.claude/...` differently than in-process checks.

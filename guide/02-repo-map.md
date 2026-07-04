@@ -147,8 +147,8 @@ flowchart TB
 - `roadmap.md`
 - `state.md`
 - `UAT.md`
-- `AI-SPEC.md`
-- `UI-SPEC.md`
+- `spec.md`
+- `research.md`
 
 ### `get-shit-done/references/`
 
@@ -174,8 +174,8 @@ flowchart TB
 
 当前快照下:
 
-- 同名命令和 workflow 重叠 71 个
-- 只有命令没有同名 workflow 的有 12 个
+- 同名命令和 workflow 重叠 32 个
+- 只有命令没有同名 workflow 的有 5 个
 - 只有 workflow 没有同名命令的有 10 个
 
 这说明两件事:

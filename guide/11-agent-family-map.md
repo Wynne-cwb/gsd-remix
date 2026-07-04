@@ -20,16 +20,16 @@ tags:
 
 读到 `agents/` 目录时，很多人的第一反应是：
 
-- 为什么会有 33 个 agent？
+- 为什么会有 18 个 agent？
 - 这些 agent 是不是只是“一个任务一个 prompt”地不断堆出来的？
 
 如果只是平铺文件名，你会觉得很散。
 
-但如果按“它在整条流水线里的位置”和“它交付什么工件”去看，这 33 个 agent 其实是几类非常稳定的角色模板。
+但如果按“它在整条流水线里的位置”和“它交付什么工件”去看，这 18 个 agent 其实是几类非常稳定的角色模板。
 
 一句话先说结论：
 
-> GSD 不是有 33 个互不相干的 agent，而是有一组重复出现的角色原型。每个 agent 的差异，主要体现在它负责哪个阶段、交付哪种工件、拿到多大的工具权限。
+> GSD 不是有 18 个互不相干的 agent，而是有一组重复出现的角色原型。每个 agent 的差异，主要体现在它负责哪个阶段、交付哪种工件、拿到多大的工具权限。
 
 ## 关键源码入口
 
@@ -39,8 +39,7 @@ tags:
 - [`../agents/gsd-plan-checker.md`](../agents/gsd-plan-checker.md)
 - [`../agents/gsd-executor.md`](../agents/gsd-executor.md)
 - [`../agents/gsd-verifier.md`](../agents/gsd-verifier.md)
-- [`../agents/gsd-doc-writer.md`](../agents/gsd-doc-writer.md)
-- [`../agents/gsd-doc-verifier.md`](../agents/gsd-doc-verifier.md)
+- [`../agents/gsd-code-reviewer.md`](../agents/gsd-code-reviewer.md)
 - [`../agents/gsd-debug-session-manager.md`](../agents/gsd-debug-session-manager.md)
 - [`../commands/gsd/new-project.md`](../commands/gsd/new-project.md)
 - [`../commands/gsd/plan-phase.md`](../commands/gsd/plan-phase.md)
@@ -55,7 +54,6 @@ flowchart TD
     C --> D["执行 / 修复型"]
     D --> E["验证 / 审计型"]
 
-    F["文档 / 知识型"] --> B
     G["调试 / 会话管理型"] --> D
 ```
 
@@ -116,12 +114,8 @@ flowchart TD
 | --- | --- | --- |
 | `gsd-project-researcher` | `new-project` | `.planning/research/*.md` |
 | `gsd-phase-researcher` | `plan-phase` | `RESEARCH.md` |
-| `gsd-ai-researcher` | `ai-integration` | `AI-SPEC.md` 的框架实现建议 |
-| `gsd-domain-researcher` | `ai-integration` | 业务域评估标准和风险 |
-| `gsd-ui-researcher` | `ui-phase` | `UI-SPEC.md` |
 | `gsd-advisor-researcher` | `discuss-phase advisor mode` | 单个 gray area 的比较表 |
 | `gsd-assumptions-analyzer` | `discuss-phase assumptions mode` | 带证据的假设清单 |
-| `gsd-user-profiler` | profile 工作流 | 用户行为画像 |
 
 ### 2.2 这一族最值得注意的点
 
@@ -129,9 +123,8 @@ flowchart TD
 
 - 项目级研究
 - phase 级研究
-- UI 设计契约研究
-- AI 集成研究
 - 单个 gray area 决策研究
+- 带证据的假设分析
 
 这说明 GSD 的思路不是“一个 researcher 全包”，而是按下游消费者来定研究粒度。
 
@@ -147,7 +140,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A["原始代码 / 原始文档"] --> B["mapper / classifier / synthesizer / intel-updater"]
+    A["原始代码 / 原始研究"] --> B["mapper / synthesizer"]
     B --> C["结构化中间工件"]
     C --> D["planner / command / query / verifier"]
 ```
@@ -156,12 +149,9 @@ flowchart LR
 
 | agent | 主要位置 | 典型产物 |
 | --- | --- | --- |
-| `gsd-codebase-mapper` | `map-codebase` / `scan` | `.planning/codebase/*.md` |
+| `gsd-codebase-mapper` | `map-codebase` | `.planning/codebase/*.md` |
 | `gsd-pattern-mapper` | `plan-phase` | `PATTERNS.md` |
-| `gsd-intel-updater` | `/gsd-intel refresh` | `.planning/intel/*` |
 | `gsd-research-synthesizer` | `new-project` | `.planning/research/SUMMARY.md` |
-| `gsd-doc-classifier` | `ingest-docs` | 单文档分类 JSON |
-| `gsd-doc-synthesizer` | `ingest-docs` | 聚合后的冲突与综合上下文 |
 
 ### 3.2 这一族为什么重要
 
@@ -174,8 +164,8 @@ flowchart LR
 例如：
 
 - `gsd-codebase-mapper` 把代码库压成 7 份专题地图
-- `gsd-intel-updater` 把代码库压成结构化索引
-- `gsd-research-synthesizer` 把 4 份研究压成一份 roadmap 友好的 `SUMMARY.md`
+- `gsd-pattern-mapper` 把现有代码模式压成 `PATTERNS.md`，给新文件找到最近的类比
+- `gsd-research-synthesizer` 把多份研究压成一份 roadmap 友好的 `SUMMARY.md`
 
 这也是 GSD 减轻主编排器上下文负担的核心手段之一。
 
@@ -190,9 +180,6 @@ flowchart LR
 | `gsd-roadmapper` | `new-project` | `ROADMAP.md`、`STATE.md` |
 | `gsd-planner` | `plan-phase` | `PLAN.md` |
 | `gsd-plan-checker` | `plan-phase` | 对计划的 blocker/warning 审核 |
-| `gsd-eval-planner` | `ai-integration` | AI eval strategy |
-| `gsd-framework-selector` | `ai-integration` / `select-framework` | 框架决策矩阵 |
-| `gsd-ui-checker` | `ui-phase` | `UI-SPEC.md` 的 PASS / FLAG / BLOCK |
 
 ### 4.2 这一族的共同模式
 
@@ -201,7 +188,6 @@ flowchart LR
 - roadmapper 把 requirements 变 phase contract
 - planner 把 phase contract 变 execution contract
 - plan-checker 验证 execution contract 是否真能交付
-- ui-checker 验证 design contract 是否足够清晰
 
 所以这类 agent 的本质不是“想点子”，而是“把边界锁硬”。
 
@@ -216,9 +202,8 @@ GSD 里最经典的配对就是：
 
 这对配对后来在别处也重复出现了：
 
-- `gsd-doc-writer` / `gsd-doc-verifier`
-- `gsd-ui-researcher` / `gsd-ui-checker`
 - `gsd-executor` / `gsd-verifier`
+- `gsd-code-fixer`（写）与 `gsd-code-reviewer`（判）
 
 也就是说，GSD 很少让“同一个 agent 既写又判自己写得对不对”。
 
@@ -273,12 +258,8 @@ GSD 里最经典的配对就是：
 | --- | --- | --- |
 | `gsd-verifier` | `execute-phase` 之后 | `VERIFICATION.md` |
 | `gsd-code-reviewer` | `code-review` | `REVIEW.md` |
-| `gsd-doc-verifier` | `docs-update` | 逐文档验证 JSON |
 | `gsd-integration-checker` | cross-phase integration | E2E 集成检查 |
-| `gsd-nyquist-auditor` | `validate-phase` | 测试与覆盖缺口 |
 | `gsd-security-auditor` | `secure-phase` | `SECURITY.md` |
-| `gsd-eval-auditor` | `eval-review` | `EVAL-REVIEW.md` |
-| `gsd-ui-auditor` | `ui-review` | `UI-REVIEW.md` |
 
 ### 6.2 这一族最值得学的地方
 
@@ -287,36 +268,12 @@ GSD 里最经典的配对就是：
 比如：
 
 - `gsd-verifier` 明确说不信 `SUMMARY.md`
-- `gsd-doc-verifier` 假设文档默认是错的，逐条 claim 去核
+- `gsd-code-reviewer` 假设代码默认可能有 bug，逐文件找问题
 - `gsd-plan-checker` 假设计划默认有缺口
 
 这说明 GSD 的质量策略不是“让上游更努力”，而是“下游必须带怀疑地验”。
 
-## 7. 第六大家族：文档 / 知识交付型 agent
-
-这类 agent 不是在做规划或验证，而是在维护知识成品本身。
-
-### 7.1 这一族包含谁
-
-| agent | 主要位置 | 典型产物 |
-| --- | --- | --- |
-| `gsd-doc-writer` | `docs-update` | README / ARCHITECTURE / API 文档等 |
-
-严格说，`doc-classifier`、`doc-synthesizer`、`doc-verifier` 也都在文档链路上，但它们更像 intake / synthesis / audit，所以我前面把它们拆到别的家族去了。
-
-`gsd-doc-writer` 之所以值得单列，是因为它展示了另一种 agent 设计：
-
-- 不是围绕 phase
-- 而是围绕 assignment block
-
-也就是：
-
-- 同一个 agent
-- 通过 `<doc_assignment>` 改变输出模式
-
-这和 `planner / executor` 这种 phase-centered agent 是不同风格。
-
-## 8. 这些家族背后还有一个更深的模式：工具预算分层
+## 7. 这些家族背后还有一个更深的模式：工具预算分层
 
 如果你看各 agent 的 `tools:` frontmatter，会发现它们也按家族成簇。
 
@@ -339,20 +296,19 @@ flowchart TD
 
 这正是“角色边界”在工具层上的体现。
 
-## 9. 把 33 个 agent 压成一句话，你应该怎么记
+## 8. 把 18 个 agent 压成一句话，你应该怎么记
 
 我会这样记：
 
 - 研究型：找事实、找模式、找选择
 - 映射型：把大量输入压成中间工件
 - 规划型：把目标锁成执行契约
-- 执行型：真正改代码、交工件
+- 执行型：真正改代码、交工件（含 debug 会话管理这类管理角色）
 - 验证型：不信上游，专找缺口
-- 管理型：在长流程里做路由、checkpoint、交接
 
-如果你记住这六层，`agents/` 目录就不会再像随机堆出来的 33 份 prompt。
+如果你记住这五类，`agents/` 目录就不会再像随机堆出来的 18 份 prompt。
 
-## 10. 这套 agent 谱系最值得学的地方
+## 9. 这套 agent 谱系最值得学的地方
 
 ### 1. agent 不是按“话题”切，而是按“工件责任”切
 
@@ -370,7 +326,7 @@ research / synthesize / create / check / audit 这条链，在很多子系统里
 
 所以系统复杂度没有文件数量看起来那么失控。
 
-## 11. 但它的代价也很明显
+## 10. 但它的代价也很明显
 
 ### 1. taxonomy 很容易膨胀
 
@@ -384,17 +340,17 @@ research / synthesize / create / check / audit 这条链，在很多子系统里
 
 ### 2. 家族边界并不总是完美
 
-例如某些 agent 同时带一点 synthesis 和 planning 味道，某些 doc agent 既像 intake 又像 verification。
+例如某些 agent 同时带一点 synthesis 和 planning 味道，某些 mapper 既像 intake 又像 verification。
 
 ### 3. 使用者必须理解“找谁来做”
 
 如果没有 workflow 帮忙路由，单看 agent 名字不一定容易选对。
 
-## 12. 看完这章后，你应该记住什么
+## 11. 看完这章后，你应该记住什么
 
-- `agents/` 的 33 个文件背后其实是 6 类比较稳定的角色家族。
+- `agents/` 的 18 个文件背后其实是 5 类比较稳定的角色家族。
 - 最好的分类方式不是看名字，而是看它在流水线里的位置、交付的工件、拥有的工具预算。
-- GSD 最常见的模式是成对出现：research / synthesize、planner / checker、executor / verifier、writer / verifier。
+- GSD 最常见的模式是成对出现：planner / checker、executor / verifier、code-fixer / code-reviewer。
 - 研究型 agent 往往拿 Web/Context7，执行型 agent 才拿 `Edit`，这体现了权限按角色切分。
 - 这套系统最强的地方不是 agent 多，而是 agent 之间的“工件交接”非常明确。
 

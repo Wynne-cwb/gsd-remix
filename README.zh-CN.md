@@ -108,7 +108,6 @@ GSD 解决的就是这个问题。它是让 Claude Code 变得可靠的上下文
 
 ### v1.37.0 亮点
 
-- **Spiking 与 sketching** — `/gsd-spike` 可运行 2–5 个聚焦实验并给出 Given/When/Then 结论；`/gsd-sketch` 可围绕设计问题产出 2–3 个交互式 HTML 方案，这两类产物都会落到 `.planning/`，并可配合 wrap-up 命令整理成项目本地 skills
 - **Agent 大小预算约束** — 分级行数上限（XL: 1600、Large: 1000、Default: 500）用于压缩 agent prompt，超限会在 CI 中暴露
 - **共享 boilerplate 抽取** — 将 mandatory-initial-read 和 project-skills-discovery 等逻辑提取到 reference 文件，减少多个 agent 之间的重复内容
 - **Runtime health 检查** — `discuss-phase`、`plan-phase` 和 `execute-phase` 现在都会先运行确定性的 runtime 预检；`/gsd-health --runtime` 可手动诊断安装/runtime 漂移，`/gsd-health --runtime --repair` 可重建内置 SDK
@@ -420,14 +419,13 @@ claude --dangerously-skip-permissions
 
 ---
 
-### 6. 重复 → 发布 → 完成 → 下一个里程碑
+### 6. 重复 → 完成 → 下一个里程碑
 
 ```
 /gsd-discuss-phase 2
 /gsd-plan-phase 2
 /gsd-execute-phase 2
 /gsd-verify-work 2
-/gsd-ship 2                  # 从已验证的工作创建 PR
 ...
 /gsd-complete-milestone
 /gsd-new-milestone
@@ -439,7 +437,7 @@ claude --dangerously-skip-permissions
 /gsd-next                    # 自动检测并执行下一步
 ```
 
-循环执行 **讨论 → 规划 → 执行 → 验证 → 发布**，直到整个里程碑完成。
+循环执行 **讨论 → 规划 → 执行 → 验证**，直到整个里程碑完成。
 
 如果你希望在讨论阶段更快收集信息，可以用 `/gsd-discuss-phase <n> --batch`，一次回答一小组问题，而不是逐个问答。
 
@@ -573,41 +571,13 @@ lmn012o feat(08-02): create registration endpoint
 |------|------|
 | `/gsd-new-project [--auto]` | 完整初始化：提问 → 研究 → 需求 → 路线图 |
 | `/gsd-discuss-phase [N] [--auto] [--analyze]` | 在规划前收集实现决策（`--analyze` 增加权衡分析） |
-| `/gsd-plan-phase [N] [--auto] [--reviews]` | 为某个阶段执行研究 + 规划 + 验证（`--reviews` 加载代码库审查结果） |
+| `/gsd-plan-phase [N] [--auto]` | 为某个阶段执行研究 + 规划 + 验证 |
 | `/gsd-execute-phase <N>` | 以并行 wave 执行全部计划，完成后验证 |
 | `/gsd-verify-work [N]` | 人工用户验收测试 ¹ |
-| `/gsd-ship [N] [--draft]` | 从已验证的阶段工作创建 PR，自动生成 PR 描述 |
 | `/gsd-fast <text>` | 内联处理琐碎任务——完全跳过规划，立即执行 |
 | `/gsd-next` | 自动推进到下一个逻辑工作流步骤 |
-| `/gsd-audit-milestone` | 验证里程碑是否达到完成定义 |
 | `/gsd-complete-milestone` | 归档里程碑并打 release tag |
 | `/gsd-new-milestone [name]` | 开始下一个版本：提问 → 研究 → 需求 → 路线图 |
-| `/gsd-milestone-summary` | 从已完成的里程碑产物生成项目概览，用于团队上手 |
-| `/gsd-forensics` | 对失败或卡住的工作流进行事后调查 |
-
-### 工作流（Workstreams）
-
-| 命令 | 作用 |
-|------|------|
-| `/gsd-workstreams list` | 显示所有工作流及其状态 |
-| `/gsd-workstreams create <name>` | 创建命名空间工作流，用于并行里程碑工作 |
-| `/gsd-workstreams switch <name>` | 切换当前活跃工作流 |
-| `/gsd-workstreams complete <name>` | 完成并合并工作流 |
-
-### 多项目工作区
-
-| 命令 | 作用 |
-|------|------|
-| `/gsd-new-workspace` | 创建隔离工作区，包含仓库副本（worktree 或 clone） |
-| `/gsd-list-workspaces` | 显示所有 GSD 工作区及其状态 |
-| `/gsd-remove-workspace` | 移除工作区并清理 worktree |
-
-### UI 设计
-
-| 命令 | 作用 |
-|------|------|
-| `/gsd-ui-phase [N]` | 为前端阶段生成 UI 设计合约（UI-SPEC.md） |
-| `/gsd-ui-review [N]` | 对已实现前端代码进行 6 维视觉审计 |
 
 ### 导航
 
@@ -617,7 +587,6 @@ lmn012o feat(08-02): create registration endpoint
 | `/gsd-next` | 自动检测状态并执行下一步 |
 | `/gsd-help` | 显示全部命令和使用指南 |
 | `/gsd-update` | 更新 GSD，并预览变更日志 |
-| `/gsd-join-discord` | 加入 GSD Discord 社区 |
 
 ### Brownfield
 
@@ -632,22 +601,21 @@ lmn012o feat(08-02): create registration endpoint
 | `/gsd-add-phase` | 在路线图末尾追加 phase |
 | `/gsd-insert-phase [N]` | 在 phase 之间插入紧急工作 |
 | `/gsd-remove-phase [N]` | 删除未来 phase，并重编号 |
-| `/gsd-list-phase-assumptions [N]` | 在规划前查看 Claude 打算采用的方案 |
-| `/gsd-plan-milestone-gaps` | 为 audit 发现的缺口创建 phase |
 
 ### 代码质量
 
 | 命令 | 作用 |
 |------|------|
-| `/gsd-review` | 对当前阶段或分支进行跨 AI 同行评审 |
+| `/gsd-code-review [N]` | 审查阶段改动的源码文件，发现 bug、安全和质量问题 |
+| `/gsd-code-review-fix [N]` | 自动修复代码审查发现的问题，每个修复独立提交 |
 | `/gsd-pr-branch` | 创建过滤 `.planning/` 提交的干净 PR 分支 |
-| `/gsd-audit-uat` | 审计验证债务——找出缺少 UAT 的阶段 |
 
 ### 积压
 
 | 命令 | 作用 |
 |------|------|
-| `/gsd-plant-seed <idea>` | 将想法存入积压停车场，留待未来里程碑 |
+| `/gsd-add-backlog <desc>` | 将想法加入积压停车场（999.x 编号，独立于活跃序列） |
+| `/gsd-review-backlog` | 审查积压项，提升到当前里程碑或清除过期条目 |
 
 ### 会话
 
@@ -655,14 +623,12 @@ lmn012o feat(08-02): create registration endpoint
 |------|------|
 | `/gsd-pause-work` | 在中途暂停时创建交接上下文（写入 HANDOFF.json） |
 | `/gsd-resume-work` | 从上一次会话恢复 |
-| `/gsd-session-report` | 生成会话摘要，包含已完成工作和结果 |
 
 ### 工具
 
 | 命令 | 作用 |
 |------|------|
 | `/gsd-settings` | 配置模型 profile 和工作流代理 |
-| `/gsd-set-profile <profile>` | 切换模型 profile（quality / balanced / budget / inherit） |
 | `/gsd-add-todo [desc]` | 记录一个待办想法 |
 | `/gsd-check-todos` | 查看待办列表 |
 | `/gsd-debug [desc]` | 使用持久状态进行系统化调试 |
@@ -670,8 +636,6 @@ lmn012o feat(08-02): create registration endpoint
 | `/gsd-note <text>` | 零摩擦想法捕捉——追加、列出或提升为待办 |
 | `/gsd-quick [--full] [--discuss] [--research]` | 以 GSD 保障执行临时任务（`--full` 增加计划检查和验证，`--discuss` 先补上下文，`--research` 在规划前先调研） |
 | `/gsd-health [--runtime] [--repair]` | 校验 `.planning/` 完整性、自动修复 planning 问题、确认 runtime 身份，或用 `--runtime --repair` 重建 `gsd-remix-sdk` |
-| `/gsd-stats` | 显示项目统计——阶段、计划、需求、git 指标 |
-| `/gsd-profile-user [--questionnaire] [--refresh]` | 从会话分析生成开发者行为档案，用于个性化响应 |
 
 <sup>¹ 由 reddit 用户 OracleGreyBeard 贡献</sup>
 
@@ -690,23 +654,16 @@ GSD 将项目设置保存在 `.planning/config.json`。你可以在 `/gsd-new-pr
 
 ### 模型 Profile
 
-控制各代理使用哪种 Claude 模型，在质量和 token 成本之间平衡。
+控制各代理使用哪种 Claude 模型。所有命名 profile（`quality`、`balanced`、`budget`）现在都解析为同一套统一分配——规划、路线图、研究和调试类代理使用 Opus，执行、验证、检查和映射类代理使用 Sonnet。profile 键名保留只是为了配置兼容。
 
-| Profile | Planning | Execution | Verification |
-|---------|----------|-----------|--------------|
-| `quality` | Opus | Opus | Sonnet |
-| `balanced`（默认） | Opus | Sonnet | Sonnet |
-| `budget` | Sonnet | Sonnet | Haiku |
-| `inherit` | Inherit | Inherit | Inherit |
-
-切换方式：
-```
-/gsd-set-profile budget
-```
+| Profile | 规划 / 研究 / 调试 | 其余代理 |
+|---------|--------------------|----------|
+| 命名 profile | Opus | Sonnet |
+| `inherit` | Inherit | Inherit |
 
 使用非 Anthropic 提供商（OpenRouter、本地模型）时，或想跟随当前运行时的模型选择时（如 OpenCode 的 `/model`），可用 `inherit`。
 
-也可以通过 `/gsd-settings` 配置。
+通过 `/gsd-settings` 配置。
 
 ### 工作流代理
 

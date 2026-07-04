@@ -25,9 +25,6 @@ const README_FILES = [
   'README.md',
   'README.zh-CN.md',
   'docs/zh-CN/README.md',
-  'docs/ko-KR/README.md',
-  'docs/ja-JP/README.md',
-  'docs/pt-BR/README.md',
   'docs/README.md',
 ].filter(f => fs.existsSync(path.join(ROOT, f)));
 
