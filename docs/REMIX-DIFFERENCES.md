@@ -42,6 +42,14 @@ This lets the remix stay close to upstream usage patterns while still making opi
 
 ## Current Deltas
 
+### 2026-07-04 — Slim Release (1.1.0)
+
+- **Area:** Command/agent surface, workflow ceremonies, docs, packaging
+- **Change:** Trimmed the harness to the core discuss → plan → execute → verify loop. Removed ~44 legacy commands and 15 agents and their ceremonies: AI-integration wizard + eval-review, Nyquist validation + `validate-phase`, secure-phase, multi-workspace/workstream user entry (SDK compat layer kept), intel/graphify/scan, docs-ingest/docs-writer family, developer profiling, spike/sketch, and standalone `ship`/`stats`/`manager`/`forensics`/`import`/`explore`/etc. Removed the update-check system (`/gsd-update`, `/gsd-reapply-patches`, `gsd-check-update` hook + installer wiring). Unified all named model profiles to one allocation (Opus for planning/research/debugging, Sonnet elsewhere). Redesigned security review as a diff-scoped gate inside `execute-phase` (prefers an installed company security skill, falls back to a bundled generic reviewer) instead of a standalone `secure-phase`. Decoupled advisor mode from user profiling. Reduced maintained docs to English + 简体中文 (removed ja-JP/ko-KR/pt-BR trees).
+- **Rationale:** The step-by-step ceremony surface had grown well beyond what the core loop needs; the slim keeps the high-value workflow and cuts the maintenance/onboarding overhead.
+- **Key files:** [README.md](../README.md), [docs/FEATURES.md](FEATURES.md), [docs/COMMANDS.md](COMMANDS.md), [docs/ARCHITECTURE.md](ARCHITECTURE.md), [docs/INVENTORY.md](INVENTORY.md), [get-shit-done/workflows/execute-phase.md](../get-shit-done/workflows/execute-phase.md), [get-shit-done/workflows/plan-phase.md](../get-shit-done/workflows/plan-phase.md), [bin/install.js](../bin/install.js), [get-shit-done/bin/lib/model-profiles.cjs](../get-shit-done/bin/lib/model-profiles.cjs)
+- **Compatibility impact:** High. Removed commands/agents no longer exist; projects relying on them should pin an earlier version. The `/gsd-*` core loop, `.planning/` layout, and config keys (removed features kept as documented `false` legacy keys) remain compatible.
+
 ### 2026-04-23 — Package Identity
 
 - **Area:** Packaging / distribution

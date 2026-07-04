@@ -72,6 +72,7 @@ npx gsd-remix@latest
 All remix-specific changes are tracked in [docs/REMIX-DIFFERENCES.md](docs/REMIX-DIFFERENCES.md). If this fork changes upstream behavior, installation, prompts, queries, or workflow defaults, it should be recorded there.
 
 Current highlights:
+- **Slimmed to a focused core (1.1.0)** — trimmed the command/agent surface down to the essential discuss → plan → execute → verify loop. Removed the update-check system (`/gsd-update`, `/gsd-reapply-patches`, background update hook) and the heavyweight ceremonies (AI-integration wizard, Nyquist validation, secure-phase, multi-workspace/workstreams, spike/sketch, intel/graphify). Unified the model profiles and folded security review into execution. Docs maintained in **English + 简体中文** only.
 - Published independently on npm as `gsd-remix`, while keeping the `/gsd-*` command surface and core planning layout compatible
 - Isolates the bundled SDK namespace as `@gsd-remix/sdk` / `gsd-remix-sdk`, so remix installs no longer collide with upstream `@gsd-build/sdk`
 - Token-efficiency changes in the main workflow path, including summary-first discuss history loading and low-complexity inline execution routing
@@ -108,12 +109,14 @@ People who want to describe what they want and have it built correctly — witho
 
 Built-in quality gates catch real problems: schema drift detection flags ORM changes missing migrations, a diff-scoped security review gate runs during execution, and scope reduction detection prevents the planner from silently dropping your requirements.
 
-### v1.37.0 Highlights
+### 1.1.0 Highlights — The Slim Release
 
-- **Agent size-budget enforcement** — Tiered line-count limits (XL: 1 600, Large: 1 000, Default: 500) keep agent prompts lean; violations surface in CI
-- **Shared boilerplate extraction** — Mandatory-initial-read and project-skills-discovery logic extracted to reference files, reducing duplication across a dozen agents
-- **Runtime health checks** — `discuss-phase`, `plan-phase`, and `execute-phase` now run deterministic runtime preflight checks up front; `/gsd-health --runtime` diagnoses install/runtime drift and `/gsd-health --runtime --repair` rebuilds the bundled SDK
-- **Isolated SDK package/binary** — the remix now builds its bundled SDK as `@gsd-remix/sdk` with the `gsd-remix-sdk` binary, avoiding PATH/package collisions with upstream installs
+- **Focused command surface** — Removed ~44 legacy commands and the ceremonies behind them (AI-integration wizard, Nyquist validation, secure-phase, multi-workspace/workstreams, spike/sketch, intel/graphify/scan, docs-ingest, developer profiling, ship/stats/manager/forensics). What remains is the core loop plus the utilities that earn their keep.
+- **No more update machinery** — Dropped `/gsd-update`, `/gsd-reapply-patches`, and the background update-check hook. Update by re-running `npx gsd-remix@latest`.
+- **Unified model profiles** — All named profiles resolve to one allocation: Opus for planning/research/debugging, Sonnet for everything else. Use `inherit` for non-Anthropic providers.
+- **Security review folded into execution** — A diff-scoped security review gate runs during `/gsd-execute-phase` instead of a separate secure-phase command; it prefers an installed company security skill and falls back to the bundled generic reviewer.
+- **18 focused agents** and **English + 简体中文** docs only.
+- **Runtime health + isolated SDK** — `/gsd-health --runtime` diagnoses install drift and `/gsd-health --runtime --repair` rebuilds the bundled `@gsd-remix/sdk` (`gsd-remix-sdk` binary), avoiding collisions with upstream installs.
 
 ---
 
