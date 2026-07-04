@@ -4295,7 +4295,7 @@ function copyWithPathReplacement(srcDir, destDir, pathPrefix, runtime, isCommand
   }
 }
 
-function copySdkBundleToRuntime(srcRoot, gsdRuntimeDir) {
+function copySdkBundleToRuntime(srcRoot, gsdRuntimeDir, runtime, pathPrefix, isGlobal) {
   const sdkSrc = path.join(srcRoot, 'sdk');
   const sdkDest = path.join(gsdRuntimeDir, 'sdk');
   const sdkEntries = ['src', 'prompts', 'package.json', 'package-lock.json', 'tsconfig.json'];
@@ -4313,7 +4313,15 @@ function copySdkBundleToRuntime(srcRoot, gsdRuntimeDir) {
   for (const entry of sdkEntries) {
     const source = path.join(sdkSrc, entry);
     if (!fs.existsSync(source)) continue;
-    fs.cpSync(source, path.join(sdkDest, entry), { recursive: true });
+    // The prompts/ mirror is markdown that must have Claude references (CLAUDE.md,
+    // .claude/) rewritten for non-Claude runtimes (#2112). Route it through the same
+    // transform used for the rest of the get-shit-done tree. SDK source and manifests
+    // are copied verbatim so the bundled repair source stays a faithful rebuild input.
+    if (entry === 'prompts' && runtime && runtime !== 'claude') {
+      copyWithPathReplacement(source, path.join(sdkDest, entry), pathPrefix, runtime, false, isGlobal);
+    } else {
+      fs.cpSync(source, path.join(sdkDest, entry), { recursive: true });
+    }
   }
 
   return true;
@@ -4801,7 +4809,7 @@ function uninstall(isGlobal, runtime = 'claude') {
   // 4. Remove GSD hooks
   const hooksDir = path.join(targetDir, 'hooks');
   if (fs.existsSync(hooksDir)) {
-    const gsdHooks = ['gsd-statusline.js', 'gsd-check-update.js', 'gsd-context-monitor.js', 'gsd-prompt-guard.js', 'gsd-read-guard.js', 'gsd-read-injection-scanner.js', 'gsd-workflow-guard.js', 'gsd-session-state.sh', 'gsd-validate-commit.sh', 'gsd-phase-boundary.sh'];
+    const gsdHooks = ['gsd-statusline.js', 'gsd-context-monitor.js', 'gsd-prompt-guard.js', 'gsd-read-guard.js', 'gsd-read-injection-scanner.js', 'gsd-workflow-guard.js', 'gsd-session-state.sh', 'gsd-validate-commit.sh', 'gsd-phase-boundary.sh'];
     let hookCount = 0;
     for (const hook of gsdHooks) {
       const hookPath = path.join(hooksDir, hook);
@@ -4853,7 +4861,7 @@ function uninstall(isGlobal, runtime = 'claude') {
     // Remove GSD hooks from settings — per-hook granularity to preserve
     // user hooks that share an entry with a GSD hook (#1755 followup)
     const isGsdHookCommand = (cmd) =>
-      cmd && (cmd.includes('gsd-check-update') || cmd.includes('gsd-statusline') ||
+      cmd && (cmd.includes('gsd-statusline') ||
         cmd.includes('gsd-session-state') || cmd.includes('gsd-context-monitor') ||
         cmd.includes('gsd-phase-boundary') || cmd.includes('gsd-prompt-guard') ||
         cmd.includes('gsd-read-guard') || cmd.includes('gsd-read-injection-scanner') ||
@@ -5363,9 +5371,9 @@ function writeManifest(configDir, runtime = 'claude') {
 
 /**
  * Detect user-modified GSD files by comparing against install manifest.
- * Backs up modified files to gsd-local-patches/ for reapply after update.
+ * Backs up modified files to gsd-local-patches/ for manual re-merge after reinstall.
  * Also saves pristine copies (from manifest) to gsd-pristine/ to enable
- * three-way merge during reapply-patches (pristine vs user vs new).
+ * a three-way merge (pristine vs user vs new) when re-merging by hand.
  */
 function saveLocalPatches(configDir) {
   const manifestPath = path.join(configDir, MANIFEST_NAME);
@@ -5393,7 +5401,7 @@ function saveLocalPatches(configDir) {
 
   // Save pristine copies of modified files from the CURRENT install (before wipe)
   // These represent the original GSD distribution files that the user then modified.
-  // The reapply-patches workflow uses these for three-way merge:
+  // These enable a manual three-way merge after reinstall:
   //   pristine (original) → user's version (what they changed) → new version (after update)
   if (modified.length > 0) {
     // We need the pristine originals, but the current files on disk are user-modified.
@@ -5434,13 +5442,6 @@ function reportLocalPatches(configDir, runtime = 'claude') {
   try { meta = JSON.parse(fs.readFileSync(metaPath, 'utf8')); } catch { return []; }
 
   if (meta.files && meta.files.length > 0) {
-    const reapplyCommand = (runtime === 'opencode' || runtime === 'kilo' || runtime === 'copilot')
-      ? '/gsd-reapply-patches'
-      : runtime === 'codex'
-        ? '$gsd-reapply-patches'
-        : runtime === 'cursor'
-          ? 'gsd-reapply-patches (mention the skill name)'
-          : '/gsd-reapply-patches';
     console.log('');
     console.log('  ' + yellow + 'Local patches detected' + reset + ' (from v' + meta.from_version + '):');
     for (const f of meta.files) {
@@ -5448,8 +5449,7 @@ function reportLocalPatches(configDir, runtime = 'claude') {
     }
     console.log('');
     console.log('  Your modifications are saved in ' + cyan + PATCHES_DIR_NAME + '/' + reset);
-    console.log('  Run ' + cyan + reapplyCommand + reset + ' to merge them into the new version.');
-    console.log('  Or manually compare and merge the files.');
+    console.log('  Manually compare and merge the files into the new version.');
     console.log('');
   }
   return meta.files || [];
@@ -5729,7 +5729,7 @@ function install(isGlobal, runtime = 'claude') {
   const skillDest = path.join(targetDir, 'get-shit-done');
   const savedGsdArtifacts = preserveUserArtifacts(skillDest, ['USER-PROFILE.md']);
   copyWithPathReplacement(skillSrc, skillDest, pathPrefix, runtime, false, isGlobal);
-  const copiedSdkBundle = copySdkBundleToRuntime(src, skillDest);
+  const copiedSdkBundle = copySdkBundleToRuntime(src, skillDest, runtime, pathPrefix, isGlobal);
   restoreUserArtifacts(skillDest, savedGsdArtifacts);
   if (verifyInstalled(skillDest, 'get-shit-done')) {
     console.log(`  ${green}✓${reset} Installed get-shit-done`);
@@ -5896,8 +5896,8 @@ function install(isGlobal, runtime = 'claude') {
             // Ensure hook files are executable (fixes #1162 — missing +x permission)
             try { fs.chmodSync(destFile, 0o755); } catch (e) { /* Windows doesn't support chmod */ }
           } else {
-            // .sh hooks carry a gsd-hook-version header so gsd-check-update.js can
-            // detect staleness after updates — stamp the version just like .js hooks.
+            // .sh hooks carry a gsd-hook-version header stamped with the install
+            // version — stamp the version just like .js hooks.
             if (entry.endsWith('.sh')) {
               let content = fs.readFileSync(srcFile, 'utf8');
               content = content.replace(/\{\{GSD_VERSION\}\}/g, pkg.version);
@@ -5923,11 +5923,6 @@ function install(isGlobal, runtime = 'claude') {
       }
     }
   }
-
-  // Clear stale update cache so next session re-evaluates hook versions
-  // Cache lives at ~/.cache/gsd/ (see hooks/gsd-check-update.js line 35-36)
-  const updateCacheFile = path.join(os.homedir(), '.cache', 'gsd', 'gsd-update-check.json');
-  try { fs.unlinkSync(updateCacheFile); } catch (e) { /* cache may not exist yet */ }
 
   if (failures.length > 0) {
     console.error(`\n  ${yellow}Installation incomplete!${reset} Failed: ${failures.join(', ')}`);
@@ -5995,73 +5990,6 @@ function install(isGlobal, runtime = 'claude') {
     const agentCount = installCodexConfig(targetDir, agentsSrc);
     console.log(`  ${green}✓${reset} Generated config.toml with ${agentCount} agent roles`);
     console.log(`  ${green}✓${reset} Generated ${agentCount} agent .toml config files`);
-
-    // Copy hook files that are referenced in config.toml (#2153)
-    // The main hook-copy block is gated to non-Codex runtimes, but Codex registers
-    // gsd-check-update.js in config.toml — the file must physically exist.
-    const codexHooksSrc = path.join(src, 'hooks', 'dist');
-    if (fs.existsSync(codexHooksSrc)) {
-      const codexHooksDest = path.join(targetDir, 'hooks');
-      fs.mkdirSync(codexHooksDest, { recursive: true });
-      const configDirReplacement = getConfigDirFromHome(runtime, isGlobal);
-      for (const entry of fs.readdirSync(codexHooksSrc)) {
-        const srcFile = path.join(codexHooksSrc, entry);
-        if (!fs.statSync(srcFile).isFile()) continue;
-        const destFile = path.join(codexHooksDest, entry);
-        if (entry.endsWith('.js')) {
-          let content = fs.readFileSync(srcFile, 'utf8');
-          content = content.replace(/'\.claude'/g, configDirReplacement);
-          content = content.replace(/\/\.claude\//g, `/${getDirName(runtime)}/`);
-          content = content.replace(/\.claude\//g, `${getDirName(runtime)}/`);
-          content = content.replace(/\{\{GSD_VERSION\}\}/g, pkg.version);
-          fs.writeFileSync(destFile, content);
-          try { fs.chmodSync(destFile, 0o755); } catch (e) { /* Windows */ }
-        } else {
-          if (entry.endsWith('.sh')) {
-            let content = fs.readFileSync(srcFile, 'utf8');
-            content = content.replace(/\{\{GSD_VERSION\}\}/g, pkg.version);
-            fs.writeFileSync(destFile, content);
-            try { fs.chmodSync(destFile, 0o755); } catch (e) { /* Windows */ }
-          } else {
-            fs.copyFileSync(srcFile, destFile);
-          }
-        }
-      }
-      console.log(`  ${green}✓${reset} Installed hooks`);
-    }
-
-    // Add Codex hooks (SessionStart for update checking) — requires codex_hooks feature flag
-    const configPath = path.join(targetDir, 'config.toml');
-    try {
-      let configContent = fs.existsSync(configPath) ? fs.readFileSync(configPath, 'utf-8') : '';
-      const eol = detectLineEnding(configContent);
-      const codexHooksFeature = ensureCodexHooksFeature(configContent);
-      configContent = setManagedCodexHooksOwnership(codexHooksFeature.content, codexHooksFeature.ownership);
-
-      // Add SessionStart hook for update checking
-      const updateCheckScript = path.resolve(targetDir, 'hooks', 'gsd-check-update.js').replace(/\\/g, '/');
-      const hookBlock =
-        `${eol}# GSD Hooks${eol}` +
-        `[[hooks]]${eol}` +
-        `event = "SessionStart"${eol}` +
-        `command = "node ${updateCheckScript}"${eol}`;
-
-      // Migrate legacy gsd-update-check entries from prior installs (#1755 followup)
-      // Remove stale hook blocks that used the inverted filename or wrong path
-      if (configContent.includes('gsd-update-check')) {
-        configContent = configContent.replace(/\n# GSD Hooks\n\[\[hooks\]\]\nevent = "SessionStart"\ncommand = "node [^\n]*gsd-update-check\.js"\n/g, '\n');
-        configContent = configContent.replace(/\r\n# GSD Hooks\r\n\[\[hooks\]\]\r\nevent = "SessionStart"\r\ncommand = "node [^\r\n]*gsd-update-check\.js"\r\n/g, '\r\n');
-      }
-
-      if (hasEnabledCodexHooksFeature(configContent) && !configContent.includes('gsd-check-update')) {
-        configContent += hookBlock;
-      }
-
-      fs.writeFileSync(configPath, configContent, 'utf-8');
-      console.log(`  ${green}✓${reset} Configured Codex hooks (SessionStart)`);
-    } catch (e) {
-      console.warn(`  ${yellow}⚠${reset}  Could not configure Codex hooks: ${e.message}`);
-    }
 
     return { settingsPath: null, settings: null, statuslineCommand: null, runtime, configDir: targetDir };
   }
@@ -6131,9 +6059,6 @@ function install(isGlobal, runtime = 'claude') {
   const statuslineCommand = isGlobal
     ? buildHookCommand(targetDir, 'gsd-statusline.js', hookOpts)
     : 'node ' + localPrefix + '/hooks/gsd-statusline.js';
-  const updateCheckCommand = isGlobal
-    ? buildHookCommand(targetDir, 'gsd-check-update.js', hookOpts)
-    : 'node ' + localPrefix + '/hooks/gsd-check-update.js';
   const contextMonitorCommand = isGlobal
     ? buildHookCommand(targetDir, 'gsd-context-monitor.js', hookOpts)
     : 'node ' + localPrefix + '/hooks/gsd-context-monitor.js';
@@ -6158,36 +6083,13 @@ function install(isGlobal, runtime = 'claude') {
     }
   }
 
-  // Configure SessionStart hook for update checking (skip for opencode)
+  // Configure GSD hooks (skip for opencode)
   if (!isOpencode && !isKilo) {
     if (!settings.hooks) {
       settings.hooks = {};
     }
     if (!settings.hooks.SessionStart) {
       settings.hooks.SessionStart = [];
-    }
-
-    const hasGsdUpdateHook = settings.hooks.SessionStart.some(entry =>
-      entry.hooks && entry.hooks.some(h => h.command && h.command.includes('gsd-check-update'))
-    );
-
-    // Guard: only register if the hook file was actually installed (#1754).
-    // When hooks/dist/ is missing from the npm package (as in v1.32.0), the
-    // copy step produces no files but the registration step ran unconditionally,
-    // causing "hook error" on every tool invocation.
-    const checkUpdateFile = path.join(targetDir, 'hooks', 'gsd-check-update.js');
-    if (!hasGsdUpdateHook && fs.existsSync(checkUpdateFile)) {
-      settings.hooks.SessionStart.push({
-        hooks: [
-          {
-            type: 'command',
-            command: updateCheckCommand
-          }
-        ]
-      });
-      console.log(`  ${green}✓${reset} Configured update check hook`);
-    } else if (!hasGsdUpdateHook && !fs.existsSync(checkUpdateFile)) {
-      console.warn(`  ${yellow}⚠${reset}  Skipped update check hook — gsd-check-update.js not found at target`);
     }
 
     // Configure post-tool hook for context window monitoring

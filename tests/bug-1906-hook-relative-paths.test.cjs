@@ -25,7 +25,6 @@ const INSTALL_SRC = path.join(__dirname, '..', 'bin', 'install.js');
 // All hooks that the installer registers for local installs
 const HOOKS = [
   'gsd-statusline.js',
-  'gsd-check-update.js',
   'gsd-context-monitor.js',
   'gsd-prompt-guard.js',
   'gsd-read-guard.js',

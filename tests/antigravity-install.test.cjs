@@ -131,7 +131,7 @@ describe('convertClaudeToAntigravityContent', () => {
     });
 
     test('replaces ./.claude/ with ./.agent/', () => {
-      const input = 'path ./.claude/hooks/gsd-check-update.js';
+      const input = 'path ./.claude/hooks/gsd-context-monitor.js';
       const result = convertClaudeToAntigravityContent(input, false);
       assert.ok(result.includes('./.agent/hooks/'), result);
       assert.ok(!result.includes('./.claude/'), result);

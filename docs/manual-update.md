@@ -18,12 +18,9 @@ node scripts/build-hooks.js
 
 # 3. Run the installer directly
 node bin/install.js --claude --global
-
-# 4. Clear the update cache so the statusline indicator resets
-rm -f ~/.cache/gsd/gsd-update-check.json
 ```
 
-**Step 5 — Restart your runtime** to pick up the new commands and agents.
+**Step 4 — Restart your runtime** to pick up the new commands and agents.
 
 ## Runtime flags
 
@@ -59,4 +56,4 @@ The installer performs a clean wipe-and-replace of GSD-managed directories only:
 - Your `CLAUDE.md` files
 - Custom hooks
 
-Locally modified GSD files are automatically backed up to `gsd-local-patches/` before the install. Run `/gsd-reapply-patches` after updating to merge your modifications back in.
+Locally modified GSD files are automatically backed up to `gsd-local-patches/` before the install. After updating, manually compare and merge your modifications back in from that directory.

@@ -153,13 +153,13 @@ Warnings: N
 ## Warnings
 
 - [legacy_bridge_missing] No gsd-tools.cjs bridge could be found for CJS fallback commands.
-  Fix: Run /gsd-update to restore the bundled bridge. Use /gsd-health --runtime --repair only for SDK CLI repair.
+  Fix: Reinstall GSD to restore the bundled bridge. Use /gsd-health --runtime --repair only for SDK CLI repair.
 ```
 
 **Footer:**
 ```
 ---
-Runtime mode is read-only unless --repair is set. Use /gsd-health --runtime --repair to rebuild the bundled SDK, or /gsd-update to refresh all runtime assets.
+Runtime mode is read-only unless --repair is set. Use /gsd-health --runtime --repair to rebuild the bundled SDK, or reinstall GSD to refresh all runtime assets.
 ```
 
 Then STOP. Do not proceed to repair prompts.

@@ -1064,7 +1064,7 @@ describe('Copilot manifest and patches fixes', () => {
       console.log = originalLog;
     });
 
-    test('reportLocalPatches shows /gsd-reapply-patches for Copilot', () => {
+    test('reportLocalPatches reports backed-up patches for Copilot', () => {
       // Create patches directory with metadata
       const patchesDir = path.join(tmpDir, 'gsd-local-patches');
       fs.mkdirSync(patchesDir, { recursive: true });
@@ -1077,11 +1077,11 @@ describe('Copilot manifest and patches fixes', () => {
 
       assert.ok(result.length > 0, 'returns patched files list');
       const output = logs.join('\n');
-      assert.ok(output.includes('/gsd-reapply-patches'), 'uses dash format for Copilot');
-      assert.ok(!output.includes('/gsd:reapply-patches'), 'does not use colon format');
+      assert.ok(output.includes('gsd-local-patches'), 'points user to gsd-local-patches/ directory');
+      assert.ok(!output.includes('reapply-patches'), 'does not reference the removed reapply-patches command');
     });
 
-    test('reportLocalPatches shows /gsd-reapply-patches for Claude', () => {
+    test('reportLocalPatches reports backed-up patches for Claude', () => {
       // Create patches directory with metadata
       const patchesDir = path.join(tmpDir, 'gsd-local-patches');
       fs.mkdirSync(patchesDir, { recursive: true });
@@ -1094,8 +1094,8 @@ describe('Copilot manifest and patches fixes', () => {
 
       assert.ok(result.length > 0, 'returns patched files list');
       const output = logs.join('\n');
-      assert.ok(output.includes('/gsd-reapply-patches'), 'uses hyphen format for Claude');
-      assert.ok(!output.includes('/gsd:reapply-patches'), 'does not use colon format for Claude');
+      assert.ok(output.includes('gsd-local-patches'), 'points user to gsd-local-patches/ directory');
+      assert.ok(!output.includes('reapply-patches'), 'does not reference the removed reapply-patches command');
     });
   });
 });

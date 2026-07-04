@@ -484,26 +484,6 @@ Analyze existing codebase with parallel mapper agents.
 
 ---
 
-## Update Commands
-
-### `/gsd-update`
-
-Update GSD with changelog preview.
-
-```bash
-/gsd-update                         # Check for updates and install
-```
-
-### `/gsd-reapply-patches`
-
-Restore local modifications after a GSD update.
-
-```bash
-/gsd-reapply-patches                # Merge back local changes
-```
-
----
-
 ## Code Quality Commands
 
 ### `/gsd-code-review`

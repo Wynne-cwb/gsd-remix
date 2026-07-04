@@ -42,10 +42,8 @@ describe('/gsd-health runtime mode', () => {
 
     const preamble = content.slice(checkIndex, runtimeCall);
     const hasInstallHint =
-      preamble.includes('/gsd-health --runtime --repair') ||
-      preamble.includes('gsd-update') ||
-      preamble.includes('/gsd-update');
-    assert.ok(hasInstallHint, 'health workflow preflight should include install/update guidance');
+      preamble.includes('/gsd-health --runtime --repair');
+    assert.ok(hasInstallHint, 'health workflow preflight should include install/repair guidance');
   });
 
   test('workflow can run bundled SDK repair before querying runtime.health', () => {

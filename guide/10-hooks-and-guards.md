@@ -46,8 +46,6 @@ tags:
 - [`../hooks/gsd-validate-commit.sh`](../hooks/gsd-validate-commit.sh)
 - [`../hooks/gsd-session-state.sh`](../hooks/gsd-session-state.sh)
 - [`../hooks/gsd-phase-boundary.sh`](../hooks/gsd-phase-boundary.sh)
-- [`../hooks/gsd-check-update.js`](../hooks/gsd-check-update.js)
-- [`../hooks/gsd-check-update-worker.js`](../hooks/gsd-check-update-worker.js)
 - [`../scripts/build-hooks.js`](../scripts/build-hooks.js)
 - [`../bin/install.js`](../bin/install.js)
 - [`../get-shit-done/templates/config.json`](../get-shit-done/templates/config.json)
@@ -198,8 +196,8 @@ flowchart TD
 
 | 通道 | 代表 hook | 主要职责 |
 | --- | --- | --- |
-| `statusLine` | `gsd-statusline.js` | 给用户显示当前任务、目录、上下文压力、更新提示 |
-| `SessionStart` | `gsd-check-update.js`、`gsd-session-state.sh` | 会话开始时做后台检查和状态定向 |
+| `statusLine` | `gsd-statusline.js` | 给用户显示当前任务、目录、上下文压力 |
+| `SessionStart` | `gsd-session-state.sh` | 会话开始时做状态定向 |
 | `PreToolUse` / `BeforeTool` | `gsd-prompt-guard.js`、`gsd-read-guard.js`、`gsd-workflow-guard.js`、`gsd-validate-commit.sh` | 工具执行前提醒、扫描、策略约束 |
 | `PostToolUse` / `AfterTool` | `gsd-context-monitor.js`、`gsd-read-injection-scanner.js`、`gsd-phase-boundary.sh` | 工具执行后根据结果做告警、扫描或提醒 |
 
@@ -443,39 +441,6 @@ flowchart LR
 - 当前 config mode
 
 这相当于在会话刚建立时，先给 agent 一个“你现在站在哪”的定向提醒。
-
-### 7.2 `gsd-check-update.js` 与 `gsd-check-update-worker.js`
-
-这一对脚本展示了 hook 层里的另一种模式：
-
-- 前台触发器
-- 后台 worker
-
-`gsd-check-update.js` 本身并不做重活，它只是：
-
-- 定位版本文件
-- 准备 cache 路径
-- spawn 一个 detached worker
-
-真正的检查和 stale hook 探测，是在 `gsd-check-update-worker.js` 里做的。
-
-而这个 worker 的结果，最后又会被 `gsd-statusline.js` 读出来，变成：
-
-- `⬆ /gsd-update`
-- `⚠ stale hooks`
-
-所以这又是一条桥：
-
-```mermaid
-flowchart LR
-    A["SessionStart: gsd-check-update.js"] --> B["spawn detached worker"]
-    B --> C["gsd-check-update-worker.js"]
-    C --> D["写 ~/.cache/gsd/gsd-update-check.json"]
-    D --> E["gsd-statusline.js 读取 cache"]
-    E --> F["用户看到 update / stale hooks 提示"]
-```
-
-这条链说明 hook 层不只会“拦”和“扫”，也会做轻量后台观察，并把结果回灌给 statusline。
 
 ## 8. 这层真正的设计取舍：大多数 hook 都是软性的
 

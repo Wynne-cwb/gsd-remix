@@ -37,8 +37,6 @@ const os = require('os');
 const { execFileSync } = require('child_process');
 
 const HOOKS_DIR = path.join(__dirname, '..', 'hooks');
-const CHECK_UPDATE_FILE = path.join(HOOKS_DIR, 'gsd-check-update.js');
-const WORKER_FILE = path.join(HOOKS_DIR, 'gsd-check-update-worker.js');
 const INSTALL_SCRIPT = path.join(__dirname, '..', 'bin', 'install.js');
 const BUILD_SCRIPT = path.join(__dirname, '..', 'scripts', 'build-hooks.js');
 
@@ -109,77 +107,6 @@ describe('bug #2136 part 1: bash hook sources carry gsd-hook-version placeholder
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Part 2: gsd-check-update-worker.js regex handles bash "#" comment syntax
-// (Logic moved from inline -e template literal to dedicated worker file)
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe('bug #2136 part 2: stale-hook detector handles bash comment syntax', () => {
-  let src;
-
-  before(() => {
-    src = fs.readFileSync(WORKER_FILE, 'utf8');
-  });
-
-  test('version regex in source matches "#" comment syntax in addition to "//"', () => {
-    // The regex string in the source must contain the alternation for "#".
-    // The worker uses plain JS (no template-literal escaping), so the form is
-    // "(?:\/\/|#)" directly in source.
-    const hasBashAlternative =
-      src.includes('(?:\\/\\/|#)') ||     // escaped form (old template-literal style)
-      src.includes('(?:\/\/|#)');          // direct form in plain JS worker
-    assert.ok(
-      hasBashAlternative,
-      'gsd-check-update-worker.js version regex must include an alternative for bash "#" comments. ' +
-      'Expected to find (?:\\/\\/|#) or (?:\/\/|#) in the source. ' +
-      'The original "//" only regex causes bash hooks to always report hookVersion: "unknown"'
-    );
-  });
-
-  test('version regex does not use the old JS-only form as the sole pattern', () => {
-    // The old regex inside the template literal was the string:
-    //   /\\/\\/ gsd-hook-version:\\s*(.+)/
-    // which, when evaluated in the subprocess, produced: /\/\/ gsd-hook-version:\s*(.+)/
-    // That only matched JS "//" comments — never bash "#".
-    // We verify that the old exact string no longer appears.
-    assert.ok(
-      !src.includes('\\/\\/ gsd-hook-version'),
-      'gsd-check-update-worker.js must not use the old JS-only (\\/\\/ gsd-hook-version) ' +
-      'escape form as the sole version matcher — it cannot match bash "#" comments'
-    );
-  });
-
-  test('version regex correctly matches both bash and JS hook version headers', () => {
-    // Verify that the versionMatch line in the source uses a regex that matches
-    // both bash "#" and JS "//" comment styles. We check the source contains the
-    // expected alternation, then directly test the known required pattern.
-    //
-    // We do NOT try to extract and evaluate the regex from source (it contains ")"
-    // which breaks simple extraction), so instead we confirm the source matches
-    // our expectation and run the regex itself.
-    assert.ok(
-      src.includes('gsd-hook-version'),
-      'gsd-check-update-worker.js must contain a gsd-hook-version version check'
-    );
-
-    // The fixed regex that must be present: matches both comment styles
-    const fixedRegex = /(?:\/\/|#) gsd-hook-version:\s*(.+)/;
-
-    assert.ok(
-      fixedRegex.test('# gsd-hook-version: 1.36.0'),
-      'bash-style "# gsd-hook-version: X" must be matchable by the required regex'
-    );
-    assert.ok(
-      fixedRegex.test('// gsd-hook-version: 1.36.0'),
-      'JS-style "// gsd-hook-version: X" must still match (no regression)'
-    );
-    assert.ok(
-      !fixedRegex.test('gsd-hook-version: 1.36.0'),
-      'line without a comment prefix must not match (prevents false positives)'
-    );
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Part 3a: install.js bundled path substitutes {{GSD_VERSION}} in .sh hooks
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -215,36 +142,6 @@ describe('bug #2136 part 3a: install.js bundled path substitutes {{GSD_VERSION}}
       shBranchRegion.includes('readFileSync') || shBranchRegion.includes('writeFileSync'),
       'bundled .sh branch must read the file (readFileSync) to perform substitution, ' +
       'not copyFileSync directly (which skips template expansion)'
-    );
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Part 3b: install.js Codex path also substitutes {{GSD_VERSION}} in .sh hooks
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe('bug #2136 part 3b: install.js Codex path substitutes {{GSD_VERSION}} in .sh hooks', () => {
-  let src;
-
-  before(() => {
-    src = fs.readFileSync(INSTALL_SCRIPT, 'utf8');
-  });
-
-  test('.sh branch in Codex hook copy block substitutes GSD_VERSION', () => {
-    // Anchor on codexHooksSrc — unique to the Codex path.
-    const anchorIdx = src.indexOf('codexHooksSrc');
-    assert.ok(anchorIdx !== -1, 'Codex hook copy block anchor (codexHooksSrc) not found');
-
-    const region = src.slice(anchorIdx, anchorIdx + 2000);
-
-    assert.ok(
-      region.includes("entry.endsWith('.sh')"),
-      "Codex hook copy block must check entry.endsWith('.sh')"
-    );
-    assert.ok(
-      region.includes('GSD_VERSION'),
-      'Codex .sh branch must substitute {{GSD_VERSION}}. The bundled path was fixed ' +
-      'but Codex installs a separate copy of the hooks from hooks/dist that also needs stamping'
     );
   });
 });

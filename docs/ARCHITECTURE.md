@@ -201,8 +201,6 @@ Runtime hooks that integrate with the host AI agent:
 |------|-------|---------|
 | `gsd-statusline.js` | `statusLine` | Displays model, directory, context usage bar, and runtime-provided rate limits |
 | `gsd-context-monitor.js` | `PostToolUse` / `AfterTool` | Injects agent-facing context warnings at 35%/25% remaining |
-| `gsd-check-update.js` | `SessionStart` | Foreground trigger for the background update check |
-| `gsd-check-update-worker.js` | (helper) | Background worker spawned by `gsd-check-update.js`; no direct event registration |
 | `gsd-prompt-guard.js` | `PreToolUse` | Scans `.planning/` writes for prompt injection patterns (advisory) |
 | `gsd-read-injection-scanner.js` | `PostToolUse` | Scans Read tool output for injected instructions in untrusted content |
 | `gsd-workflow-guard.js` | `PreToolUse` | Detects file edits outside GSD workflow context (advisory, opt-in via `hooks.workflow_guard`) |
@@ -211,7 +209,7 @@ Runtime hooks that integrate with the host AI agent:
 | `gsd-validate-commit.sh` | `PostToolUse` | Commit validation for conventional commit enforcement |
 | `gsd-phase-boundary.sh` | `PostToolUse` | Phase boundary detection for workflow transitions |
 
-See [`docs/INVENTORY.md`](INVENTORY.md#hooks-11-shipped) for the authoritative 11-hook roster.
+See [`docs/INVENTORY.md`](INVENTORY.md#hooks-9-shipped) for the authoritative 9-hook roster.
 
 ### CLI Tools (`get-shit-done/bin/`)
 
@@ -408,7 +406,7 @@ SUMMARY.md (per plan) ───────────────────�
 │   ├── references/*.md             # Shared reference docs (authoritative roster: docs/INVENTORY.md)
 │   └── templates/                  # Planning artifact templates
 ├── agents/*.md                     # Agent definitions (authoritative roster: docs/INVENTORY.md)
-├── hooks/*.js                      # Node.js hooks (statusline, guards, monitors, update check)
+├── hooks/*.js                      # Node.js hooks (statusline, guards, monitors)
 ├── hooks/*.sh                      # Shell hooks (session state, commit validation, phase boundary)
 ├── settings.json                   # Hook registrations
 └── VERSION                         # Installed version number
@@ -491,7 +489,7 @@ The installer (`bin/install.js`, ~3,000 lines) handles:
   - Augment Code: Skills-first with full skill conversion and config management
 5. **Path normalization** — Replaces `~/.claude/` paths with runtime-specific paths
 6. **Settings integration** — Registers hooks in runtime's `settings.json`
-7. **Patch backup** — Since v1.17, backs up locally modified files to `gsd-local-patches/` for `/gsd-reapply-patches`
+7. **Patch backup** — Since v1.17, backs up locally modified files to `gsd-local-patches/` for manual re-merge after reinstall
 8. **Manifest tracking** — Writes `gsd-file-manifest.json` for clean uninstall
 9. **Uninstall mode** — `--uninstall` removes all GSD files, hooks, and settings
 
@@ -514,13 +512,9 @@ Runtime Engine (Claude Code / Gemini CLI)
     │   Reads: stdin (session JSON)
     │   Writes: stdout (formatted status), /tmp/claude-ctx-{session}.json (bridge)
     │
-    ├── PostToolUse/AfterTool event ──► gsd-context-monitor.js
-    │   Reads: stdin (tool event JSON), /tmp/claude-ctx-{session}.json (bridge)
-    │   Writes: stdout (hookSpecificOutput with additionalContext warning)
-    │
-    └── SessionStart event ──► gsd-check-update.js
-        Reads: VERSION file
-        Writes: ~/.claude/cache/gsd-update-check.json (spawns background process)
+    └── PostToolUse/AfterTool event ──► gsd-context-monitor.js
+        Reads: stdin (tool event JSON), /tmp/claude-ctx-{session}.json (bridge)
+        Writes: stdout (hookSpecificOutput with additionalContext warning)
 ```
 
 ### Context Monitor Thresholds

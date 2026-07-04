@@ -31,7 +31,6 @@ const EXPECTED_SH_HOOKS = [
 
 // All hooks that should be in hooks/dist/ after build
 const EXPECTED_ALL_HOOKS = [
-  'gsd-check-update.js',
   'gsd-context-monitor.js',
   'gsd-prompt-guard.js',
   'gsd-read-guard.js',
@@ -156,31 +155,6 @@ describe('install.js source correctness', () => {
     );
   });
 
-  test('Codex hook uses correct filename gsd-check-update.js (not gsd-update-check.js)', () => {
-    // The cache file gsd-update-check.json is legitimate (different artifact);
-    // check that no hook registration uses the inverted .js filename.
-    // Match the exact pattern: quote + gsd-update-check.js + quote
-    assert.ok(
-      !src.match(/['"]gsd-update-check\.js['"]/),
-      'install.js must not reference the inverted hook name gsd-update-check.js in quotes'
-    );
-  });
-
-  test('Codex hook path does not use get-shit-done/hooks/ subdirectory', () => {
-    // The Codex hook should resolve to targetDir/hooks/, not targetDir/get-shit-done/hooks/
-    assert.ok(
-      !src.includes("'get-shit-done', 'hooks', 'gsd-check-update"),
-      'Codex hook should not use get-shit-done/hooks/ path segment'
-    );
-  });
-
-  test('cache invalidation uses ~/.cache/gsd/ path', () => {
-    assert.ok(
-      src.includes("os.homedir(), '.cache', 'gsd'"),
-      'Cache path should use os.homedir()/.cache/gsd/'
-    );
-  });
-
   test('manifest tracks .sh hook files', () => {
     assert.ok(
       src.includes("file.endsWith('.sh')"),
@@ -211,7 +185,7 @@ describe('install.js source correctness', () => {
   test('isGsdHookCommand covers all GSD hook names', () => {
     // The consolidated uninstall cleanup uses isGsdHookCommand — verify all hook names are present
     const expectedHookNames = [
-      'gsd-check-update', 'gsd-statusline', 'gsd-session-state',
+      'gsd-statusline', 'gsd-session-state',
       'gsd-context-monitor', 'gsd-phase-boundary', 'gsd-prompt-guard',
       'gsd-read-guard', 'gsd-validate-commit', 'gsd-workflow-guard',
     ];
@@ -221,13 +195,6 @@ describe('install.js source correctness', () => {
         `isGsdHookCommand should match ${name}`
       );
     }
-  });
-
-  test('Codex install migrates legacy gsd-update-check entries', () => {
-    assert.ok(
-      src.includes('gsd-update-check'),
-      'install.js should detect legacy gsd-update-check entries for migration'
-    );
   });
 
   test('no duplicate isCursor or isWindsurf branches in uninstall skill removal', () => {
@@ -316,7 +283,7 @@ describe('writeManifest includes .sh hooks', () => {
 describe('uninstall settings cleanup preserves user hooks', () => {
   // Mirror the isGsdHookCommand logic from install.js
   const isGsdHookCommand = (cmd) =>
-    cmd && (cmd.includes('gsd-check-update') || cmd.includes('gsd-statusline') ||
+    cmd && (cmd.includes('gsd-statusline') ||
       cmd.includes('gsd-session-state') || cmd.includes('gsd-context-monitor') ||
       cmd.includes('gsd-phase-boundary') || cmd.includes('gsd-prompt-guard') ||
       cmd.includes('gsd-read-guard') || cmd.includes('gsd-validate-commit') ||
@@ -351,7 +318,7 @@ describe('uninstall settings cleanup preserves user hooks', () => {
   test('entry with only GSD hooks is fully removed', () => {
     const entries = [{
       hooks: [
-        { type: 'command', command: 'node /path/to/gsd-check-update.js' },
+        { type: 'command', command: 'node /path/to/gsd-context-monitor.js' },
         { type: 'command', command: 'node /path/to/gsd-statusline.js' },
       ],
     }];
@@ -388,7 +355,6 @@ describe('uninstall settings cleanup preserves user hooks', () => {
 
   test('all GSD hook names are recognized by isGsdHookCommand', () => {
     const gsdCommands = [
-      'node /path/gsd-check-update.js',
       'node /path/gsd-statusline.js',
       'bash /path/gsd-session-state.sh',
       'node /path/gsd-context-monitor.js',
@@ -405,52 +371,3 @@ describe('uninstall settings cleanup preserves user hooks', () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 5. Codex legacy migration
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe('Codex legacy gsd-update-check migration', () => {
-  test('install.js strips legacy gsd-update-check hook blocks from config', () => {
-    const src = fs.readFileSync(INSTALL_SRC, 'utf-8');
-    assert.ok(
-      src.includes('gsd-update-check') && src.includes('replace('),
-      'install.js should have migration logic to strip legacy gsd-update-check entries'
-    );
-  });
-
-  test('migration regex removes LF legacy hook block', () => {
-    const legacyBlock = [
-      '[features]',
-      'codex_hooks = true',
-      '',
-      '# GSD Hooks',
-      '[[hooks]]',
-      'event = "SessionStart"',
-      'command = "node /old/path/gsd-update-check.js"',
-      '',
-    ].join('\n');
-
-    let content = legacyBlock;
-    content = content.replace(/\n# GSD Hooks\n\[\[hooks\]\]\nevent = "SessionStart"\ncommand = "node [^\n]*gsd-update-check\.js"\n/g, '\n');
-    assert.ok(!content.includes('gsd-update-check'), 'legacy hook block should be removed');
-    assert.ok(content.includes('[features]'), 'non-hook content should be preserved');
-  });
-
-  test('migration regex removes CRLF legacy hook block', () => {
-    const legacyBlock = [
-      '[features]',
-      'codex_hooks = true',
-      '',
-      '# GSD Hooks',
-      '[[hooks]]',
-      'event = "SessionStart"',
-      'command = "node /old/path/gsd-update-check.js"',
-      '',
-    ].join('\r\n');
-
-    let content = legacyBlock;
-    content = content.replace(/\r\n# GSD Hooks\r\n\[\[hooks\]\]\r\nevent = "SessionStart"\r\ncommand = "node [^\r\n]*gsd-update-check\.js"\r\n/g, '\r\n');
-    assert.ok(!content.includes('gsd-update-check'), 'legacy CRLF hook block should be removed');
-    assert.ok(content.includes('[features]'), 'non-hook content should be preserved');
-  });
-});

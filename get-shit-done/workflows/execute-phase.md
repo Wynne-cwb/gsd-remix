@@ -67,9 +67,6 @@ if ! command -v gsd-remix-sdk &>/dev/null; then
   echo ""
   echo "Repair the bundled SDK:"
   echo "  /gsd-health --runtime --repair"
-  echo ""
-  echo "Or refresh all runtime assets:"
-  echo "  /gsd-update"
   exit 1
 fi
 

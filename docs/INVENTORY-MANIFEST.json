@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-03",
+  "generated": "2026-07-04",
   "families": {
     "agents": [
       "gsd-advisor-researcher",
@@ -50,14 +50,12 @@
       "/gsd-pr-branch",
       "/gsd-progress",
       "/gsd-quick",
-      "/gsd-reapply-patches",
       "/gsd-remove-phase",
       "/gsd-research-phase",
       "/gsd-resume-work",
       "/gsd-review-backlog",
       "/gsd-settings",
       "/gsd-undo",
-      "/gsd-update",
       "/gsd-verify-work"
     ],
     "workflows": [
@@ -100,7 +98,6 @@
       "settings.md",
       "transition.md",
       "undo.md",
-      "update.md",
       "verify-phase.md",
       "verify-work.md"
     ],
@@ -161,8 +158,6 @@
       "verify.cjs"
     ],
     "hooks": [
-      "gsd-check-update-worker.js",
-      "gsd-check-update.js",
       "gsd-context-monitor.js",
       "gsd-phase-boundary.sh",
       "gsd-prompt-guard.js",

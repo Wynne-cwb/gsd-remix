@@ -37,7 +37,6 @@
 - [Utility Features](#utility-features)
   - [Debug System](#28-debug-system)
   - [Todo Management](#29-todo-management)
-  - [Update System](#31-update-system)
   - [Settings Management](#32-settings-management)
   - [Test Generation](#33-test-generation)
 - [Infrastructure Features](#infrastructure-features)
@@ -101,7 +100,6 @@
   - [Stall Detection in Plan-Phase](#100-stall-detection-in-plan-phase)
   - [Hard Stop Safety Gates in /gsd-next](#101-hard-stop-safety-gates-in-gsd-next)
   - [Adaptive Model Preset](#102-adaptive-model-preset)
-  - [Post-Merge Hunk Verification](#103-post-merge-hunk-verification)
 - [v1.35.0 Features](#v1350-features)
   - [New Runtime Support (Cline, CodeBuddy, Qwen Code)](#104-new-runtime-support-cline-codebuddy-qwen-code)
 - [v1.36.0 Features](#v1360-features)
@@ -668,21 +666,6 @@
 - REQ-TODO-02: Todos MUST be stored in `.planning/todos/pending/`
 - REQ-TODO-03: Completed todos MUST move to `.planning/todos/completed/`
 - REQ-TODO-04: Check-todos MUST list all pending items with selection to work on one
-
----
-
-### 31. Update System
-
-**Command:** `/gsd-update`
-
-**Purpose:** Update GSD to the latest version with changelog preview.
-
-**Requirements:**
-- REQ-UPDATE-01: System MUST check for new versions via npm
-- REQ-UPDATE-02: System MUST display changelog for new version before updating
-- REQ-UPDATE-03: System MUST be runtime-aware and target the correct directory
-- REQ-UPDATE-04: System MUST back up locally modified files to `gsd-local-patches/`
-- REQ-UPDATE-05: `/gsd-reapply-patches` MUST restore local modifications after update
 
 ---
 
@@ -1549,7 +1532,6 @@ Test suite that scans all agent, workflow, and command files for embedded inject
   - [Stall Detection in Plan-Phase](#100-stall-detection-in-plan-phase)
   - [Hard Stop Safety Gates in /gsd-next](#101-hard-stop-safety-gates-in-gsd-next)
   - [Adaptive Model Preset](#102-adaptive-model-preset)
-  - [Post-Merge Hunk Verification](#103-post-merge-hunk-verification)
 
 ---
 
@@ -1704,19 +1686,6 @@ Test suite that scans all agent, workflow, and command files for embedded inject
 **Requirements:**
 - REQ-ADAPTIVE-01: `adaptive` preset MUST assign model tiers based on agent role (planner → quality tier, executor → balanced tier, etc.)
 - REQ-ADAPTIVE-02: `adaptive` MUST be selectable via the `model_profile` config setting
-
----
-
-### 103. Post-Merge Hunk Verification
-
-**Command:** `/gsd-reapply-patches`
-
-**Purpose:** After applying local patches post-update, verify that all hunks were actually applied by comparing the expected patch content against the live filesystem. Surface any dropped or partial hunks immediately rather than silently accepting incomplete merges.
-
-**Requirements:**
-- REQ-PATCH-VERIFY-01: Reapply-patches MUST verify each hunk was applied after the merge
-- REQ-PATCH-VERIFY-02: Dropped or partial hunks MUST be reported to the user with file and line context
-- REQ-PATCH-VERIFY-03: Verification MUST run after all patches are applied, not per-patch
 
 ---
 

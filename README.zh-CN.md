@@ -586,7 +586,6 @@ lmn012o feat(08-02): create registration endpoint
 | `/gsd-progress` | 我现在在哪？下一步是什么？ |
 | `/gsd-next` | 自动检测状态并执行下一步 |
 | `/gsd-help` | 显示全部命令和使用指南 |
-| `/gsd-update` | 更新 GSD，并预览变更日志 |
 
 ### Brownfield
 

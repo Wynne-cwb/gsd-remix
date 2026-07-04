@@ -206,8 +206,6 @@ describe('configureKiloPermissions', () => {
 
 describe('Source code integration (Kilo)', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'bin', 'install.js'), 'utf8');
-  const updateWorkflowSrc = fs.readFileSync(path.join(__dirname, '..', 'get-shit-done', 'workflows', 'update.md'), 'utf8');
-  const reapplyPatchesSrc = fs.readFileSync(path.join(__dirname, '..', 'commands', 'gsd', 'reapply-patches.md'), 'utf8');
 
   test('--kilo flag parsing exists', () => {
     assert.ok(src.includes("args.includes('--kilo')"), '--kilo flag parsed');
@@ -250,16 +248,4 @@ describe('Source code integration (Kilo)', () => {
     assert.ok(src.includes('const configPath = resolveKiloConfigPath(targetDir);'), 'Kilo uninstall cleanup uses targetDir');
   });
 
-  test('update workflow checks preferred custom config dirs before defaults', () => {
-    assert.ok(updateWorkflowSrc.includes('PREFERRED_CONFIG_DIR'), 'workflow tracks preferred config dir');
-    assert.ok(updateWorkflowSrc.includes('kilo.jsonc'), 'workflow infers Kilo from config files');
-    assert.ok(updateWorkflowSrc.includes('ENV_RUNTIME_DIRS'), 'workflow checks env-derived config dirs');
-    assert.ok(updateWorkflowSrc.includes('KILO_CONFIG'), 'workflow checks KILO_CONFIG');
-  });
-
-  test('reapply-patches checks Kilo custom config env vars first', () => {
-    assert.ok(reapplyPatchesSrc.includes('KILO_CONFIG_DIR'), 'reapply-patches checks KILO_CONFIG_DIR');
-    assert.ok(reapplyPatchesSrc.includes('KILO_CONFIG'), 'reapply-patches checks KILO_CONFIG');
-    assert.ok(reapplyPatchesSrc.includes('XDG_CONFIG_HOME'), 'reapply-patches checks XDG_CONFIG_HOME');
-  });
 });

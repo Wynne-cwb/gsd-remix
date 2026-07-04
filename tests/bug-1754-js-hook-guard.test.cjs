@@ -22,7 +22,6 @@ const path = require('path');
 const INSTALL_SRC = path.join(__dirname, '..', 'bin', 'install.js');
 
 const JS_HOOKS = [
-  { name: 'gsd-check-update.js',      registrationAnchor: 'hasGsdUpdateHook' },
   { name: 'gsd-context-monitor.js',   registrationAnchor: 'hasContextMonitorHook' },
   { name: 'gsd-prompt-guard.js',      registrationAnchor: 'hasPromptGuardHook' },
   { name: 'gsd-read-guard.js',        registrationAnchor: 'hasReadGuardHook' },
@@ -80,7 +79,7 @@ describe('bug #1754: .js hook registration guards', () => {
     // There should be guards for all JS hooks plus the existing SH hooks.
     // This test ensures new hooks added in the future follow the same pattern.
     const registrationSection = src.slice(
-      src.indexOf('// Configure SessionStart hook'),
+      src.indexOf('// Configure GSD hooks'),
       src.indexOf('return { settingsPath, settings, statuslineCommand')
     );
 

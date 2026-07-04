@@ -53,10 +53,10 @@ describe('bug #2334: quick workflow gsd-remix-sdk pre-flight check', () => {
     const firstSdkCall = content.indexOf('gsd-remix-sdk query init.quick', step2Start);
     const step2Section = content.slice(step2Start, firstSdkCall);
 
-    const hasInstallHint = step2Section.includes('/gsd-health --runtime --repair') || step2Section.includes('gsd-update') || step2Section.includes('/gsd-update');
+    const hasInstallHint = step2Section.includes('/gsd-health --runtime --repair');
     assert.ok(
       hasInstallHint,
-      'Pre-flight error must include a hint on how to repair gsd-remix-sdk (/gsd-health --runtime --repair or /gsd-update)'
+      'Pre-flight error must include a hint on how to repair gsd-remix-sdk (/gsd-health --runtime --repair)'
     );
   });
 });

@@ -157,7 +157,6 @@
 | `/gsd-resume-work` | 从上次会话恢复完整上下文 | 开始新会话 |
 | `/gsd-pause-work` | 保存上下文交接 | 阶段中途停止 |
 | `/gsd-help` | 显示所有命令 | 快速参考 |
-| `/gsd-update` | 更新 GSD 并预览变更日志 | 检查新版本 |
 
 ### 阶段管理
 
@@ -188,7 +187,6 @@
 | `/gsd-add-todo [desc]` | 捕获想法留待后用 | 会话期间想到什么 |
 | `/gsd-check-todos` | 列出待处理事项 | 查看捕获的想法 |
 | `/gsd-settings` | 配置工作流开关和模型配置 | 更改模型、切换代理 |
-| `/gsd-reapply-patches` | 更新后恢复本地修改 | 如果你有本地编辑，在 `/gsd-update` 后 |
 
 ---
 
@@ -417,7 +415,7 @@ node gsd-tools.cjs state sync              # 从磁盘重建 STATE.md
 
 ### GSD 更新覆盖了我的本地更改
 
-从 v1.17 开始，安装程序将本地修改的文件备份到 `gsd-local-patches/`。运行 `/gsd-reapply-patches` 将你的更改合并回来。
+从 v1.17 开始，安装程序将本地修改的文件备份到 `gsd-local-patches/`。重新安装后，从该目录手动对比并合并你的更改。
 
 ### 子代理似乎失败但工作已完成
 
@@ -437,7 +435,7 @@ node gsd-tools.cjs state sync              # 从磁盘重建 STATE.md
 | 快速针对性修复 | `/gsd-quick` |
 | 计划与你的愿景不符 | `/gsd-discuss-phase [N]` 然后重新规划 |
 | 成本过高 | 用 `/gsd-settings` 关闭可选代理 |
-| 更新破坏了本地更改 | `/gsd-reapply-patches` |
+| 更新破坏了本地更改 | 从 `gsd-local-patches/` 手动合并 |
 
 ---
 
