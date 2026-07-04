@@ -4,6 +4,38 @@ All notable changes to GSD will be documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+> **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.1.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
+
+## [1.1.1] — Remix Slim — 2026-07-04
+
+Docs refresh for the slim release. The slim itself shipped as `gsd-remix@1.1.0`; `1.1.1` republishes so the npm page carries the updated README/docs.
+
+### Changed
+
+- **README + REMIX-DIFFERENCES** now describe the slim: focused command surface, removed update machinery, unified model profiles, security review folded into `execute-phase`, English + 简体中文 docs only.
+
+## [1.1.0] — Remix Slim — 2026-07-04
+
+Large slim of the harness down to the core discuss → plan → execute → verify loop. (Distinct from the inherited upstream `[1.1.0] - 2025-12-15` entry below.)
+
+### Removed
+
+- **~44 legacy commands + 15 agents** and their ceremonies: AI-integration wizard + `eval-review`, Nyquist validation + `validate-phase`, `secure-phase`, multi-workspace/workstream user entry (SDK path-resolution compat layer kept), `intel`/`graphify`/`scan`, docs-ingest / doc-writer family, developer profiling, `spike`/`sketch`, and standalone `ship`/`stats`/`manager`/`forensics`/`import`/`explore`/`analyze-dependencies`/`audit-*`/`milestone-summary`/`from-gsd2`/`sync-skills`/`ultraplan-phase`/`spec-phase`/`inbox`/`plan-milestone-gaps`/`plan-review-convergence`/`extract_learnings`.
+- **Update system** — `/gsd-update`, `/gsd-reapply-patches`, the `gsd-check-update` background hook + worker, and their installer wiring (Claude + Codex SessionStart). Update by re-running `npx gsd-remix@latest`. Local-patches backup/reapply machinery retained.
+- **ja-JP / ko-KR / pt-BR** translation doc trees. Maintained docs are now English + 简体中文 only.
+
+### Changed
+
+- **Model profiles unified** — all named profiles (`quality`/`balanced`/`budget`) resolve to one allocation: Opus for planning/research/debugging, Sonnet elsewhere; keys kept for config compatibility. `inherit` unchanged.
+- **Security review** redesigned as a diff-scoped gate inside `/gsd-execute-phase` (prefers an installed company security skill, falls back to a bundled generic reviewer) instead of a standalone `secure-phase`.
+- **Advisor mode** decoupled from user profiling (default-on, `--no-advisor` opt-out).
+- Agent roster reduced to **18**. Removed-feature config keys (`nyquist_validation`, `ai_integration_phase`, `intel.enabled`, `security_enforcement`) kept as documented `false` legacy keys.
+
+### Fixed
+
+- **#2112** — the bundled SDK `prompts/` mirror is now run through the runtime transform during install, so `CLAUDE.md` / `.claude/` references no longer leak into non-Claude installs (Qwen, etc.).
+- **bug-2420** — `stateBeginPhase` now returns `name` and throws a contractual error when a flag value is missing.
+
 ## [Unreleased](https://github.com/Wynne-cwb/gsd-remix/compare/v1.37.1...HEAD)
 
 ### SDK query layer — Phase 3 (what you get)

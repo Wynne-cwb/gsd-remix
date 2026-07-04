@@ -23,4 +23,4 @@
 
 - Start by reading this file, then `AGENTS.md` for the context protocol.
 - No active handoff file is required right now.
-- Recent published npm version: `gsd-remix@1.1.0` (slim release: en+zh-CN docs, update system removed).
+- Recent published npm version: `gsd-remix@1.1.1` (slim release: en+zh-CN docs, update system removed; docs refreshed).
