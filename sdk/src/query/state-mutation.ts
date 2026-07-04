@@ -405,6 +405,23 @@ export const statePatch: QueryHandler = async (args, projectDir) => {
  * @returns QueryResult with phase metadata and `updated` field names (for raw parity)
  */
 export const stateBeginPhase: QueryHandler = async (args, projectDir) => {
+  // Bug #2420: a flag token present without a value (next token is another flag
+  // or the token is the last argument) must be an explicit error rather than
+  // silently parsing to null. parseNamedArgs swallows this case, so validate
+  // the flag-form arguments up front.
+  for (const flag of ['phase', 'name', 'plans']) {
+    const idx = args.indexOf(`--${flag}`);
+    if (idx !== -1) {
+      const value = args[idx + 1];
+      if (value === undefined || String(value).startsWith('--')) {
+        throw new GSDError(
+          `missing value for --${flag}`,
+          ErrorClassification.Validation,
+        );
+      }
+    }
+  }
+
   const named = parseNamedArgs(args, ['phase', 'name', 'plans']);
   let phaseNumber = (named.phase as string | null) || '';
   let phaseName = (named.name as string | null) || '';
@@ -533,6 +550,7 @@ export const stateBeginPhase: QueryHandler = async (args, projectDir) => {
     data: {
       updated,
       phase: phaseNumber,
+      name: phaseName || null,
       phase_name: phaseName || null,
       plan_count: planNum !== null && !Number.isNaN(planNum) ? planNum : null,
     },
