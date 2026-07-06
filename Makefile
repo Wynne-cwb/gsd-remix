@@ -42,7 +42,7 @@ release-pack:
 	node -e "const pack=require('/tmp/gsd-remix-pack-dry-run.json')[0]; console.log(JSON.stringify({name:pack.name,version:pack.version,filename:pack.filename,files:pack.files.length}, null, 2))"
 
 release-whoami: release-auth
-	NPM_CONFIG_USERCONFIG="$(NPM_USERCONFIG)" npm whoami
+	npm whoami --userconfig="$(NPM_USERCONFIG)"
 
 release-publish: release-auth release-check release-whoami
-	NPM_CONFIG_USERCONFIG="$(NPM_USERCONFIG)" npm publish --tag "$(NPM_TAG)" $(NPM_PUBLISH_ARGS)
+	npm publish --userconfig="$(NPM_USERCONFIG)" --tag "$(NPM_TAG)" $(NPM_PUBLISH_ARGS)
