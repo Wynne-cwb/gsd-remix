@@ -4,7 +4,33 @@ All notable changes to GSD will be documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-> **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.1.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
+> **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.2.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
+
+## [1.2.0] — Task-Size Router — 2026-07-06
+
+The "final form": you describe the work and one router sizes it, then runs the right amount of process. Built as 8 phases behind a deterministic evidence layer + LLM judgment layer, gated by a golden acceptance matrix.
+
+### Added
+
+- **Task-size router** — `/gsd-do` now routes by **size** as well as intent. Two SDK handlers do the deterministic work: `route.risk-scan` (single shared high-risk lexicon) and `route.size-classify` (evidence only — files/surfaces/unknowns, never a lane). `gsd-do` judges the lane (LIGHT/MEDIUM/HEAVY) + confidence from that evidence and confirms before running.
+- **Escalation 铁律** — one shared risk scan gates `/gsd-do`, `/gsd-fast`, and `/gsd-quick`. Any hard high-risk surface (auth/session/token, payment/billing, migration/schema, public API, webhook, tenant boundary, PII/logging, cookie/CORS, unsafe HTML, BFF outbound) forces HEAVY. `/gsd-fast` refuses a hard hit unless `--force-light` (with a recorded reason).
+- **`/gsd-escalate`** — evidence-preserving quick → heavy migration (`route.escalate`): seeds a heavy phase from a quick task's context/plan/commits under an `evidence_status` (accepted / suspect / revert-recommended), routes it to planning, and **never reverts committed code**.
+- **`/gsd-brainstorm`** — native, self-contained requirement-level clarification: converges an idea into an approved PRD (`prds/<date>-<topic>/PRD.md`) with Red Team / risk / YAGNI self-review, hard-gated at the PRD. `/gsd-new-milestone`, `/gsd-new-project`, and `/gsd-plan-phase --prd` consume it.
+- **Team mode** for `/gsd-autonomous` (`workflow.team_mode`, default `off`) — capability-gated (runtime + no-op Agent probe) Team Lead flow: front-loaded Decision Harvest, a fresh teammate per bounded step, deferred consolidated UAT. Spec vendored self-contained in `references/team-mode.md`.
+- **Config keys** `workflow.quick_plan_gate` (`auto`/`ask`/`off`) and `workflow.team_mode` (`off`/`auto`/`on`).
+
+### Changed
+
+- **`/gsd-code-review`** is now a two-axis structured review (Spec + Standards) in one REVIEW.md, impact-weighted (confidence never filters a finding; low-confidence + high-impact goes to "Needs Human Review"). `--deep-review` opts into true blind review. `/gsd-code-review-fix` holds back `needs_decision` / `blocks_auto_fix` findings for a human instead of guessing.
+- **`/gsd-quick` (MEDIUM)** — `--validate-lite` is the always-on baseline (acceptance/verify fields + runnable evidence, no verifier spawn); `--review` split out as its own switch; `--full` = `--discuss --research --validate --review`; verification gradient with a manual-verification admission gate; optional `workflow.quick_plan_gate`.
+- **`/gsd-fast` (LIGHT)** — reproduce-then-resolve discipline with inline evidence.
+- **`/gsd-plan-phase` (HEAVY)** — conditional multi-lens architecture selection (minimal/clean/pragmatic), triggered only on new architecture/dependency/data model.
+- **README** (English + 简体中文) rewritten around the router / three-lane model.
+
+### Docs
+
+- New `references/stolen-parts.md` anchors every borrowed convention (EARS, RED-GREEN, multi-lens, impact-weighted, two-axis, adversarial lenses) locally — implementation cites the repo, not external originals.
+- Project `CLAUDE.md` added (release process + dev gate + layout); `npm run release` / `release:check` / `release:whoami` wrap the Makefile targets.
 
 ## [1.1.1] — Remix Slim — 2026-07-04
 
