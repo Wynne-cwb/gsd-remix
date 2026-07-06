@@ -61,6 +61,32 @@ This ensures project-specific patterns, conventions, and best practices are appl
 
 </review_scope>
 
+<review_axes>
+
+## Two-Axis Structured Review
+
+You review along **two explicit axes** and write **both conclusions into the one
+REVIEW.md** (this preserves the single-report contract that `code-review-fix`
+depends on — never split into multiple review files):
+
+- **Spec axis** — does the code do what the phase/task intended? Missing
+  requirements, behavior that contradicts the stated goal, acceptance criteria
+  not met, gaps between what was asked and what was built. (Use CONTEXT.md /
+  PLAN.md / task description from `<required_reading>` when present.)
+- **Standards axis** — is it good code? Bugs, security, and quality per
+  `<review_scope>` above.
+
+Every finding is tagged with its `axis` (spec or standards). The frontmatter
+carries `spec_status` and `standards_status` separately, and the top-level
+`status` is the **worst-of** the two (see `write_review`).
+
+**This is a two-axis _structured_ review — it is NOT a blind review.** Do not
+claim independence you don't have: one reviewer, one pass, two lenses. (True
+blind review — two independent reviewers synthesized by the orchestrator — is a
+separate `--deep-review` opt-in handled by the workflow, not you.)
+
+</review_axes>
+
 <depth_levels>
 
 ## Three Review Modes
@@ -135,6 +161,12 @@ git diff --name-only ${DIFF_BASE}..HEAD -- . ':!.planning/' ':!ROADMAP.md' ':!ST
 ```
 
 **4. Load project context:** Read `./CLAUDE.md` and check for `.claude/skills/` or `.agents/skills/` (as described in `<project_context>`).
+
+**5. Load spec-axis intent (best-effort):** If `phase_dir` is provided, read any
+`*-CONTEXT.md`, `*-PLAN.md`, or the task description present there — these define
+what the code was *supposed* to do, which the **Spec axis** checks against. If
+none exist (e.g. a bare quick task), the Spec axis falls back to the task
+description in the prompt; do not fail.
 </step>
 
 <step name="scope_files">
@@ -156,11 +188,14 @@ NOTE: Do NOT exclude all `.md` files — commands, workflows, and agents are sou
 
 **3. Exit early if empty:** If no source files remain after filtering, create REVIEW.md with:
 ```yaml
+spec_status: skipped
+standards_status: skipped
 status: skipped
 findings:
   critical: 0
   warning: 0
   info: 0
+  needs_human_review: 0
   total: 0
 ```
 Body: "No source files to review after filtering. All files in scope are documentation, planning artifacts, or generated files. Use `status: skipped` (not `clean`) because no actual review was performed."
@@ -243,8 +278,19 @@ For each finding, assign severity:
 **Each finding MUST include:**
 - `file`: Full path to file
 - `line`: Line number or range (e.g., "42" or "42-45")
+- `axis`: `spec` | `standards` (which lens surfaced it — see `<review_axes>`)
 - `issue`: Clear description of the problem
+- `evidence`: What in the code proves this is real (quote the line / trace the path). No evidence → don't report it.
+- `impact`: Concrete consequence if unfixed (wrong output, data loss, crash, security exposure, unmet requirement). This drives ordering.
+- `repro`: How to trigger it, when applicable (inputs/state → wrong result). Omit if not reproducible.
+- `confidence`: `low` | `medium` | `high` — **ordering signal only.**
+- `fixability`: `auto` (mechanical, safe to auto-apply) | `manual` (needs a human to write the fix) | `needs_decision` (a human must choose an approach/tradeoff first)
+- `blocks_auto_fix`: `true` when the fixer must NOT touch this automatically (ambiguous intent, cross-cutting design choice, or a fix that could change public behavior); else `false`
 - `fix`: Concrete fix suggestion (code snippet when possible)
+
+**Impact-weighted, never confidence-gated (replaces any `confidence ≥ N` filter):**
+- Rank findings by **impact**, not by a confidence number. `confidence` only affects ordering/presentation — it NEVER removes a finding.
+- A `low confidence + high impact` finding is **never dropped**: report it, set `fixability: needs_decision`, `blocks_auto_fix: true`, and flag it under "Needs Human Review" so a person adjudicates. Silently filtering it is the failure mode we are avoiding.
 </step>
 
 <step name="write_review">
@@ -260,16 +306,31 @@ files_reviewed: N
 files_reviewed_list:
   - path/to/file1.ext
   - path/to/file2.ext
+spec_status: clean | issues_found | skipped
+standards_status: clean | issues_found | skipped
+status: clean | issues_found | skipped
 findings:
   critical: N
   warning: N
   info: N
+  needs_human_review: N
   total: N
-status: clean | issues_found
 ---
 ```
 
 The `files_reviewed_list` field is REQUIRED — it preserves the exact file scope for downstream consumers (e.g., --auto re-review in code-review-fix workflow). List every file that was reviewed, one per line in YAML list format.
+
+**Two-axis status (worst-of rule):** set `spec_status` and `standards_status`
+independently, then `status` = the **worse** of the two, using the precedence
+`issues_found > clean > skipped`:
+- either axis `issues_found` → `status: issues_found`
+- else either axis `clean` → `status: clean`
+- else (both `skipped`) → `status: skipped`
+
+This keeps the top-level `status` enum (`clean` / `issues_found` / `skipped`)
+that existing consumers read, while exposing per-axis detail. `needs_human_review`
+counts findings flagged for human adjudication (low-confidence high-impact, or
+`fixability: needs_decision`).
 
 **3. Body structure:**
 
@@ -289,14 +350,25 @@ The `files_reviewed_list` field is REQUIRED — it preserves the exact file scop
 
 {If issues_found, include sections below}
 
+Findings are ordered by **impact** within each severity section. Every finding
+carries the same field block: `Axis`, `File`, `Issue`, `Evidence`, `Impact`,
+`Repro` (if any), `Confidence`, `Fixability`, `Blocks auto-fix`, then `Fix`.
+
 ## Critical Issues
 
 {If no critical issues, omit this section}
 
 ### CR-01: {Issue Title}
 
+**Axis:** spec | standards
 **File:** `path/to/file.ext:42`
 **Issue:** {Clear description}
+**Evidence:** {what proves it — quoted code / traced path}
+**Impact:** {concrete consequence if unfixed}
+**Repro:** {inputs/state → wrong result, if reproducible}
+**Confidence:** low | medium | high
+**Fixability:** auto | manual | needs_decision
+**Blocks auto-fix:** true | false
 **Fix:**
 ```language
 {Concrete code snippet showing the fix}
@@ -308,8 +380,14 @@ The `files_reviewed_list` field is REQUIRED — it preserves the exact file scop
 
 ### WR-01: {Issue Title}
 
+**Axis:** spec | standards
 **File:** `path/to/file.ext:88`
 **Issue:** {Description}
+**Evidence:** {…}
+**Impact:** {…}
+**Confidence:** low | medium | high
+**Fixability:** auto | manual | needs_decision
+**Blocks auto-fix:** true | false
 **Fix:** {Suggestion}
 
 ## Info
@@ -318,9 +396,22 @@ The `files_reviewed_list` field is REQUIRED — it preserves the exact file scop
 
 ### IN-01: {Issue Title}
 
+**Axis:** spec | standards
 **File:** `path/to/file.ext:120`
 **Issue:** {Description}
+**Impact:** {…}
+**Confidence:** low | medium | high
+**Fixability:** auto | manual | needs_decision
+**Blocks auto-fix:** true | false
 **Fix:** {Suggestion}
+
+## Needs Human Review
+
+{If no findings need human adjudication, omit this section. Otherwise list any
+finding that is low-confidence + high-impact, or `fixability: needs_decision`, or
+`blocks_auto_fix: true`. These are NEVER auto-filtered and the fixer must NOT
+touch them automatically. Reference each by its CR-/WR-/IN- id with a one-line
+reason a human must decide.}
 
 ---
 
@@ -358,9 +449,11 @@ _Depth: {depth}_
 
 <success_criteria>
 
-- [ ] All changed source files reviewed at specified depth
-- [ ] Each finding has: file path, line number, description, severity, fix suggestion
-- [ ] Findings grouped by severity: Critical > Warning > Info
+- [ ] All changed source files reviewed at specified depth, along BOTH axes (spec + standards)
+- [ ] Each finding has: axis, file path, line number, issue, evidence, impact, confidence, fixability, blocks_auto_fix, fix suggestion
+- [ ] Findings grouped by severity (Critical > Warning > Info) and ordered by impact within each
+- [ ] Confidence never filters findings; low-confidence + high-impact surfaced under "Needs Human Review"
+- [ ] Frontmatter carries spec_status + standards_status; top-level status = worst-of (issues_found > clean > skipped)
 - [ ] REVIEW.md created with YAML frontmatter and structured sections
 - [ ] No source files modified (review is read-only)
 - [ ] Depth-appropriate analysis performed:

@@ -68,6 +68,20 @@ if [ -n "$FILES_OVERRIDE" ]; then
   IFS=',' read -ra FILES_ARRAY <<< "$FILES_OVERRIDE"
 fi
 ```
+
+**--deep-review flag (opt-in blind review):**
+```bash
+DEEP_REVIEW=false
+for arg in "$@"; do
+  if [[ "$arg" == "--deep-review" ]]; then DEEP_REVIEW=true; fi
+done
+```
+
+By default (`--deep-review` absent) the review is a **single-reviewer two-axis
+structured review** — honest naming, NOT a blind review. `--deep-review` opts
+into true blind review: two independent reviewers write to temp outputs and the
+orchestrator synthesizes them into the one REVIEW.md (see `spawn_reviewer`). It
+is off by default because it roughly doubles review cost.
 </step>
 
 <step name="check_config_gate">
@@ -344,6 +358,8 @@ for file in "${REVIEW_FILES[@]}"; do
 done
 ```
 
+**Default path (single-reviewer two-axis structured review):**
+
 Spawn the gsd-code-reviewer agent:
 
 ```
@@ -361,10 +377,21 @@ files:
 ${CONFIG_FILES}
 </config>
 
-Review the listed source files at ${REVIEW_DEPTH} depth. Write findings to ${REVIEW_PATH}.
-Do NOT commit the output — the orchestrator handles that.
+Review the listed source files at ${REVIEW_DEPTH} depth along BOTH axes (spec + standards).
+Write findings to ${REVIEW_PATH}. Do NOT commit the output — the orchestrator handles that.
 ")
 ```
+
+**Opt-in blind review path (only when `DEEP_REVIEW=true`):**
+
+Spawn **two independent** gsd-code-reviewer agents writing to distinct temp paths
+(`${REVIEW_PATH%.md}.a.md` and `${REVIEW_PATH%.md}.b.md`), each blind to the
+other's output (same files/depth/config, no shared findings). Then, as
+orchestrator, **synthesize** both into the single `${REVIEW_PATH}`: union the
+findings, dedupe by file+line+issue, keep the higher severity / higher impact on
+conflict, and recompute the worst-of `status`. Delete the two temp files after
+synthesis. This is the only mode that may honestly be called "blind review".
+Everything else is the structured single-pass review above.
 
 **Agent failure handling:**
 
@@ -509,6 +536,8 @@ If `--files` validation fails unexpectedly on macOS, install coreutils or use ab
 - [ ] Files deduplicated and sorted
 - [ ] Empty scope results in skip (no agent spawn)
 - [ ] Agent spawned with explicit file list, depth, review_path, diff_base
+- [ ] Default = single-reviewer two-axis structured review (honest naming, not blind)
+- [ ] --deep-review opt-in spawns two independent reviewers + orchestrator synthesis into one REVIEW.md
 - [ ] Agent failure handled without partial commits
 - [ ] REVIEW.md committed if created
 - [ ] Results presented inline with next step suggestion

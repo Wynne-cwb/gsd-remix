@@ -39,11 +39,26 @@ INTERACTIVE=""
 if echo "$ARGUMENTS" | grep -q '\-\-interactive'; then
   INTERACTIVE="true"
 fi
+
+AUTO_AFTER_HARVEST=""
+if echo "$ARGUMENTS" | grep -q '\-\-auto'; then
+  AUTO_AFTER_HARVEST="true"
+fi
+
+TEAM_MODE=$(gsd-remix-sdk query config-get workflow.team_mode 2>/dev/null || echo "off")
 ```
 
 When `--only` is set, also set `FROM_PHASE` to the same value so existing filter logic applies.
 
 When `--interactive` is set, discuss runs inline with questions (not auto-answered), while plan and execute are dispatched as background agents. This keeps the main context lean — only discuss conversations accumulate — while preserving user input on all design decisions.
+
+**Team mode (`workflow.team_mode: auto|on|off`, default `off`):** when enabled and
+the capability gate passes (see the `team_mode` step), the milestone runs as a Team
+Lead coordinating fresh per-step Agent teammates, with all human decisions
+front-loaded (Decision Harvest) and UAT deferred to one end-of-milestone packet.
+`--auto` here means **after-harvest unattended** — it does NOT disable team mode.
+Team mode is strictly sequential post-harvest, so it **beats `--interactive`** (if
+both set, team wins and `--interactive` is ignored with a notice).
 
 Bootstrap via milestone-level init:
 
@@ -145,6 +160,46 @@ DETAIL=$(gsd-remix-sdk query roadmap.get-phase ${PHASE_NUM})
 ```
 
 Extract `phase_name`, `goal`, `success_criteria` from each. Store for use in execute_phase and transition messages.
+
+</step>
+
+<step name="team_mode">
+
+## 2.5. Team Mode Gate (capability-gated)
+
+Runs after phase discovery, **before** any Decision Harvest or the first
+`execute_phase` — nothing is written to a phase artifact until this gate resolves.
+
+**If `TEAM_MODE` is `off`:** skip this step entirely — run the inline loop
+(`execute_phase` onward) as usual. Do not probe.
+
+**If `TEAM_MODE` is `auto` or `on`:** run the two-tier capability check.
+
+1. **Coarse gate — runtime identity** must be Claude Code (Agent tool available):
+   ```bash
+   RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity||'')}catch{console.log('')}})")
+   ```
+2. **Fine gate — deterministic no-op Agent probe:** spawn one trivial Agent that must
+   return a fixed token (e.g. `Agent(prompt="Reply with exactly: TEAM_OK")`). Success
+   = the Agent tool + coordination are usable.
+
+Resolve:
+- Coarse fails OR probe fails, and `TEAM_MODE=auto` → **silently fall back** to the
+  inline loop. No error, no half-written state. Continue to `execute_phase`.
+- Coarse fails OR probe fails, and `TEAM_MODE=on` → **error and stop** (do not
+  downgrade): "Team mode required (workflow.team_mode=on) but the Agent tool/probe is
+  unavailable in this runtime." Exit.
+- Both pass → **enter team mode.** Read and follow
+  `$HOME/.claude/get-shit-done/references/team-mode.md` for the entire milestone loop
+  (Decision Harvest over the `--from/--to/--only` scope → fresh teammate per bounded
+  step → deferred consolidated UAT), honoring the flag matrix (`--auto` =
+  after-harvest unattended; team beats `--interactive`; resume checkpoint). When team
+  mode runs the milestone to completion, proceed to the `lifecycle` step; do NOT also
+  run the inline `execute_phase` loop.
+
+**Never write a half state on probe failure.** A passing probe does not guarantee
+every later teammate spawn succeeds — per `team-mode.md`, each spawn failure falls
+back to inline for that step and preserves the checkpoint.
 
 </step>
 
@@ -654,4 +709,9 @@ When any phase operation fails or a blocker is detected, present 3 options via A
 - [ ] `--interactive` main context only accumulates discuss conversations (lean)
 - [ ] `--interactive` waits for background agents before post-execution routing
 - [ ] `--interactive` compatible with `--only`, `--from`, and `--to` flags
+- [ ] `workflow.team_mode` (auto|on|off, default off) resolved in initialize
+- [ ] Team gate runs coarse (runtime) + fine (no-op Agent probe) BEFORE any harvest/artifact write
+- [ ] Probe fail: `auto` silently falls back to inline (no half-state), `on` errors and stops, `off` never probes
+- [ ] Team mode follows references/team-mode.md (harvest scoped to --from/--to/--only, fresh teammate per step, deferred UAT)
+- [ ] `--auto` = after-harvest unattended (does NOT disable team); team beats `--interactive`
 </success_criteria>

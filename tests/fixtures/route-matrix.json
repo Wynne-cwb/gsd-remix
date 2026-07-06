@@ -1,0 +1,289 @@
+{
+  "$schema_note": "Golden routing dataset for the size-axis router (design D5/D6, .plans/gsd-final-form-design.md). Phase 0 locks this dataset's shape + coverage + invariants. Phase 1 wires route.size-classify + gsd-do judgment to run each sample and assert `expected_lane`. Single source of truth — consumed by tests/route-matrix.test.cjs (CJS) and, in Phase 1, the SDK vitest suite.",
+  "lanes": ["LIGHT", "MEDIUM", "HEAVY"],
+  "risk_strengths": ["none", "noise", "soft", "hard"],
+  "high_risk_surfaces": [
+    "auth/session/token", "payment/billing", "migration/schema", "public API",
+    "webhook", "tenant/org boundary", "PII/logging", "CORS/cookie/redirect",
+    "unsafe HTML", "BFF outbound"
+  ],
+  "samples": [
+    {
+      "id": "light-readme-typo",
+      "category": "pure-light",
+      "description": "fix a typo in the README heading",
+      "candidate_paths": ["README.md"],
+      "expected_lane": "LIGHT",
+      "risk": { "expected_strength": "none" },
+      "rationale": "single-file doc edit, one-sentence diff, no decision, no high-risk surface"
+    },
+    {
+      "id": "light-rename-local-var",
+      "category": "pure-light",
+      "description": "rename the local variable `res` to `response` in formatDate",
+      "candidate_paths": ["src/utils/format.js"],
+      "expected_lane": "LIGHT",
+      "risk": { "expected_strength": "none" },
+      "rationale": "mechanical single-function rename, no behavior change"
+    },
+    {
+      "id": "light-copyright-year",
+      "category": "pure-light",
+      "description": "bump the copyright year in the footer",
+      "candidate_paths": ["src/components/Footer.jsx"],
+      "expected_lane": "LIGHT",
+      "risk": { "expected_strength": "none" },
+      "rationale": "trivial single-file string edit"
+    },
+    {
+      "id": "light-error-string",
+      "category": "pure-light",
+      "description": "reword the 'file not found' error message to be clearer",
+      "candidate_paths": ["src/errors.js"],
+      "expected_lane": "LIGHT",
+      "risk": { "expected_strength": "none" },
+      "rationale": "single string, no logic, no risky surface"
+    },
+    {
+      "id": "light-button-color",
+      "category": "light",
+      "description": "change the primary button color to blue",
+      "candidate_paths": ["src/components/Button.css"],
+      "expected_lane": "LIGHT",
+      "risk": { "expected_strength": "none" },
+      "rationale": "one-file CSS diff, clearly describable, no decision point"
+    },
+    {
+      "id": "light-add-null-check",
+      "category": "light",
+      "description": "add a null guard before reading user.profile in the header",
+      "candidate_paths": ["src/components/Header.jsx"],
+      "expected_lane": "LIGHT",
+      "risk": { "expected_strength": "none" },
+      "rationale": "localized defensive fix, single file, no new decision"
+    },
+    {
+      "id": "medium-pagination",
+      "category": "medium",
+      "description": "add pagination to the products list",
+      "candidate_paths": ["src/api/products.js", "src/components/ProductList.jsx"],
+      "expected_lane": "MEDIUM",
+      "risk": { "expected_strength": "none" },
+      "rationale": "cross-file (api + ui), page-size/offset decision to make, no high-risk surface"
+    },
+    {
+      "id": "medium-cli-json-flag",
+      "category": "medium",
+      "description": "add a --json output flag to the export CLI command",
+      "candidate_paths": ["src/cli/export.js", "src/cli/index.js"],
+      "expected_lane": "MEDIUM",
+      "risk": { "expected_strength": "none" },
+      "rationale": "cross-file, output-format decision, benefits from acceptance/verify evidence"
+    },
+    {
+      "id": "medium-search-cache",
+      "category": "medium",
+      "description": "cache search results in memory to avoid repeat queries",
+      "candidate_paths": ["src/search/service.js", "src/search/cache.js"],
+      "expected_lane": "MEDIUM",
+      "risk": { "expected_strength": "none" },
+      "rationale": "cross-file, eviction/TTL decision points, no persistent high-risk surface"
+    },
+    {
+      "id": "medium-table-sort",
+      "category": "medium",
+      "description": "add column sorting to the dashboard table",
+      "candidate_paths": ["src/components/DashboardTable.jsx", "src/hooks/useSort.js"],
+      "expected_lane": "MEDIUM",
+      "risk": { "expected_strength": "none" },
+      "rationale": "multi-file UI change with sort-semantics decision"
+    },
+    {
+      "id": "heavy-new-microservice",
+      "category": "heavy",
+      "description": "set up a new notifications microservice from scratch",
+      "candidate_paths": [],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "none" },
+      "rationale": "greenfield service — new architecture, needs full plan/build cycle"
+    },
+    {
+      "id": "heavy-redis-queue",
+      "category": "heavy",
+      "description": "introduce Redis to back a distributed job queue",
+      "candidate_paths": ["src/jobs/queue.js", "package.json"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "none" },
+      "rationale": "new dependency + new data model + cross-cutting — heavy by design rule 2"
+    },
+    {
+      "id": "heavy-state-mgmt-migration",
+      "category": "heavy",
+      "description": "migrate state management from Redux to Zustand across the app",
+      "candidate_paths": ["src/store/", "src/components/"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "none" },
+      "rationale": "new architecture, sweeping cross-file change — heavy by design rule 2"
+    },
+    {
+      "id": "alias-session-persistence",
+      "category": "high-risk-alias",
+      "description": "let users stay logged in across app restarts",
+      "candidate_paths": ["src/session/store.js"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "hard", "surface": "auth/session/token", "note": "word 'auth' never appears — alias must be caught via session-persistence semantics" },
+      "rationale": "touches session/auth surface — escalation铁律 forces HEAVY even though it sounds like a small toggle"
+    },
+    {
+      "id": "alias-public-api-docs-only",
+      "category": "high-risk-alias",
+      "description": "fix a typo in the public API reference docs for /v1/orders",
+      "candidate_paths": ["docs/api/orders.md"],
+      "expected_lane": "LIGHT",
+      "risk": { "expected_strength": "noise", "surface": "public API", "note": "mentions public API but only edits docs — NEGATIVE control, must NOT force HEAVY" },
+      "rationale": "docs/help context downgrades the public-API term to noise; no contract change → routes by size to LIGHT"
+    },
+    {
+      "id": "alias-tenant-filter",
+      "category": "high-risk-alias",
+      "description": "add an org_id filter so each tenant only sees their own invoices",
+      "candidate_paths": ["src/api/invoices.js"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "hard", "surface": "tenant/org boundary", "note": "multi-tenant isolation — a filter bug leaks cross-tenant data" },
+      "rationale": "tenant/org boundary is a hard surface — HEAVY regardless of small apparent diff"
+    },
+    {
+      "id": "alias-jwt-expiry",
+      "category": "high-risk-alias",
+      "description": "shorten the jwt expiry from 24h to 1h",
+      "candidate_paths": ["src/auth/token.js"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "hard", "surface": "auth/session/token", "note": "one-number change but touches token lifetime logic" },
+      "rationale": "token surface — hard; deceptively tiny diff, real blast radius on sessions"
+    },
+    {
+      "id": "alias-stripe-webhook",
+      "category": "high-risk-alias",
+      "description": "add a Stripe webhook handler for payment.succeeded",
+      "candidate_paths": ["src/webhooks/stripe.js"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "hard", "surface": "webhook", "note": "webhook + payment double surface" },
+      "rationale": "webhook and payment/billing are both hard surfaces — HEAVY"
+    },
+    {
+      "id": "alias-log-request-body",
+      "category": "high-risk-alias",
+      "description": "log the full request body to help debug the checkout error",
+      "candidate_paths": ["src/middleware/logger.js"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "hard", "surface": "PII/logging", "note": "sounds like adding one log line — actually a PII exposure risk" },
+      "rationale": "PII/logging is a hard surface — a trivial-looking log line can leak sensitive data"
+    },
+    {
+      "id": "alias-samesite-cookie",
+      "category": "high-risk-alias",
+      "description": "set the SameSite attribute on the session cookie",
+      "candidate_paths": ["src/server/cookies.js"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "hard", "surface": "CORS/cookie/redirect", "note": "cookie/session security attribute" },
+      "rationale": "cookie/session security surface — hard; CSRF/session implications"
+    },
+    {
+      "id": "risk-soft-auth-header-format",
+      "category": "risk-strength",
+      "description": "refactor the helper that formats the Authorization header string",
+      "candidate_paths": ["src/http/headers.js"],
+      "expected_lane": "MEDIUM",
+      "risk": { "expected_strength": "soft", "surface": "auth/session/token", "note": "auth-adjacent string formatting — proximity but not the auth decision itself" },
+      "rationale": "soft hit: noteworthy but not force-escalated; routes by size (cross-file-ish → MEDIUM)"
+    },
+    {
+      "id": "risk-noise-marketing-token",
+      "category": "risk-strength",
+      "description": "update the word 'token' in the marketing landing copy",
+      "candidate_paths": ["src/pages/marketing.jsx"],
+      "expected_lane": "LIGHT",
+      "risk": { "expected_strength": "noise", "surface": "auth/session/token", "note": "'token' appears but purely as marketing copy — noise" },
+      "rationale": "noise hit must not escalate — trivial copy edit stays LIGHT"
+    },
+    {
+      "id": "migration-add-column",
+      "category": "migration",
+      "description": "add a nullable archived_at column to the orders table",
+      "candidate_paths": ["migrations/", "src/models/order.js"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "hard", "surface": "migration/schema" },
+      "rationale": "schema migration — hard surface, always HEAVY"
+    },
+    {
+      "id": "migration-backfill",
+      "category": "migration",
+      "description": "backfill user.display_name from first and last name",
+      "candidate_paths": ["migrations/", "scripts/backfill.js"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "hard", "surface": "migration/schema", "note": "data migration touching existing rows" },
+      "rationale": "data migration — hard surface, irreversible blast radius → HEAVY"
+    },
+    {
+      "id": "migration-rename-column",
+      "category": "migration",
+      "description": "rename the qty column to quantity in order_items",
+      "candidate_paths": ["migrations/", "src/models/orderItem.js"],
+      "expected_lane": "HEAVY",
+      "risk": { "expected_strength": "hard", "surface": "migration/schema", "note": "rename requires read/write compatibility window" },
+      "rationale": "schema rename — hard surface, needs staged migration → HEAVY"
+    },
+    {
+      "id": "gate-claude-interactive",
+      "category": "runtime-gate",
+      "description": "improve the checkout flow",
+      "candidate_paths": ["src/checkout/"],
+      "expected_lane": "MEDIUM",
+      "risk": { "expected_strength": "soft" },
+      "runtime": "claude",
+      "mode": "interactive",
+      "interaction": "ask",
+      "confidence": "low",
+      "rationale": "vague scope → unknown → conservative MEDIUM (never LIGHT); interactive runtime asks the user to confirm the lane via AskUserQuestion"
+    },
+    {
+      "id": "gate-claude-auto",
+      "category": "runtime-gate",
+      "description": "improve the checkout flow",
+      "candidate_paths": ["src/checkout/"],
+      "expected_lane": "MEDIUM",
+      "risk": { "expected_strength": "soft" },
+      "runtime": "claude",
+      "mode": "auto",
+      "interaction": "auto-adopt",
+      "confidence": "low",
+      "rationale": "same vague scope; --auto adopts the conservative recommendation (MEDIUM) without stopping"
+    },
+    {
+      "id": "gate-nonclaude-interactive",
+      "category": "runtime-gate",
+      "description": "improve the checkout flow",
+      "candidate_paths": ["src/checkout/"],
+      "expected_lane": "MEDIUM",
+      "risk": { "expected_strength": "soft" },
+      "runtime": "non-claude",
+      "mode": "interactive",
+      "interaction": "text-numbered-list",
+      "confidence": "low",
+      "rationale": "non-Claude runtime replaces AskUserQuestion with a numbered text list; still MEDIUM (unknown→MEDIUM)"
+    },
+    {
+      "id": "gate-nonclaude-auto",
+      "category": "runtime-gate",
+      "description": "improve the checkout flow",
+      "candidate_paths": ["src/checkout/"],
+      "expected_lane": "MEDIUM",
+      "risk": { "expected_strength": "soft" },
+      "runtime": "non-claude",
+      "mode": "auto",
+      "interaction": "auto-adopt",
+      "confidence": "low",
+      "rationale": "headless/non-Claude auto path adopts conservative MEDIUM, no stop"
+    }
+  ]
+}

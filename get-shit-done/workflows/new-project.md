@@ -249,6 +249,13 @@ Proceed to Step 4 (skip Steps 3 and 5).
 
 ## 3. Deep Questioning
 
+**PRD consumption (D4/R2 H8 — never auto-consume an arbitrary PRD):** if `--prd <path>`
+was passed, or exactly one `prds/*/PRD.md` exists with frontmatter `status: approved`
++ `target_milestone` + a non-stale `last_reviewed`, present its summary and confirm
+via AskUserQuestion (Use it / Clarify fresh; text mode → numbered list). Only on
+explicit "Use it" seed project context/requirements from the PRD and skip the
+questioning below. Otherwise clarify normally. Never silently adopt a random PRD.
+
 **If auto mode:** Skip (already handled in Step 2a). Extract project context from provided document instead and proceed to Step 4.
 
 **Display stage banner:**

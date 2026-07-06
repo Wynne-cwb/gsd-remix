@@ -39,7 +39,7 @@ Full roster at `agents/gsd-*.md`. The "Primary doc" column flags whether [`docs/
 
 ---
 
-## Commands (35 shipped)
+## Commands (37 shipped)
 
 Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md` section order; each row carries the command name, a one-line role derived from the command's frontmatter `description:`, and a link to the source file. `tests/command-count-sync.test.cjs` locks the count against the filesystem.
 
@@ -56,6 +56,8 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 | `/gsd-next` | Automatically advance to the next logical step in the GSD workflow. | [commands/gsd/next.md](../commands/gsd/next.md) |
 | `/gsd-fast` | Execute a trivial task inline — no subagents, no planning overhead. | [commands/gsd/fast.md](../commands/gsd/fast.md) |
 | `/gsd-quick` | Execute a quick task with GSD guarantees (atomic commits, state tracking) but skip optional agents. | [commands/gsd/quick.md](../commands/gsd/quick.md) |
+| `/gsd-escalate` | Escalate a completed quick task into a heavy phase, carrying its work forward as evidence (quick → heavy). | [commands/gsd/escalate.md](../commands/gsd/escalate.md) |
+| `/gsd-brainstorm` | Converge a rough idea into an approved PRD (requirement-level clarification) before a milestone or phase. | [commands/gsd/brainstorm.md](../commands/gsd/brainstorm.md) |
 | `/gsd-code-review` | Review source files changed during a phase for bugs, security, and code-quality problems. | [commands/gsd/code-review.md](../commands/gsd/code-review.md) |
 | `/gsd-code-review-fix` | Auto-fix issues found by `/gsd-code-review`, committing each fix atomically. | [commands/gsd/code-review-fix.md](../commands/gsd/code-review-fix.md) |
 
@@ -110,7 +112,7 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 
 ---
 
-## Workflows (41 shipped)
+## Workflows (43 shipped)
 
 Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators that commands reference internally; most are not read directly by end users. Rows below map each workflow file to its role (derived from the `<purpose>` block) and, where applicable, to the command that invokes it.
 
@@ -118,6 +120,8 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 |----------|------|------------|
 | `add-phase.md` | Add a new integer phase to the end of the current milestone in the roadmap. | `/gsd-add-phase` |
 | `add-tests.md` | Generate unit and E2E tests for a completed phase based on its artifacts. | `/gsd-add-tests` |
+| `escalate.md` | Escalate a completed quick task into a heavy phase, seeding it with prior context/commits as evidence (quick → heavy). | `/gsd-escalate` |
+| `brainstorm.md` | Converge a rough idea into an approved PRD (requirement-level clarification), gated at the PRD. | `/gsd-brainstorm` |
 | `add-todo.md` | Capture an idea or task that surfaces during a session as a structured todo. | `/gsd-add-todo`, `/gsd-add-backlog` |
 | `autonomous.md` | Drive milestone phases autonomously — all remaining, a range, or a single phase. | `/gsd-autonomous` |
 | `check-todos.md` | List pending todos, allow selection, load context, and route to the appropriate action. | `/gsd-check-todos` |
@@ -162,7 +166,7 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 
 ---
 
-## References (32 shipped)
+## References (35 shipped)
 
 Full roster at `get-shit-done/references/*.md`. References are shared knowledge documents that workflows and agents `@-reference`. The groupings below match [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#references-get-shit-donereferencesmd) — core, workflow clusters, and the modular planner decomposition.
 
@@ -201,8 +205,11 @@ Full roster at `get-shit-done/references/*.md`. References are shared knowledge 
 | `phase-argument-parsing.md` | Phase argument parsing conventions. |
 | `decimal-phase-calculation.md` | Decimal sub-phase numbering rules. |
 | `autonomous-smart-discuss.md` | Smart-discuss logic for autonomous mode. |
+| `team-mode.md` | Capability-gated team-mode spec for `/gsd-autonomous` (Decision Harvest, fresh per-step teammates, deferred UAT). |
+| `teammate-prompts.md` | Agent teammate prompt templates used by team mode. |
 | `ios-scaffold.md` | iOS application scaffolding patterns. |
 | `executor-examples.md` | Worked examples for the gsd-executor agent. |
+| `stolen-parts.md` | Local spec anchors for conventions borrowed from external frameworks (final-form router/lanes). |
 
 ### Modular Planner Decomposition
 

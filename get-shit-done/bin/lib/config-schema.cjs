@@ -29,6 +29,8 @@ const VALID_CONFIG_KEYS = new Set([
   'workflow.use_worktrees',
   'workflow.code_review',
   'workflow.code_review_depth',
+  'workflow.quick_plan_gate',
+  'workflow.team_mode',
   'workflow.pattern_mapper',
   'workflow.security_enforcement',
   'workflow.security_review',

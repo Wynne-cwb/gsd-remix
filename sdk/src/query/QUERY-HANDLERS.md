@@ -185,6 +185,9 @@ These handlers implement `.planning/research/decision-routing-audit.md` — **no
 | `check.config-gates` / `check config-gates [workflow]` | Single JSON blob of merged `workflow.*` (+ `context_window`) for batch config gates. |
 | `check.phase-ready` / `check phase-ready <phase>` | Phase directory stats, `dependencies_met`, `next_step` (`discuss` / `plan` / `execute` / `verify` / `complete`). |
 | `route.next-action` / `route next-action` | Suggested next slash command from `next.md`-style rules (`/gsd-discuss-phase`, `/gsd-execute-phase`, `/gsd-resume-work`, gates, etc.). |
+| `route.risk-scan` / `route risk-scan <description> [--paths a,b,c]` | Shared high-risk surface scanner for the size-axis router / fast / quick (one lexicon, no drift). Scans only the description + candidate path strings — no full-repo grep, no semantics. Returns `{ hits:[{surface,strength:hard\|soft\|noise,term}], max_strength, candidate_paths }`. Only `hard` justifies force-escalation. |
+| `route.size-classify` / `route size-classify <description> [--paths a,b,c]` | Deterministic evidence layer for `gsd-do`'s size axis (R2 C1). Emits evidence **only** — `{ risk_hits, max_risk_strength, hard_surfaces, surface_count, candidate_files, unknowns }` — never a lane; the lane + confidence come from `gsd-do`'s LLM judgment layer. |
+| `route.escalate` / `route escalate <quick-id> --evidence <accepted_prior_work\|suspect_prior_work\|revert_recommended> [--goal "…"]` | Deterministic quick→heavy migration for `/gsd-escalate` (v1). Reuses `phase.add`, seeds the new phase's CONTEXT.md from the quick task's context/plan/commits under the chosen `evidence_status`, writes NO PLAN.md (so `route.next-action` routes to plan, not verify), and updates STATE `Current Phase`. Never reverts committed code. |
 
 ### Tier 2
 

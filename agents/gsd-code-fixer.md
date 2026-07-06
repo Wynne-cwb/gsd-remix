@@ -243,22 +243,32 @@ For each finding, extract:
 - `id`: Finding identifier (e.g., CR-01, WR-03, IN-12)
 - `severity`: Critical (CR-*), Warning (WR-*), Info (IN-*)
 - `title`: Issue title from `### ` heading
+- `axis`: `spec` | `standards` from **Axis:** line (if present)
 - `file`: Primary file path from **File:** line
 - `files`: ALL file paths referenced in finding (including in Fix section) — for multi-file fixes
 - `line`: Line number from file reference (if present, else null)
 - `issue`: Description text from **Issue:** line
+- `fixability`: `auto` | `manual` | `needs_decision` from **Fixability:** line (default `auto` if absent, for backward compatibility with older REVIEW.md)
+- `blocks_auto_fix`: `true` | `false` from **Blocks auto-fix:** line (default `false` if absent)
 - `fix`: Full fix content from **Fix:** section (may be multi-line, may contain code fences)
 
 **2. Filter by fix_scope:**
 - If `fix_scope == "critical_warning"`: include only CR-* and WR-* findings
 - If `fix_scope == "all"`: include CR-*, WR-*, and IN-* findings
 
-**3. Sort findings by severity:**
-- Critical first, then Warning, then Info
-- Within same severity, maintain document order
+**3. Hold back findings a human must adjudicate (two-axis schema gate):**
+- Any finding with `blocks_auto_fix: true` OR `fixability: needs_decision` is **NEVER auto-applied** — do not edit code for it.
+- Record it immediately as `skipped: needs human decision ({reason})` and exclude it from the apply loop.
+- `fixability: manual` findings are also not auto-editable — skip as `skipped: manual fix required`.
+- Only `fixability: auto` (or absent, treated as auto) findings proceed to `apply_fixes`.
+- This holds in every mode — the `--auto` iteration loop especially must **stop at** these, not force them.
 
-**4. Count findings in scope:**
-Record `findings_in_scope` for REVIEW-FIX.md frontmatter.
+**4. Sort remaining (auto-fixable) findings by severity:**
+- Critical first, then Warning, then Info
+- Within same severity, maintain document order (already impact-ordered by the reviewer)
+
+**5. Count findings in scope:**
+Record `findings_in_scope` (auto-fixable findings) and `needs_human` (held-back count) for REVIEW-FIX.md frontmatter.
 </step>
 
 <step name="apply_fixes">
@@ -374,17 +384,22 @@ phase: {phase}
 fixed_at: {ISO timestamp}
 review_path: {path to source REVIEW.md}
 iteration: {current iteration number, default 1}
-findings_in_scope: {count}
+findings_in_scope: {auto-fixable count}
 fixed: {count}
 skipped: {count}
-status: all_fixed | partial | none_fixed
+needs_human: {count of findings held back — blocks_auto_fix or needs_decision or manual}
+status: all_fixed | partial | none_fixed | needs_human
 ---
 ```
 
 Status values:
-- `all_fixed`: All in-scope findings successfully fixed
+- `all_fixed`: All auto-fixable in-scope findings successfully fixed (and no held-back findings remain)
 - `partial`: Some fixed, some skipped
 - `none_fixed`: All findings skipped (no fixes applied)
+- `needs_human`: Nothing left auto-fixable, but one or more findings were held back for human decision (`blocks_auto_fix` / `needs_decision` / `manual`)
+
+List every held-back finding in a **## Needs Human Decision** body section with its
+id, axis, and the reason a human must decide — never silently drop it.
 
 **3. Body structure:**
 ```markdown
@@ -503,7 +518,8 @@ Fixes are committed **per-finding**. This has operational implications:
 
 <success_criteria>
 
-- [ ] All in-scope findings attempted (either fixed or skipped with reason)
+- [ ] Findings with `blocks_auto_fix: true` or `fixability: needs_decision`/`manual` held back (never auto-applied), recorded under "Needs Human Decision"
+- [ ] All auto-fixable in-scope findings attempted (either fixed or skipped with reason)
 - [ ] Each fix committed atomically with `fix({padded_phase}): {id} {description}` format
 - [ ] All modified files listed after each commit message (multi-file fix support)
 - [ ] REVIEW-FIX.md created with accurate counts, status, and iteration number

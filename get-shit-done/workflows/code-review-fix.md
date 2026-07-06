@@ -325,6 +325,21 @@ Read REVIEW.md findings, apply fixes, commit each atomically, write REVIEW-FIX.m
       echo "Warning: Iteration ${ITERATION} fixer failed to produce fix report. Stopping auto-loop."
       break
     fi
+
+    # Stop at human-decision findings: if nothing auto-fixable remains (only
+    # blocks_auto_fix / needs_decision / manual held back), further iterations
+    # cannot make progress. Do NOT burn iterations forcing them.
+    ITER_FIX_STATUS=$(FIX_REPORT_PATH="${FIX_REPORT_PATH}" node -e "
+      const fs = require('fs');
+      const content = fs.readFileSync(process.env.FIX_REPORT_PATH, 'utf-8');
+      const match = content.match(/^---\n([\s\S]*?)\n---/);
+      if (match && /status:\s*(\S+)/.test(match[1])) { console.log(match[1].match(/status:\s*(\S+)/)[1]); }
+      else { console.log('unknown'); }
+    " 2>/dev/null)
+    if [ "$ITER_FIX_STATUS" = "needs_human" ]; then
+      echo "Remaining findings need human decision (blocks_auto_fix / needs_decision). Stopping auto-loop — see REVIEW-FIX.md."
+      break
+    fi
   done
   
   # After loop completes
@@ -417,6 +432,7 @@ FIX_STATUS=$(echo "$FIX_FRONTMATTER" | grep "^status:" | cut -d: -f2 | xargs)
 FINDINGS_IN_SCOPE=$(echo "$FIX_FRONTMATTER" | grep "^findings_in_scope:" | cut -d: -f2 | xargs)
 FIXED_COUNT=$(echo "$FIX_FRONTMATTER" | grep "^fixed:" | cut -d: -f2 | xargs)
 SKIPPED_COUNT=$(echo "$FIX_FRONTMATTER" | grep "^skipped:" | cut -d: -f2 | xargs)
+NEEDS_HUMAN_COUNT=$(echo "$FIX_FRONTMATTER" | grep "^needs_human:" | cut -d: -f2 | xargs)
 ITERATION_COUNT=$(echo "$FIX_FRONTMATTER" | grep "^iteration:" | cut -d: -f2 | xargs)
 ```
 
@@ -434,6 +450,7 @@ echo "  Fix Scope:       ${FIX_SCOPE}"
 echo "  Findings:        ${FINDINGS_IN_SCOPE}"
 echo "  Fixed:           ${FIXED_COUNT}"
 echo "  Skipped:         ${SKIPPED_COUNT}"
+echo "  Needs human:     ${NEEDS_HUMAN_COUNT}"
 if [ "$AUTO_MODE" = "true" ]; then
   echo "  Iterations:      ${ITERATION_COUNT}"
 fi
@@ -456,15 +473,19 @@ if [ "$FIX_STATUS" = "all_fixed" ]; then
 fi
 ```
 
-If status is "partial" or "none_fixed":
+If status is "partial", "none_fixed", or "needs_human":
 ```bash
-if [ "$FIX_STATUS" = "partial" ] || [ "$FIX_STATUS" = "none_fixed" ]; then
-  echo "⚠ Some issues could not be fixed automatically."
+if [ "$FIX_STATUS" = "partial" ] || [ "$FIX_STATUS" = "none_fixed" ] || [ "$FIX_STATUS" = "needs_human" ]; then
+  if [ "$FIX_STATUS" = "needs_human" ]; then
+    echo "⚠ Remaining findings need a human decision (blocks_auto_fix / needs_decision / manual) — not auto-fixed by design."
+  else
+    echo "⚠ Some issues could not be fixed automatically."
+  fi
   echo ""
   echo "Full report: ${FIX_REPORT_PATH}"
   echo ""
   echo "Next steps:"
-  echo "  cat ${FIX_REPORT_PATH}                     — View fix report"
+  echo "  cat ${FIX_REPORT_PATH}                     — View fix report (see 'Needs Human Decision')"
   echo "  /gsd-code-review ${PHASE_NUMBER}           — Re-review code"
   echo "  /gsd-verify-work                           — Verify phase completion"
   echo ""
@@ -489,7 +510,8 @@ echo "════════════════════════�
 - [ ] REVIEW.md status checked (skip if clean/skipped)
 - [ ] Agent spawned with correct config (review_path, fix_scope, fix_report_path)
 - [ ] Agent failure handled with partial-success awareness (some fix commits may exist)
-- [ ] --auto iteration loop respects 3-iteration cap
+- [ ] Findings with blocks_auto_fix / needs_decision / manual held back for human (never auto-fixed)
+- [ ] --auto iteration loop respects 3-iteration cap and stops early when only human-decision findings remain
 - [ ] --auto re-review uses persisted file scope (not lost between iterations)
 - [ ] REVIEW-FIX.md committed ONCE after all iterations (not per-iteration)
 - [ ] Missing fix report handled with explicit error message in present_results

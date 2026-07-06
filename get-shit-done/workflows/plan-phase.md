@@ -497,6 +497,48 @@ After pattern mapper completes, update the path variable:
 PATTERNS_PATH="${PHASE_DIR}/${PADDED_PHASE}-PATTERNS.md"
 ```
 
+## 7.9. Architecture Selection (multi-lens, conditional)
+
+> Borrows feature-dev's multi-approach discipline (see `references/stolen-parts.md` §6).
+> **Conditional trigger only** — this runs solely when the phase introduces genuinely
+> new architecture, and is skipped for ordinary phases (including phases that are
+> merely locally high-risk but architecturally routine).
+
+**Trigger test.** Read the phase goal, CONTEXT.md, and RESEARCH.md. Trigger this step
+only if the phase introduces at least one of:
+- a **new architectural component** (new service/module/subsystem, or greenfield), OR
+- a **new dependency** (a library/framework not already in the project), OR
+- a **new data model** (new schema/table/store or a significant reshaping of one).
+
+If none apply → **skip silently to step 8.** Do not manufacture alternatives for
+routine work. A phase can touch a hard high-risk surface and still be architecturally
+routine — that alone does NOT trigger this step.
+
+**When triggered**, present three contrasting approaches with trade-offs and a
+recommendation, then let the user choose:
+
+```
+AskUserQuestion(
+  header: "Architecture",
+  question: "Phase {X} introduces {new component/dependency/data model}. Which approach?",
+  options: [
+    { label: "Minimal (recommended if …)", description: "Smallest change that works; least new surface. Trade-off: {…}" },
+    { label: "Clean",   description: "Best long-term structure; more upfront work. Trade-off: {…}" },
+    { label: "Pragmatic", description: "Balance of the two; {…}. Trade-off: {…}" }
+  ],
+  multiSelect: false
+)
+```
+
+- Lead with a concrete recommendation (mark it in the label) grounded in the phase's
+  constraints — do not present three equal options with no opinion.
+- **Text mode:** numbered list (1 Minimal / 2 Clean / 3 Pragmatic), read the typed number.
+- **`--auto`/headless:** adopt the recommended approach without stopping.
+
+Record the chosen approach and inject it into the planner prompt (step 8) as an
+`<architecture_choice>` block so the plan follows it. This is a plan-time decision
+only — it writes no separate persistent artifact.
+
 ## 8. Spawn gsd-planner Agent
 
 Display banner:
@@ -506,6 +548,15 @@ Display banner:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ◆ Spawning planner...
+```
+
+**If step 7.9 selected an architecture approach**, prepend to the planner prompt:
+
+```markdown
+<architecture_choice>
+Chosen approach: {Minimal|Clean|Pragmatic} — {one-line rationale}.
+The plan MUST follow this approach. Do not re-litigate the architecture.
+</architecture_choice>
 ```
 
 Planner prompt:
@@ -1056,6 +1107,7 @@ If freezes persist, try `--skip-research` to reduce the agent chain from 3 to 2 
 - [ ] Research completed (unless --skip-research or --gaps or exists)
 - [ ] gsd-phase-researcher spawned with CONTEXT.md
 - [ ] Existing plans checked
+- [ ] Multi-lens architecture selection triggered ONLY on new architecture/dependency/data model; skipped for routine phases; choice injected into planner
 - [ ] gsd-planner spawned with CONTEXT.md + RESEARCH.md
 - [ ] Plans created (PLANNING COMPLETE or CHECKPOINT handled)
 - [ ] gsd-plan-checker spawned with CONTEXT.md

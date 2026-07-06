@@ -30,13 +30,36 @@ Valid GSD subagent types (use exact names — do not fall back to 'general-purpo
 **Step 1: Parse arguments and get task description**
 
 Parse `$ARGUMENTS` for:
-- `--full` flag → store `$FULL_MODE=true`, `$DISCUSS_MODE=true`, `$RESEARCH_MODE=true`, `$VALIDATE_MODE=true`
+- `--full` flag → store `$FULL_MODE=true`, `$DISCUSS_MODE=true`, `$RESEARCH_MODE=true`, `$VALIDATE_MODE=true`, `$REVIEW_MODE=true`
 - `--validate` flag → store `$VALIDATE_MODE=true`
+- `--review` flag → store `$REVIEW_MODE=true`
 - `--discuss` flag → store `$DISCUSS_MODE=true`
 - `--research` flag → store `$RESEARCH_MODE=true`
+- `--auto` flag → store `$AUTO_MODE=true` (unattended: never hang on the plan gate)
 - Remaining text → use as `$DESCRIPTION` if non-empty
 
-After parsing, normalize: if `$DISCUSS_MODE` and `$RESEARCH_MODE` and `$VALIDATE_MODE` are all true, set `$FULL_MODE=true`. This ensures `--discuss --research --validate` is treated identically to `--full`.
+After parsing, normalize: if `$DISCUSS_MODE` and `$RESEARCH_MODE` and `$VALIDATE_MODE` and `$REVIEW_MODE` are all true, set `$FULL_MODE=true`. This ensures `--discuss --research --validate --review` is treated identically to `--full`.
+
+**Always-on baseline (`--validate-lite`, MEDIUM's floor):** regardless of flags,
+the default quick run includes the low-cost enhancement — the planner MUST emit
+`acceptance` + `verify` fields per task and the executor MUST produce runnable
+verification evidence (see Steps 5 and 6). This is NOT gated by `--validate`; it
+does NOT spawn a verifier. It guarantees MEDIUM is always a real increment over a
+bare quick task without re-bloating it. `--validate` adds the plan-checker + a
+dedicated verifier on top.
+
+## Flag semantics (backward-compatible)
+
+| flag | effect |
+|------|--------|
+| (default) | quick plan + executor + `--validate-lite` (acceptance/verify fields + runnable evidence) |
+| `--validate` | + plan-check loop + dedicated verifier |
+| `--review` | + two-axis structured code review (independent switch) |
+| `--discuss` | + lightweight discussion phase |
+| `--research` | + focused research phase |
+| `--full` | = `--discuss --research --validate --review` (unchanged aggregate) |
+| `--auto` | unattended — skip the plan gate, never hang |
+| `workflow.quick_plan_gate` | config `auto\|ask\|off` — human plan→execute gate (Step 5.7) |
 
 If `$DESCRIPTION` is empty after parsing, prompt user interactively:
 
@@ -63,7 +86,7 @@ If `$FULL_MODE` (all phases enabled — `--full` or all granular flags):
  GSD ► QUICK TASK (FULL)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-◆ Discussion + research + plan checking + verification enabled
+◆ Discussion + research + plan checking + verification + code review enabled
 ```
 
 If `$DISCUSS_MODE` and `$VALIDATE_MODE` (no research):
@@ -119,6 +142,33 @@ If `$VALIDATE_MODE` only:
 
 ◆ Plan checking + verification enabled
 ```
+
+---
+
+**Step 1.9: High-risk preflight (shared `route.risk-scan`)**
+
+Before initializing, run the **same** risk scanner the router and fast lane use
+(one lexicon, no drift) against `$DESCRIPTION` and the likely files:
+
+```bash
+RISK=$(gsd-remix-sdk query route.risk-scan "$DESCRIPTION" --paths "inferred/path1,inferred/path2" 2>/dev/null)
+MAX_STRENGTH=$(printf '%s' "$RISK" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).max_strength||'none')}catch{console.log('none')}})" 2>/dev/null)
+```
+
+If `MAX_STRENGTH` is `hard`, this touches a high-risk surface. The escalation
+铁律 wants high-risk work in HEAVY (full plan/build/review). Recommend it:
+
+```
+Heads up: this touches a high-risk surface ({surface}). A heavier lane gives it
+planning + code review before it ships:
+  /gsd-do "{task}"        — router picks HEAVY, or
+  /gsd-add-phase "{task}" — full phase
+```
+
+- **Interactive:** ask whether to escalate to HEAVY or continue in quick (default: escalate).
+- **`--auto`/headless:** do NOT silently proceed on `hard` — continue in quick but
+  force `--validate` on for this run (plan-check + verifier) and note the retained risk.
+- `soft`/`noise`/`none`: no action.
 
 ---
 
@@ -428,10 +478,10 @@ ${AGENT_SKILLS_PLANNER}
 <constraints>
 - Create a SINGLE plan with 1-3 focused tasks
 - Quick tasks should be atomic and self-contained
+- **Validate-lite baseline (always):** every task MUST have `files`, `action`, `acceptance`, `verify`, `done` fields. `acceptance` = the observable pass condition (phrase it EARS-style per `references/stolen-parts.md` §3, e.g. "When X, the system shall Y"); `verify` = the concrete runnable check that proves it.
 ${RESEARCH_MODE ? '- Research findings are available — use them to inform library/pattern choices' : '- No research phase'}
 ${VALIDATE_MODE ? '- Target ~40% context usage (structured for verification)' : '- Target ~30% context usage (simple, focused)'}
 ${VALIDATE_MODE ? '- MUST generate `must_haves` in plan frontmatter (truths, artifacts, key_links)' : ''}
-${VALIDATE_MODE ? '- Each task MUST have `files`, `action`, `verify`, `done` fields' : ''}
 </constraints>
 
 <output>
@@ -582,6 +632,42 @@ fi
 
 ---
 
+**Step 5.7: Plan gate (config `workflow.quick_plan_gate`)**
+
+Optional human gate between plan and execute. Read the config:
+
+```bash
+QUICK_PLAN_GATE=$(gsd-remix-sdk query config-get workflow.quick_plan_gate 2>/dev/null || echo "auto")
+```
+
+- `auto` (default) or `off`: proceed to executor immediately — no stop. Preserves current UX.
+- `ask`: pause and let the user approve the plan before execution.
+
+Skip the gate entirely (proceed) when `$AUTO_MODE=true`, headless, or the plan
+gate is not `ask` — **never hang an unattended run**.
+
+When `ask` and interactive, present a short plan summary and confirm:
+
+```
+AskUserQuestion(
+  header: "Plan Ready",
+  question: "Plan for '${DESCRIPTION}' is ready (${task_count} task(s)). Proceed to execute?",
+  options: [
+    { label: "Execute", description: "Run the plan as-is" },
+    { label: "Revise", description: "Send back to planner with a note" },
+    { label: "Abort", description: "Stop — keep the plan, run nothing" }
+  ],
+  multiSelect: false
+)
+```
+
+**Text mode:** replace `AskUserQuestion` with a numbered list (1 Execute / 2 Revise
+/ 3 Abort) and read the typed number. On "Revise", collect a one-line note and
+re-run Step 5 (planner revision) once, then re-gate. On "Abort", stop without
+spawning the executor.
+
+---
+
 **Step 6: Spawn executor**
 
 Capture current HEAD before spawning (used for worktree branch check):
@@ -622,6 +708,11 @@ ${AGENT_SKILLS_EXECUTOR}
 - Create summary at: ${QUICK_DIR}/${quick_id}-SUMMARY.md
 - Do NOT commit docs artifacts (SUMMARY.md, STATE.md, PLAN.md) — the orchestrator handles the docs commit in Step 8
 - Do NOT update ROADMAP.md (quick tasks are separate from planned phases)
+- **Validate-lite (always): produce runnable verification evidence per task.** For each task's `verify`, actually run it and capture the output in SUMMARY.md — do not merely assert "done". Pick the verification method by change type (gradient):
+  - **Test seam exists** → RED-GREEN (see `references/stolen-parts.md` §4): run the check, confirm it fails for the right reason, implement, re-run, confirm it passes with clean output.
+  - **CLI / config change** → snapshot or schema check: capture old output/shape before, new output/shape after.
+  - **Docs / text change** → link check / grep invariant / snapshot.
+  - **No automatic verification possible** → "manual verification required", but with an **admission gate**: first list the automatic methods you tried and why each failed. Manual does **NOT** count as green — mark the task's status accordingly so it surfaces for UAT/deferred rather than being silently accepted.
 </constraints>
 ",
   subagent_type="gsd-executor",
@@ -727,9 +818,11 @@ Note: For quick tasks producing multiple plans (rare), spawn executors in parall
 
 ---
 
-**Step 6.25: Code review (auto)**
+**Step 6.25: Code review (`--review`)**
 
-Skip this step entirely if `$FULL_MODE` is false.
+Skip this step entirely if `$REVIEW_MODE` is false. (`--full` sets `$REVIEW_MODE`;
+`--review` is the independent switch. This is the two-axis structured review — see
+`agents/gsd-code-reviewer.md`.)
 
 **Config gate:**
 ```bash
@@ -951,8 +1044,11 @@ Ready for next task: /gsd-quick ${GSD_WS}
 <success_criteria>
 - [ ] ROADMAP.md validation passes
 - [ ] User provides task description
-- [ ] `--full`, `--validate`, `--discuss`, and `--research` flags parsed from arguments when present
-- [ ] `--full` sets all booleans (`$FULL_MODE`, `$DISCUSS_MODE`, `$RESEARCH_MODE`, `$VALIDATE_MODE`)
+- [ ] `--full`, `--validate`, `--review`, `--discuss`, `--research`, `--auto` flags parsed from arguments when present
+- [ ] `--full` sets all booleans (`$FULL_MODE`, `$DISCUSS_MODE`, `$RESEARCH_MODE`, `$VALIDATE_MODE`, `$REVIEW_MODE`)
+- [ ] Validate-lite baseline always on (plan acceptance/verify fields + executor runnable evidence, no verifier spawn)
+- [ ] High-risk preflight run (Step 1.9); plan gate honored (Step 5.7, `workflow.quick_plan_gate`)
+- [ ] `--review` runs two-axis code review independently of `--full`
 - [ ] Slug generated (lowercase, hyphens, max 40 chars)
 - [ ] Quick ID generated (YYMMDD-xxx format, 2s Base36 precision)
 - [ ] Directory created at `.planning/quick/YYMMDD-xxx-slug/`

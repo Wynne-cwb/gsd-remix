@@ -44,7 +44,6 @@ Evaluate `$ARGUMENTS` against these routing rules. Apply the **first matching** 
 | A bug, error, crash, failure, or something broken | `/gsd-debug` | Needs systematic investigation |
 | Exploring, researching, comparing, or "how does X work" | `/gsd-research-phase` | Domain research before planning |
 | Discussing vision, "how should X look", brainstorming | `/gsd-discuss-phase` | Needs context gathering |
-| A complex task: refactoring, migration, multi-file architecture, system redesign | `/gsd-add-phase` | Needs a full phase with plan/build cycle |
 | Planning a specific phase or "plan phase N" | `/gsd-plan-phase` | Direct planning request |
 | Executing a phase or "build phase N", "run phase N" | `/gsd-execute-phase` | Direct execution request |
 | Running all remaining phases automatically | `/gsd-autonomous` | Full autonomous execution |
@@ -54,19 +53,83 @@ Evaluate `$ARGUMENTS` against these routing rules. Apply the **first matching** 
 | A note, idea, or "remember to..." | `/gsd-add-todo` | Capture for later |
 | Adding tests, "write tests", "test coverage" | `/gsd-add-tests` | Test generation |
 | Completing a milestone, shipping, releasing | `/gsd-complete-milestone` | Milestone lifecycle |
-| A specific, actionable, small task (add feature, fix typo, update config) | `/gsd-quick` | Self-contained, single executor |
+| **Building or changing code** — feature, fix, refactor, migration, task (any size) | **size router** → go to `size_route` step | Dispatch by task体量 to LIGHT / MEDIUM / HEAVY |
+
+The last row is the **size axis**: the intent is "write/change code" but the *size* (体量) is unknown. Do NOT statically pick a command — go to the `size_route` step, which gathers deterministic evidence and recommends a lane. Every other row is the **intent axis** and dispatches directly (skip `size_route`).
 
 **Requires `.planning/` directory:** All routes except `/gsd-new-project`, `/gsd-map-codebase`, and `/gsd-help`. If the project doesn't exist and the route requires it, suggest `/gsd-new-project` first.
 
-**Ambiguity handling:** If the text could reasonably match multiple routes, ask the user via AskUserQuestion with the top 2-3 options. For example:
+**Ambiguity handling:** If the text could reasonably match multiple *intent* routes (e.g. debug vs research), ask the user via AskUserQuestion with the top 2-3 options. Size ambiguity (small vs large code change) is NOT resolved here — that is the `size_route` step's job.
+</step>
+
+<step name="size_route">
+**Size axis — dispatch a code change by 体量 (only when the `route` step chose "size router").**
+
+This is a two-layer classifier (design D5, `.plans/gsd-final-form-design.md`): a
+deterministic evidence layer (SDK) plus this LLM judgment layer. The router
+**never writes a persistent artifact** — the target lane records anything worth
+keeping.
+
+**1. Gather candidate paths.** From `$DESCRIPTION`, infer the files/dirs the change
+would most likely touch (explicit mentions; otherwise a quick `Glob`/`Grep` for the
+named feature). A best-effort short list is fine — this is evidence, not the work.
+
+**2. Get deterministic evidence.**
+
+```bash
+EVIDENCE=$(gsd-remix-sdk query route.size-classify "$DESCRIPTION" --paths "path1,path2,...")
+```
+
+Returns `{ risk_hits, max_risk_strength, hard_surfaces, surface_count, candidate_files, unknowns }`.
+It emits **evidence only** — it does not choose a lane and does not read requirement
+semantics. `hard_surfaces` are high-risk surfaces the scan judged as actually touched;
+`unknowns` (e.g. `no_candidate_files`, `vague_scope`) mean the evidence is thin.
+
+**3. Judge the lane (apply top-down, first match wins):**
+
+1. `hard_surfaces` non-empty (auth/session/token, payment/billing, migration/schema, public API, webhook, tenant/org, PII/logging, CORS/cookie/redirect, unsafe HTML, BFF outbound) → **HEAVY**. Escalation 铁律 — never overridden by "it looks small".
+2. Introduces new architecture / new dependency / new data model, or greenfield → **HEAVY**.
+3. Touches multiple files, or has an unresolved decision point → **MEDIUM**.
+4. One-sentence diff, no new decision, no high-risk surface → **LIGHT**.
+5. `unknowns` make the size unclear → **MEDIUM** (conservative floor — **never LIGHT**).
+
+Assign a `confidence: low | medium | high`. **`confidence: low` forbids LIGHT** — floor to MEDIUM.
+
+**4. Map lane → command (D6):**
+
+| Lane | Command | Notes |
+|------|---------|-------|
+| LIGHT | `/gsd-fast` | inline, no plan/subagent |
+| MEDIUM | `/gsd-quick` | planner + executor, `.planning/quick/` |
+| HEAVY | `/gsd-new-project` (no project yet) or `/gsd-add-phase` (project exists) | full plan/build/verify cycle |
+
+**5. Confirm (do not silently auto-run).** Present the recommendation **with the evidence
+and its uncertainty** — describe what was and was NOT observed ("scan did not find any
+route/migration/auth files being touched"), never "looks simple". Let the user accept or
+pick a different lane:
 
 ```
-"Refactor the authentication system" could be:
-1. /gsd-add-phase — Full planning cycle (recommended for multi-file refactors)
-2. /gsd-quick — Quick execution (if scope is small and clear)
-
-Which approach fits better?
+AskUserQuestion(
+  header: "Task Size",
+  question: "This looks like a ${LANE} change — ${one-line evidence}. Proceed?",
+  options: [
+    { label: "${LANE} (recommended)", description: "${why, incl. confidence + key evidence}" },
+    { label: "${adjacent lane}", description: "${when to pick this instead}" },
+    { label: "Heavier — full flow", description: "Plan/build/verify cycle" }
+  ],
+  multiSelect: false
+)
 ```
+
+Never trust "the user thinks it's simple" and never count lines. If `confidence: low`,
+say so and offer MEDIUM/HEAVY only.
+
+**6. Auto path (no stopping).** If `--auto`/headless, or `TEXT_MODE` with no interactive
+channel: adopt the recommended lane directly; when `confidence: low`, conservatively
+escalate one step (LIGHT→MEDIUM) rather than pausing. In `TEXT_MODE` interactive, replace
+`AskUserQuestion` with a numbered list and read the typed choice.
+
+Store the resolved command as the dispatch target and continue to `display`.
 </step>
 
 <step name="display">
@@ -97,10 +160,14 @@ After invoking the command, stop. The dispatched command handles everything from
 
 <success_criteria>
 - [ ] Input validated (not empty)
-- [ ] Intent matched to exactly one GSD command
+- [ ] Intent matched to exactly one GSD command (intent axis)
+- [ ] Code-change intents routed by size via `size_route` (LIGHT / MEDIUM / HEAVY)
+- [ ] Size lane derived from `route.size-classify` evidence + judgment, not line counts or user's guess
+- [ ] Hard high-risk surface forces HEAVY; `confidence: low` never routes LIGHT; `unknowns` floor to MEDIUM
+- [ ] Lane confirmed with evidence shown (unless `--auto`/headless — then adopt, escalate conservatively, no stop)
 - [ ] Ambiguity resolved via user question (if needed)
 - [ ] Project existence checked for routes that require it
 - [ ] Routing decision displayed before dispatch
 - [ ] Command invoked with appropriate arguments
-- [ ] No work done directly — dispatcher only
+- [ ] No work done directly, no persistent artifact written — dispatcher only
 </success_criteria>

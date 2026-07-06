@@ -23,6 +23,7 @@ Valid GSD subagent types (use exact names — do not fall back to 'general-purpo
 
 Parse `$ARGUMENTS` before doing anything else:
 - `--reset-phase-numbers` flag → opt into restarting roadmap phase numbering at `1`
+- `--prd <path>` → consume an approved PRD as the milestone spec (see Step 2)
 - remaining text → use as milestone name if present
 
 If the flag is absent, keep the current behavior of continuing phase numbering from the previous milestone.
@@ -33,6 +34,25 @@ If the flag is absent, keep the current behavior of continuing phase numbering f
 - Check for MILESTONE-CONTEXT.md (from /gsd-discuss-milestone)
 
 ## 2. Gather Milestone Goals
+
+### 2.0. PRD consumption (D4/R2 H8 — never auto-consume an arbitrary PRD)
+
+A PRD from `/gsd-brainstorm` can seed the milestone spec and skip re-clarifying —
+but **only** when it is explicitly chosen or explicitly approved. Never silently
+adopt a random `prds/*/PRD.md`.
+
+Accept the PRD only if EITHER:
+- `--prd <path>` was passed (explicit), OR
+- exactly one `prds/*/PRD.md` exists AND its frontmatter has `status: approved`
+  **and** `target_milestone` set **and** a `last_reviewed` date that is not stale
+  (older than ~30 days → treat as unconfirmed, ask).
+
+If a candidate qualifies, **show a summary** (title, scope, non-goals, success
+criteria) and confirm via AskUserQuestion ("Use this PRD as the milestone spec?" —
+Use it / Clarify fresh). Text mode → numbered list. Only on explicit "Use it" do you
+seed goals/requirements from the PRD and skip the freeform clarification below.
+
+If no qualifying PRD (or the user picks "Clarify fresh"), continue normally.
 
 **If MILESTONE-CONTEXT.md exists:**
 - Use features and scope from discuss-milestone
