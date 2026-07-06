@@ -1,19 +1,18 @@
 <div align="center">
 
-# GSD REMIX
+<img src="assets/gsd-logo-2000-transparent.svg" alt="GSD Remix" width="140" />
+
+# GSD Remix
 
 [English](README.md) · **简体中文**
 
-**一个非官方、带有明确主张的 GSD remix，适用于 Claude Code、OpenCode、Gemini CLI、Kilo、Codex、Copilot、Cursor、Windsurf、Antigravity、Augment、Trae、Qwen Code、Cline 和 CodeBuddy。**
+**一个带有明确主张的 GSD remix —— 面向 Claude Code 及其他 AI 编码 runtime 的规格驱动构建系统。**
 
-**它解决的是 context rot：随着 Claude 的上下文窗口被填满，输出质量逐步劣化的问题。**
+**你描述工作,它评估体量、投入恰到好处的流程,并全程保持上下文新鲜。**
 
 [![npm version](https://img.shields.io/npm/v/gsd-remix?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/gsd-remix)
 [![npm downloads](https://img.shields.io/npm/dm/gsd-remix?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/gsd-remix)
 [![Tests](https://img.shields.io/github/actions/workflow/status/Wynne-cwb/gsd-remix/test.yml?branch=main&style=for-the-badge&logo=github&label=Tests)](https://github.com/Wynne-cwb/gsd-remix/actions/workflows/test.yml)
-[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mYgfVNfA2r)
-[![X (Twitter)](https://img.shields.io/badge/X-@gsd__foundation-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/gsd_foundation)
-[![$GSD Token](https://img.shields.io/badge/$GSD-Dexscreener-1C1C1C?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0iIzAwRkYwMCIvPjwvc3ZnPg==&logoColor=00FF00)](https://dexscreener.com/solana/dwudwjvan7bzkw9zwlbyv6kspdlvhwzrqy6ebk8xzxkv)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 
 <br>
@@ -22,9 +21,7 @@
 npx gsd-remix@latest
 ```
 
-**保留与 GSD 相同的 `/gsd-*` 命令、`.planning/` 目录结构和核心 workflow 表面。**
-
-**支持 Mac、Windows 和 Linux。**
+**支持 macOS、Windows、Linux · Claude Code、Codex、Gemini、OpenCode 等。**
 
 <br>
 
@@ -32,86 +29,109 @@ npx gsd-remix@latest
 
 <br>
 
-*"只要你清楚自己想要什么，它就真的能给你做出来。不扯淡。"*
-
-*"我试过 SpecKit、OpenSpec 和 Taskmaster，这套东西目前给我的结果最好。"*
-
-*"这是我给 Claude Code 加过最强的增强。没有过度设计，是真的把事做完。"*
-
-<br>
-
-**已被 Amazon、Google、Shopify 和 Webflow 的工程师采用。**
-
-[Remix 差异](#remix-差异) · [我为什么做这个](#我为什么做这个) · [它是怎么工作的](#它是怎么工作的) · [命令](#命令) · [为什么它有效](#为什么它有效) · [用户指南](docs/USER-GUIDE.md)
+[核心理念](#核心理念) · [一个入口三条车道](#一个入口三条车道) · [重档循环](#重档循环) · [快速开始](#快速开始) · [命令](#命令) · [为什么有效](#为什么有效) · [用户指南](docs/USER-GUIDE.md)
 
 </div>
 
 ---
 
 > [!NOTE]
-> `gsd-remix` 作为独立 npm 包发布。它与官方 GSD 没有关联关系，但为了兼容性，刻意保留了相同的 `/gsd-*` 命令面和内部 planning 目录布局。
+> `gsd-remix` 是一个独立、带有明确主张的 fork,发布在 npm 上。它**与官方 GSD 项目无关**,但保留了同样的 `/gsd-*` 命令面和 `.planning/` 布局,所以上游的使用习惯和项目都能平滑迁移过来。
+
+GSD 是让 AI 编码 agent 变得可靠的那层上下文工程。底层是:任务体量路由、XML 结构化计划、subagent 编排、持久化的规划状态。你看到的,只是几个能用的命令——外加一个可以用大白话对话的 router。
+
+---
+
+## 核心理念
+
+不同的工作需要不同的流程强度。改个错别字不该触发一整个研究阶段;做 schema 迁移也不该是一行 YOLO。
+
+所以你不用挑命令。你描述任务,router 来评估体量:
+
+```
+/gsd-do "移动端登录按钮错位了"                      → LIGHT(轻)
+/gsd-do "给商品列表加分页"                          → MEDIUM(中)
+/gsd-do "让用户重启后保持登录状态"                  → HEAVY(重,碰到 auth → 强制升档)
+```
+
+router 从**确定性证据**判断**体量**——涉及多少文件、是否引入新架构、是否触及高危面——然后推荐一条车道让你确认。它从不静默执行,而是把证据摆给你看。
 
 > [!IMPORTANT]
-> ### 从上游 GSD 迁移
->
-> 如果你是从上游 GSD 迁移过来，这里的项目结构和 `/gsd-*` 命令面会保持熟悉。
->
-> **把已有项目重新接入 `gsd-remix` 的方式：**
-> 1. 运行 `/gsd-map-codebase` 扫描并索引当前代码库状态
-> 2. 运行 `/gsd-new-project`，基于 codebase map 初始化一套新的 planning 结构
-> 3. 查看 [docs/USER-GUIDE.md](docs/USER-GUIDE.md) 和 [CHANGELOG.md](CHANGELOG.md) 了解最近的变化
->
-> 你的代码本身没问题，只是 planning context 需要重建。上面两个命令就是为这个准备的。
+> **升档铁律。** 任何触及高危面的改动——auth/session/token、支付/账单、schema 迁移、公共 API、webhook、租户边界、PII/日志、cookie/CORS——无论 diff 看起来多小,都强制走 HEAVY 车道。LIGHT 与 MEDIUM 入口也由同一套风险扫描把关。
 
 ---
 
-## Remix 差异
+## 一个入口三条车道
 
-`gsd-remix` 在命令面和文件布局上尽量贴近上游 GSD，但它在行为和发布方式上带有一些明确的 remix 改动。
+三条车道都是 GSD 自己的命令,只是仪式感不同——**同一套状态模型**,所以你能**中途带着上下文、决策和已提交代码平滑升档**。
 
-所有 remix 特有改动都统一记录在 [docs/REMIX-DIFFERENCES.md](docs/REMIX-DIFFERENCES.md)。只要这个 fork 修改了上游的行为、安装方式、prompt、query 或 workflow 默认值，都应该记录到那里。
+| 车道 | 命令 | 适用 | 跑什么 |
+|------|------|------|--------|
+| **LIGHT(轻)** | `/gsd-fast` | 一句话能描述的 diff,无新决策、无风险 | 内联改动、先复现再修复、原子提交——无计划、无 subagent |
+| **MEDIUM(中)** | `/gsd-quick` | 跨文件改动、有一两个决策 | planner + executor、可运行的验证证据、可选 review/validate |
+| **HEAVY(重)** | 全流程 | 新架构、全新项目、高危面 | discuss → plan → execute → verify → review,状态可 resume |
 
-当前已经存在的差异包括：
-- 独立以 `gsd-remix` 的 npm 包名发布，但保留 `/gsd-*` 命令面和核心 planning 布局兼容
-- 将内置 SDK 命名空间隔离成 `@gsd-remix/sdk` / `gsd-remix-sdk`，避免 remix 安装与上游 `@gsd-build/sdk` 互相覆盖
-- 主流程的 token 优化，包括 discuss 历史摘要优先加载，以及小型 plan 的低复杂度 inline 路由
-- 通过 `.planning/failure-memory/` 增加 failure-memory 采集与晋升，把重复执行错误沉淀成项目内记忆，并编译成执行前的确定性守卫
-- 通过主 workflow 的自动预检和 `/gsd-health --runtime` 提供 runtime health 诊断，让安装损坏或不受支持的 Node 版本更早失败，而不是静默退化
+### 带证据升档
 
----
+一开始觉得小,做着做着变大了?`/gsd-escalate` 把一个已完成的 quick 任务提升为 heavy phase——用该 quick 任务的决策、计划和 commit 作为**证据**来播种新 phase 的上下文。它**绝不回退已提交代码**,只是把工作带过去,以合适的精度重新规划。
 
-## 我为什么做这个
-
-我是独立开发者。我不写代码，Claude Code 写。
-
-市面上已经有其他规格驱动开发工具，比如 BMAD、Speckit……但它们要么把事情搞得比必要的复杂得多了些（冲刺仪式、故事点、利益相关方同步、复盘、Jira 流程），要么根本缺少对你到底在构建什么的整体理解。我不是一家 50 人的软件公司。我不想演企业流程。我只是个想把好东西真正做出来的创作者。
-
-所以我做了 GSD。复杂性在系统内部，不在你的工作流里。幕后是上下文工程、XML 提示格式、子代理编排、状态管理；你看到的是几个真能工作的命令。
-
-这套系统会把 Claude 完成工作 *以及* 验证结果所需的一切上下文都准备好。我信任这个工作流，因为它确实能把事情做好。
-
-这就是它。没有企业角色扮演式的废话，只有一套非常有效、能让你持续用 Claude Code 构建酷东西的系统。
-
-— **TÂCHES**
+```
+/gsd-escalate 250706-abc        # quick 任务 → heavy phase,既有工作保留
+```
 
 ---
 
-Vibecoding 的名声不算好。你描述需求，AI 生成代码，结果往往是质量不稳定、规模一上来就散架的垃圾。
+## 重档循环
 
-GSD 解决的就是这个问题。它是让 Claude Code 变得可靠的上下文工程层。你只要描述想法，系统会自动提取它需要知道的一切，然后让 Claude Code 去干活。
+真正的功能走 HEAVY 的完整 discuss → plan → execute → verify 循环。每一步都写入持久化状态,所以跨会话上下文始终新鲜。
+
+### 1. 澄清需求(可选)
+
+```
+/gsd-brainstorm "给老客户做一个推荐返利计划"
+```
+
+把一个粗糙想法收敛成可评审的 **PRD**(`prds/<date>-<topic>/PRD.md`)——问题、用户、范围、非目标、成功标准——并经 Red Team / 风险 / YAGNI 三个视角自审。这是硬门:PRD 批准前不开工。批准后的 PRD 再喂给 `/gsd-new-milestone` 或 `/gsd-plan-phase --prd`。
+
+### 2. 初始化
+
+```
+/gsd-new-project      # 已有项目用 /gsd-new-milestone
+```
+
+不断提问直到真正理解你的想法 → 可选的并行研究 → 划定范围的需求 → 一份分 phase 的路线图。你批准路线图。
+
+> **已经有代码?** 先跑 `/gsd-map-codebase`——并行 agent 摸清你的技术栈、架构和约定,让规划直接沿用你的模式。
+
+### 3. Discuss → Plan → Execute → Verify
+
+```
+/gsd-discuss-phase 1     # 把你的决策记成 CONTEXT.md(或 --auto 用默认值)
+/gsd-plan-phase 1        # 研究 + 原子化 XML 计划 + 验证循环
+/gsd-execute-phase 1     # 波次并行的 executor,各自新上下文,原子提交
+/gsd-verify-work 1       # 目标反推验证 + 对话式 UAT
+```
+
+计划按依赖分成**波次(wave)**——彼此独立的计划并行跑,有依赖的等前置完成。每个 executor 拿到全新的上下文窗口,所以一整个 phase 能写几千行代码,而你的主会话仍停在 30–40% 上下文。
+
+或者让 GSD 全程自动驱动:
+
+```
+/gsd-next                # 自动判断并执行下一步
+/gsd-autonomous          # 跑完所有剩余 phase:每个都 discuss → plan → execute
+```
+
+### Team 模式(自动化,能力门控)
+
+当 runtime 支持 agent team(Claude Code)时,`/gsd-autonomous` 可以以 **Team Lead** 方式运行:开跑前先把所有人工决策集中收齐(Decision Harvest),每个边界步骤派一个全新 teammate,并把 UAT 推迟到末尾统一成一个 packet。用 `workflow.team_mode` 开启(默认 `off`;`auto` 会在能力探针通过时启用,失败则静默回退到内联)。
 
 ---
 
-## 适合谁用
+## 代码审查
 
-适合那些想把自己的需求说明白，然后让系统正确构建出来的人，而不是假装自己在运营一个 50 人工程组织的人。
+`/gsd-code-review` 在同一份报告里跑**双轴结构化审查**:**Spec 轴**(有没有实现所要求的?)+ **Standards 轴**(bug、安全、质量)。发现按影响加权——低置信但高影响的发现绝不被过滤掉,而是标记为需人工评审。
 
-### v1.37.0 亮点
-
-- **Agent 大小预算约束** — 分级行数上限（XL: 1600、Large: 1000、Default: 500）用于压缩 agent prompt，超限会在 CI 中暴露
-- **共享 boilerplate 抽取** — 将 mandatory-initial-read 和 project-skills-discovery 等逻辑提取到 reference 文件，减少多个 agent 之间的重复内容
-- **Runtime health 检查** — `discuss-phase`、`plan-phase` 和 `execute-phase` 现在都会先运行确定性的 runtime 预检；`/gsd-health --runtime` 可手动诊断安装/runtime 漂移，`/gsd-health --runtime --repair` 可重建内置 SDK
-- **独立 SDK 包名与二进制** — remix 现在把内置 SDK 构建为 `@gsd-remix/sdk`，并安装 `gsd-remix-sdk` 二进制，不再和上游 `@gsd-build/sdk` 共用全局命名空间
+`/gsd-code-review-fix` 以原子提交应用修复,但对**需要人工判断的项**(`needs_decision` / `blocks_auto_fix`)会**留手不动**,而不是瞎猜。
 
 ---
 
@@ -121,152 +141,67 @@ GSD 解决的就是这个问题。它是让 Claude Code 变得可靠的上下文
 npx gsd-remix@latest
 ```
 
-安装器会提示你选择：
-1. **运行时**：Claude Code、OpenCode、Gemini、Kilo、Codex、Copilot、Cursor、Windsurf、Antigravity、Augment、Trae、Qwen Code、CodeBuddy、Cline，或全部（交互式多选，可在一次安装中勾选多个运行时）
-2. **安装位置**：全局（所有项目）或本地（仅当前项目）
+安装器会询问:
 
-安装后可这样验证：
-- Claude Code / Gemini / Copilot / Antigravity / Qwen Code：`/gsd-help`
-- OpenCode / Kilo / Augment / Trae / CodeBuddy：`/gsd-help`
-- Codex：`$gsd-help`
-- Cline：GSD 通过 `.clinerules` 安装 — 检查 `.clinerules` 是否存在
+1. **Runtime** —— Claude Code、Codex、Gemini、OpenCode、Kilo、Copilot、Cursor、Windsurf、Antigravity、Augment、Trae、Qwen Code、CodeBuddy、Cline,或全部(一次会话多选)。
+2. **位置** —— 全局(所有项目)或本地(当前项目)。
+
+用 `/gsd-help`(Claude Code、Gemini、OpenCode……)或 `$gsd-help`(Codex)验证。
 
 > [!NOTE]
-> Claude Code 2.1.88+、Qwen Code 和 Codex 以 skill 形式安装（`.claude/skills/`、`./.codex/skills/`，或对应的全局 `~/.claude/skills/` / `~/.codex/skills/` 目录）。较老版本的 Claude Code 仍使用 `commands/gsd/`。`~/.claude/get-shit-done/skills/` 仅作为上游 legacy 导入路径保留。安装器会自动处理这些格式。
-
-> [!TIP]
-> 基于源码安装或无法使用 npm 的环境，请参阅 **[docs/manual-update.md](docs/manual-update.md)**。
-
-### 保持更新
-
-GSD 迭代很快，建议定期更新：
-
-```bash
-npx gsd-remix@latest
-```
+> 新版 Claude Code、Qwen Code、Codex 以 skill 形式安装(`.claude/skills/`、`.codex/skills/`……)。旧版 Claude Code 用 `commands/gsd/`。安装器自动处理所有格式。内置 SDK 以 `@gsd-remix/sdk` / `gsd-remix-sdk` 发布,不会与上游安装冲突。
 
 <details>
-<summary><strong>非交互式安装（Docker、CI、脚本）</strong></summary>
+<summary><strong>非交互式安装(Docker、CI、脚本)</strong></summary>
 
 ```bash
-# Claude Code
-npx gsd-remix --claude --global   # 安装到 ~/.claude/
-npx gsd-remix --claude --local    # 安装到 ./.claude/
-
-# OpenCode
-npx gsd-remix --opencode --global # 安装到 ~/.config/opencode/
-
-# Gemini CLI
-npx gsd-remix --gemini --global   # 安装到 ~/.gemini/
-
-# Kilo
-npx gsd-remix --kilo --global     # 安装到 ~/.config/kilo/
-npx gsd-remix --kilo --local      # 安装到 ./.kilo/
-
-# Codex
-npx gsd-remix --codex --global    # 安装到 ~/.codex/
-npx gsd-remix --codex --local     # 安装到 ./.codex/
-
-# Copilot
-npx gsd-remix --copilot --global  # 安装到 ~/.github/
-npx gsd-remix --copilot --local   # 安装到 ./.github/
-
-# Cursor CLI
-npx gsd-remix --cursor --global      # 安装到 ~/.cursor/
-npx gsd-remix --cursor --local       # 安装到 ./.cursor/
-
-# Windsurf
-npx gsd-remix --windsurf --global    # 安装到 ~/.codeium/windsurf/
-npx gsd-remix --windsurf --local     # 安装到 ./.windsurf/
-
-# Antigravity
-npx gsd-remix --antigravity --global # 安装到 ~/.gemini/antigravity/
-npx gsd-remix --antigravity --local  # 安装到 ./.agent/
-
-# Augment
-npx gsd-remix --augment --global     # 安装到 ~/.augment/
-npx gsd-remix --augment --local      # 安装到 ./.augment/
-
-# Trae
-npx gsd-remix --trae --global        # 安装到 ~/.trae/
-npx gsd-remix --trae --local         # 安装到 ./.trae/
-
-# Qwen Code
-npx gsd-remix --qwen --global        # 安装到 ~/.qwen/
-npx gsd-remix --qwen --local         # 安装到 ./.qwen/
-
-# CodeBuddy
-npx gsd-remix --codebuddy --global   # 安装到 ~/.codebuddy/
-npx gsd-remix --codebuddy --local    # 安装到 ./.codebuddy/
-
-# Cline
-npx gsd-remix --cline --global       # 安装到 ~/.cline/
-npx gsd-remix --cline --local        # 安装到 ./.clinerules
-
-# 所有运行时
-npx gsd-remix --all --global      # 安装到所有目录
+npx gsd-remix --claude --global      # ~/.claude/
+npx gsd-remix --claude --local       # ./.claude/
+npx gsd-remix --codex --global       # ~/.codex/
+npx gsd-remix --gemini --global      # ~/.gemini/
+npx gsd-remix --opencode --global    # ~/.config/opencode/
+npx gsd-remix --all --global         # 所有支持的 runtime
 ```
 
-使用 `--global`（`-g`）或 `--local`（`-l`）可以跳过安装位置提示。
-使用 `--claude`、`--opencode`、`--gemini`、`--kilo`、`--codex`、`--copilot`、`--cursor`、`--windsurf`、`--antigravity`、`--augment`、`--trae`、`--codebuddy`、`--cline` 或 `--all` 可以跳过运行时提示。
-`GSD Remix SDK` CLI（`gsd-remix-sdk`）会从内置源码自动安装，它是 `/gsd-*` 命令运行所必需的。可用 `--no-sdk` 跳过 SDK 安装，或用 `--sdk` 强制重装。运行时 SDK 修复可通过 `/gsd-health --runtime --repair` 执行。
+用 `--global`/`-g` 或 `--local`/`-l` 跳过位置提问,用 runtime 标志(`--claude`、`--codex`……或 `--all`)跳过 runtime 提问。`gsd-remix-sdk` CLI 会从内置源自动安装;`--no-sdk` 跳过、`--sdk` 强制重装。任意组合加 `--uninstall` 即可卸载。
 
-如果你之前已经装过上游 GSD，想确认当前 `/gsd-*` 命令确实来自 `gsd-remix`，运行 `/gsd-health --runtime`。输出里会显示 `Distribution: GSD Remix`、包版本以及实际解析到的 `IDENTITY.json` 路径。Claude 全局安装也可以直接查看 `~/.claude/get-shit-done/IDENTITY.json`。
+用 `/gsd-health --runtime` 确认来源——会输出 `Distribution: GSD Remix`、版本号,以及解析到的 `IDENTITY.json`。
 
 </details>
 
 <details>
-<summary><strong>开发安装</strong></summary>
-
-克隆仓库并在本地运行安装器：
+<summary><strong>源码安装(开发用)</strong></summary>
 
 ```bash
 git clone https://github.com/Wynne-cwb/gsd-remix.git
 cd gsd-remix
+npm run build:hooks          # 编译 hooks/dist/ —— 安装前必须先跑
 node bin/install.js --claude --local
 ```
 
-这样会安装到 `./.claude/`，方便你在贡献代码前测试自己的改动。
-
 </details>
 
-### 推荐：跳过权限确认模式
+### 推荐:跳过权限确认模式
 
-GSD 的设计目标是无摩擦自动化。运行 Claude Code 时建议使用：
+GSD 为无摩擦自动化而生。反复批准 `date`、`git commit` 五十次就失去意义了:
 
 ```bash
 claude --dangerously-skip-permissions
 ```
 
-> [!TIP]
-> 这才是 GSD 的预期用法。连 `date` 和 `git commit` 都要来回确认 50 次，整个体验就废了。
-
 <details>
-<summary><strong>替代方案：细粒度权限</strong></summary>
+<summary><strong>更想用细粒度权限?</strong></summary>
 
-如果你不想使用这个 flag，可以在项目的 `.claude/settings.json` 中加入：
+在项目的 `.claude/settings.json` 里加一个 allowlist:
 
 ```json
 {
   "permissions": {
     "allow": [
-      "Bash(date:*)",
-      "Bash(echo:*)",
-      "Bash(cat:*)",
-      "Bash(ls:*)",
-      "Bash(mkdir:*)",
-      "Bash(wc:*)",
-      "Bash(head:*)",
-      "Bash(tail:*)",
-      "Bash(sort:*)",
-      "Bash(grep:*)",
-      "Bash(tr:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git status:*)",
-      "Bash(git log:*)",
-      "Bash(git diff:*)",
-      "Bash(git tag:*)"
+      "Bash(date:*)", "Bash(echo:*)", "Bash(cat:*)", "Bash(ls:*)",
+      "Bash(mkdir:*)", "Bash(grep:*)", "Bash(sort:*)", "Bash(tr:*)",
+      "Bash(git add:*)", "Bash(git commit:*)", "Bash(git status:*)",
+      "Bash(git log:*)", "Bash(git diff:*)", "Bash(git tag:*)"
     ]
   }
 }
@@ -276,557 +211,141 @@ claude --dangerously-skip-permissions
 
 ---
 
-## 它是怎么工作的
+## 为什么有效
 
-> **已经有现成代码库？** 先运行 `/gsd-map-codebase`。它会并行拉起多个代理分析你的技术栈、架构、约定和风险点。之后 `/gsd-new-project` 就会真正“理解”你的代码库，提问会聚焦在你打算新增的部分，规划时也会自动加载你的现有模式。
+**上下文工程。** GSD 只把该给模型的上下文摆在它面前,别的不给。持久化文件承载跨会话记忆——`PROJECT.md`(愿景)、`REQUIREMENTS.md`(划定范围的 v1/v2)、`ROADMAP.md`(进度)、`STATE.md`(决策/阻塞)、`PLAN.md`(原子任务)、`SUMMARY.md`(交付了什么)。每个都有大小上限,卡在模型质量还稳的边界内。
 
-### 1. 初始化项目
-
-```
-/gsd-new-project
-```
-
-一个命令，一条完整流程。系统会：
-
-1. **提问**：一直问到它彻底理解你的想法（目标、约束、技术偏好、边界情况）
-2. **研究**：并行拉起代理调研领域知识（可选，但强烈建议）
-3. **需求梳理**：提取哪些属于 v1、v2，哪些不在范围内
-4. **路线图**：创建与需求映射的阶段规划
-
-你审核并批准路线图后，就可以开始构建。
-
-**生成：** `PROJECT.md`、`REQUIREMENTS.md`、`ROADMAP.md`、`STATE.md`、`.planning/research/`
-
----
-
-### 2. 讨论阶段
-
-```
-/gsd-discuss-phase 1
-```
-
-**这是你塑造实现方式的地方。**
-
-你的路线图里，每个阶段通常只有一两句话。这点信息不足以让系统按 *你脑中的样子* 把东西做出来。这一步的作用，就是在研究和规划之前，把你的偏好先收进去。
-
-系统会分析该阶段，并根据要构建的内容识别灰区：
-
-- **视觉功能**：布局、信息密度、交互、空状态
-- **API / CLI**：返回格式、flags、错误处理、详细程度
-- **内容系统**：结构、语气、深度、流转方式
-- **组织型任务**：分组标准、命名、去重、例外情况
-
-对每个你选择的区域，系统都会持续追问，直到你满意为止。最终产物 `CONTEXT.md` 会直接喂给后续两个步骤：
-
-1. **研究代理会读取它**：知道该研究哪些模式（例如“用户想要卡片布局” → 去研究卡片组件库）
-2. **规划代理会读取它**：知道哪些决策已经锁定（例如“已决定使用无限滚动” → 计划里就会包含滚动处理）
-
-你在这里给出的信息越具体，系统越能构建出你真正想要的东西。跳过它，你拿到的是合理默认值；用好它，你拿到的是 *你的* 方案。
-
-**生成：** `{phase_num}-CONTEXT.md`
-
----
-
-### 3. 规划阶段
-
-```
-/gsd-plan-phase 1
-```
-
-系统会：
-
-1. **研究**：结合你的 `CONTEXT.md` 决策，调研这一阶段该怎么实现
-2. **制定计划**：创建 2-3 份原子化任务计划，使用 XML 结构
-3. **验证**：将计划与需求对照检查，直到通过为止
-
-每份计划都足够小，可以在一个全新的上下文窗口里执行。没有质量衰减，也不会出现“我接下来会更简洁一些”的退化状态。
-
-**生成：** `{phase_num}-RESEARCH.md`、`{phase_num}-{N}-PLAN.md`
-
----
-
-### 4. 执行阶段
-
-```
-/gsd-execute-phase 1
-```
-
-系统会：
-
-1. **按 wave 执行计划**：能并行的并行，有依赖的顺序执行
-2. **每个计划使用新上下文**：20 万 token 纯用于实现，零历史垃圾
-3. **每个任务单独提交**：每项任务都有自己的原子提交
-4. **对照目标验证**：检查代码库是否真的交付了该阶段承诺的内容
-
-你可以离开，回来时看到的是已经完成的工作和干净的 git 历史。
-
-**Wave 执行方式：**
-
-计划会根据依赖关系被分组为不同的 “wave”。同一 wave 内并行执行，不同 wave 之间顺序推进。
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│  PHASE EXECUTION                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  WAVE 1 (parallel)          WAVE 2 (parallel)          WAVE 3       │
-│  ┌─────────┐ ┌─────────┐    ┌─────────┐ ┌─────────┐    ┌─────────┐ │
-│  │ Plan 01 │ │ Plan 02 │ →  │ Plan 03 │ │ Plan 04 │ →  │ Plan 05 │ │
-│  │         │ │         │    │         │ │         │    │         │ │
-│  │ User    │ │ Product │    │ Orders  │ │ Cart    │    │ Checkout│ │
-│  │ Model   │ │ Model   │    │ API     │ │ API     │    │ UI      │ │
-│  └─────────┘ └─────────┘    └─────────┘ └─────────┘    └─────────┘ │
-│       │           │              ↑           ↑              ↑       │
-│       └───────────┴──────────────┴───────────┘              │       │
-│              Dependencies: Plan 03 needs Plan 01            │       │
-│                          Plan 04 needs Plan 02              │       │
-│                          Plan 05 needs Plans 03 + 04        │       │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-**为什么 wave 很重要：**
-- 独立计划 → 同一 wave → 并行执行
-- 依赖计划 → 更晚的 wave → 等依赖完成
-- 文件冲突 → 顺序执行，或合并到同一个计划里
-
-这也是为什么“垂直切片”（Plan 01：端到端完成用户功能）比“水平分层”（Plan 01：所有 model，Plan 02：所有 API）更容易并行化。
-
-**生成：** `{phase_num}-{N}-SUMMARY.md`、`{phase_num}-VERIFICATION.md`
-
----
-
-### 5. 验证工作
-
-```
-/gsd-verify-work 1
-```
-
-**这是你确认它是否真的可用的地方。**
-
-自动化验证能检查代码存在、测试通过。但这个功能是否真的按你的预期工作？这一步就是让你亲自用。
-
-系统会：
-
-1. **提取可测试的交付项**：你现在应该能做到什么
-2. **逐项带你验证**：“能否用邮箱登录？” 可以 / 不可以，或者描述哪里不对
-3. **自动诊断失败**：拉起 debug 代理定位根因
-4. **创建验证过的修复计划**：可立刻重新执行
-
-如果一切通过，就进入下一步；如果哪里坏了，你不需要手动 debug，只要重新运行 `/gsd-execute-phase`，执行它自动生成的修复计划即可。
-
-**生成：** `{phase_num}-UAT.md`，以及发现问题时的修复计划
-
----
-
-### 6. 重复 → 完成 → 下一个里程碑
-
-```
-/gsd-discuss-phase 2
-/gsd-plan-phase 2
-/gsd-execute-phase 2
-/gsd-verify-work 2
-...
-/gsd-complete-milestone
-/gsd-new-milestone
-```
-
-或者让 GSD 自动判断下一步：
-
-```
-/gsd-next                    # 自动检测并执行下一步
-```
-
-循环执行 **讨论 → 规划 → 执行 → 验证**，直到整个里程碑完成。
-
-如果你希望在讨论阶段更快收集信息，可以用 `/gsd-discuss-phase <n> --batch`，一次回答一小组问题，而不是逐个问答。
-
-每个阶段都会得到你的输入（discuss）、充分研究（plan）、干净执行（execute）和人工验证（verify）。上下文始终保持新鲜，质量也能持续稳定。
-
-当所有阶段完成后，`/gsd-complete-milestone` 会归档当前里程碑并打 release tag。
-
-接着用 `/gsd-new-milestone` 开启下一个版本。它和 `new-project` 流程相同，只是面向你现有的代码库。你描述下一步想构建什么，系统研究领域、梳理需求，再产出新的路线图。每个里程碑都是一个干净周期：定义 → 构建 → 发布。
-
----
-
-### 快速模式
-
-```
-/gsd-quick
-```
-
-**适用于不需要完整规划的临时任务。**
-
-快速模式保留 GSD 的核心保障（原子提交、状态跟踪），但路径更短：
-
-- **相同的代理体系**：同样是 planner + executor，质量不降
-- **跳过可选步骤**：默认不启用 research、plan checker、verifier
-- **独立跟踪**：数据存放在 `.planning/quick/`，不和 phase 混在一起
-
-**`--discuss` 参数：** 在规划前先进行轻量讨论，理清灰区。
-
-**`--research` 参数：** 在规划前拉起研究代理。调查实现方式、库选型和潜在坑点。适合你不确定怎么下手的场景。
-
-**`--full` 参数：** 启用计划检查（最多 2 轮迭代）和执行后验证。
-
-参数可组合使用：`--discuss --research --full` 可同时获得讨论 + 研究 + 计划检查 + 验证。
-
-```
-/gsd-quick
-> What do you want to do? "Add dark mode toggle to settings"
-```
-
-**生成：** `.planning/quick/001-add-dark-mode-toggle/PLAN.md`、`SUMMARY.md`
-
----
-
-## 为什么它有效
-
-### 上下文工程
-
-Claude Code 非常强大，前提是你把它需要的上下文给对。大多数人做不到。
-
-GSD 会替你处理：
-
-| 文件 | 作用 |
-|------|------|
-| `PROJECT.md` | 项目愿景，始终加载 |
-| `research/` | 生态知识（技术栈、功能、架构、坑点） |
-| `REQUIREMENTS.md` | 带 phase 可追踪性的 v1/v2 范围定义 |
-| `ROADMAP.md` | 你要去哪里、哪些已经完成 |
-| `STATE.md` | 决策、阻塞、当前位置，跨会话记忆 |
-| `PLAN.md` | 带 XML 结构和验证步骤的原子任务 |
-| `SUMMARY.md` | 做了什么、改了什么、已写入历史 |
-| `todos/` | 留待后续处理的想法和任务 |
-
-这些尺寸限制都是基于 Claude 在何处开始质量退化得出的。控制在阈值内，输出才能持续稳定。
-
-### XML 提示格式
-
-每个计划都会使用为 Claude 优化过的结构化 XML：
+**XML 结构化计划。** 每份计划都是精确、可执行、内建验证的 XML——不用猜:
 
 ```xml
 <task type="auto">
   <name>Create login endpoint</name>
   <files>src/app/api/auth/login/route.ts</files>
-  <action>
-    Use jose for JWT (not jsonwebtoken - CommonJS issues).
-    Validate credentials against users table.
-    Return httpOnly cookie on success.
-  </action>
+  <action>Use jose for JWT. Validate credentials. Return an httpOnly cookie on success.</action>
   <verify>curl -X POST localhost:3000/api/auth/login returns 200 + Set-Cookie</verify>
-  <done>Valid credentials return cookie, invalid return 401</done>
+  <done>Valid credentials return a cookie; invalid return 401.</done>
 </task>
 ```
 
-指令足够精确，不需要猜。验证也内建在计划里。
+**多 agent 编排。** 轻量的 orchestrator 派出专职 agent(研究、规划、执行、验证)并整合结果——重活都在全新的 subagent 上下文里干,所以你的会话始终快。
 
-### 多代理编排
+**原子 git 提交。** 每个任务落一个自己的 commit。git bisect 能定位到出错的那个任务,每个任务都可独立回退,未来的会话也能读到干净的历史。
 
-每个阶段都遵循同一种模式：一个轻量 orchestrator 拉起专用代理、汇总结果，再路由到下一步。
-
-| 阶段 | Orchestrator 做什么 | Agents 做什么 |
-|------|---------------------|---------------|
-| 研究 | 协调与展示研究结果 | 4 个并行研究代理分别调查技术栈、功能、架构、坑点 |
-| 规划 | 校验并管理迭代 | Planner 生成计划，checker 验证，循环直到通过 |
-| 执行 | 按 wave 分组并跟踪进度 | Executors 并行实现，每个都有全新的 20 万上下文 |
-| 验证 | 呈现结果并决定下一步 | Verifier 对照目标检查代码库，debuggers 诊断失败 |
-
-Orchestrator 本身不做重活，只负责拉代理、等待、整合结果。
-
-**最终效果：** 你可以在一个阶段里完成深度研究、生成并验证多个计划、让多个执行代理并行写下成千上万行代码，再自动对照目标验证，而主上下文窗口依然能维持在 30-40% 左右。真正的工作都发生在新鲜的子代理上下文里，所以你的主会话始终保持快速、响应稳定。
-
-### 原子 Git 提交
-
-每个任务完成后都会立刻生成独立提交：
-
-```bash
-abc123f docs(08-02): complete user registration plan
-def456g feat(08-02): add email confirmation flow
-hij789k feat(08-02): implement password hashing
-lmn012o feat(08-02): create registration endpoint
-```
-
-> [!NOTE]
-> **好处：** `git bisect` 能精准定位是哪项任务引入故障；每个任务都可单独回滚；未来 Claude 读取历史时也更清晰；整个 AI 自动化工作流的可观测性更好。
-
-每个 commit 都是外科手术式的：精确、可追踪、有意义。
-
-### 模块化设计
-
-- 给当前里程碑追加 phase
-- 在 phase 之间插入紧急工作
-- 完成当前里程碑后开启新的周期
-- 在不推倒重来的前提下调整计划
-
-你不会被这套系统绑死，它会随着项目变化而调整。
+**只偷零件,不换承包商。** 值得借鉴的外部约定(EARS 验收句式、RED-GREEN 验证、多镜头架构选型、对抗式自审)都作为本地文本约定 vendored 进来——绝不引入第二套工具或第二套状态模型。见 [`references/stolen-parts.md`](get-shit-done/references/stolen-parts.md)。
 
 ---
 
 ## 命令
 
-### 核心工作流
+### 路由与车道
 
 | 命令 | 作用 |
 |------|------|
-| `/gsd-new-project [--auto]` | 完整初始化：提问 → 研究 → 需求 → 路线图 |
-| `/gsd-discuss-phase [N] [--auto] [--analyze]` | 在规划前收集实现决策（`--analyze` 增加权衡分析） |
-| `/gsd-plan-phase [N] [--auto]` | 为某个阶段执行研究 + 规划 + 验证 |
-| `/gsd-execute-phase <N>` | 以并行 wave 执行全部计划，完成后验证 |
-| `/gsd-verify-work [N]` | 人工用户验收测试 ¹ |
-| `/gsd-fast <text>` | 内联处理琐碎任务——完全跳过规划，立即执行 |
-| `/gsd-next` | 自动推进到下一个逻辑工作流步骤 |
-| `/gsd-complete-milestone` | 归档里程碑并打 release tag |
-| `/gsd-new-milestone [name]` | 开始下一个版本：提问 → 研究 → 需求 → 路线图 |
+| `/gsd-do <text>` | 按意图**和**体量把自由文本路由到正确的车道/命令 |
+| `/gsd-fast <text>` | LIGHT —— 内联琐碎改动,先复现再修复,无规划 |
+| `/gsd-quick [--full] [--validate] [--review] [--discuss] [--research]` | MEDIUM —— planner + executor,带可运行验证(默认 validate-lite) |
+| `/gsd-escalate <quick-id>` | 把已完成的 quick 任务提升为 heavy phase,携带其工作作为证据 |
+| `/gsd-brainstorm <idea>` | 在规划前把粗糙想法收敛成已批准的 PRD |
 
-### 导航
+### 重档循环
 
 | 命令 | 作用 |
 |------|------|
-| `/gsd-progress` | 我现在在哪？下一步是什么？ |
-| `/gsd-next` | 自动检测状态并执行下一步 |
-| `/gsd-help` | 显示全部命令和使用指南 |
+| `/gsd-new-project` · `/gsd-new-milestone [name]` | 提问 → 研究 → 需求 → 路线图 |
+| `/gsd-discuss-phase [N] [--auto] [--chain]` | 规划前捕获实现决策 |
+| `/gsd-plan-phase [N] [--prd <path>]` | 研究 + 原子计划 + 验证循环 |
+| `/gsd-execute-phase <N>` | 波次并行执行,完成即验证 |
+| `/gsd-verify-work [N]` | 目标反推验证 + 对话式 UAT |
+| `/gsd-autonomous [--from N] [--to N] [--only N]` | 自动跑完剩余 phase(可选 team 模式) |
+| `/gsd-complete-milestone` | 归档 milestone、打 release tag |
 
-### Brownfield
-
-| 命令 | 作用 |
-|------|------|
-| `/gsd-map-codebase` | 在 `new-project` 前分析现有代码库 |
-
-### 阶段管理
+### 导航与会话
 
 | 命令 | 作用 |
 |------|------|
-| `/gsd-add-phase` | 在路线图末尾追加 phase |
-| `/gsd-insert-phase [N]` | 在 phase 之间插入紧急工作 |
-| `/gsd-remove-phase [N]` | 删除未来 phase，并重编号 |
+| `/gsd-next` | 自动判断状态并执行下一步 |
+| `/gsd-progress` | 我在哪?下一步做什么? |
+| `/gsd-resume-work` · `/gsd-pause-work` | 恢复 / 中途交接工作 |
+| `/gsd-map-codebase [area]` | new-project 前先摸清现有代码库 |
+| `/gsd-help` | 显示所有命令与用法 |
 
-### 代码质量
-
-| 命令 | 作用 |
-|------|------|
-| `/gsd-code-review [N]` | 审查阶段改动的源码文件，发现 bug、安全和质量问题 |
-| `/gsd-code-review-fix [N]` | 自动修复代码审查发现的问题，每个修复独立提交 |
-| `/gsd-pr-branch` | 创建过滤 `.planning/` 提交的干净 PR 分支 |
-
-### 积压
+### 代码质量与维护
 
 | 命令 | 作用 |
 |------|------|
-| `/gsd-add-backlog <desc>` | 将想法加入积压停车场（999.x 编号，独立于活跃序列） |
-| `/gsd-review-backlog` | 审查积压项，提升到当前里程碑或清除过期条目 |
+| `/gsd-code-review [N]` | 双轴(spec + standards)结构化审查 |
+| `/gsd-code-review-fix [N]` | 自动修复发现、原子提交,对需人工判断项留手 |
+| `/gsd-pr-branch` | 过滤掉 `.planning/` commit 的干净 PR 分支 |
+| `/gsd-debug [desc]` | 带持久状态的系统化调试 |
+| `/gsd-add-phase` · `/gsd-insert-phase [N]` · `/gsd-remove-phase [N]` | 路线图增删改 |
+| `/gsd-add-todo` · `/gsd-note` · `/gsd-add-backlog` · `/gsd-review-backlog` | 捕获与整理想法 |
+| `/gsd-settings` · `/gsd-health [--runtime] [--repair]` | 配置工作流;诊断或修复安装 |
 
-### 会话
-
-| 命令 | 作用 |
-|------|------|
-| `/gsd-pause-work` | 在中途暂停时创建交接上下文（写入 HANDOFF.json） |
-| `/gsd-resume-work` | 从上一次会话恢复 |
-
-### 工具
-
-| 命令 | 作用 |
-|------|------|
-| `/gsd-settings` | 配置模型 profile 和工作流代理 |
-| `/gsd-add-todo [desc]` | 记录一个待办想法 |
-| `/gsd-check-todos` | 查看待办列表 |
-| `/gsd-debug [desc]` | 使用持久状态进行系统化调试 |
-| `/gsd-do <text>` | 将自由文本自动路由到正确的 GSD 命令 |
-| `/gsd-note <text>` | 零摩擦想法捕捉——追加、列出或提升为待办 |
-| `/gsd-quick [--full] [--discuss] [--research]` | 以 GSD 保障执行临时任务（`--full` 增加计划检查和验证，`--discuss` 先补上下文，`--research` 在规划前先调研） |
-| `/gsd-health [--runtime] [--repair]` | 校验 `.planning/` 完整性、自动修复 planning 问题、确认 runtime 身份，或用 `--runtime --repair` 重建 `gsd-remix-sdk` |
-
-<sup>¹ 由 reddit 用户 OracleGreyBeard 贡献</sup>
+完整参考见 [docs/COMMANDS.md](docs/COMMANDS.md)。
 
 ---
 
 ## 配置
 
-GSD 将项目设置保存在 `.planning/config.json`。你可以在 `/gsd-new-project` 时配置，也可以稍后通过 `/gsd-settings` 修改。完整的配置 schema、工作流开关、git branching 选项以及各代理的模型分配，请查看[用户指南](docs/USER-GUIDE.md#configuration-reference)。
+项目设置在 `.planning/config.json`——在 `/gsd-new-project` 时设置,或用 `/gsd-settings` 修改。完整 schema 见[用户指南](docs/USER-GUIDE.md#configuration-reference)和 [docs/CONFIGURATION.md](docs/CONFIGURATION.md)。
 
-### 核心设置
+| 设置 | 默认 | 控制什么 |
+|------|------|----------|
+| `mode` | `interactive` | 自动批准(`yolo`)还是每步确认 |
+| `granularity` | `standard` | 范围切分成 phase × plan 的粗细 |
+| `workflow.code_review` | `true` | 启用 `/gsd-code-review[-fix]` |
+| `workflow.quick_plan_gate` | `auto` | MEDIUM 的 plan→execute 门:`auto`(不停) / `ask` / `off` |
+| `workflow.team_mode` | `off` | 自动化 team 模式:`off` / `auto`(探针门控) / `on` |
+| `workflow.use_worktrees` | `true` | 并行执行的 git worktree 隔离 |
+| `git.branching_strategy` | `none` | `none` / `phase` / `milestone` 分支创建策略 |
 
-| Setting | Options | Default | 作用 |
-|---------|---------|---------|------|
-| `mode` | `yolo`, `interactive` | `interactive` | 自动批准，还是每一步确认 |
-| `granularity` | `coarse`, `standard`, `fine` | `standard` | phase 粒度，也就是范围切分得多细 |
-
-### 模型 Profile
-
-控制各代理使用哪种 Claude 模型。所有命名 profile（`quality`、`balanced`、`budget`）现在都解析为同一套统一分配——规划、路线图、研究和调试类代理使用 Opus，执行、验证、检查和映射类代理使用 Sonnet。profile 键名保留只是为了配置兼容。
-
-| Profile | 规划 / 研究 / 调试 | 其余代理 |
-|---------|--------------------|----------|
-| 命名 profile | Opus | Sonnet |
-| `inherit` | Inherit | Inherit |
-
-使用非 Anthropic 提供商（OpenRouter、本地模型）时，或想跟随当前运行时的模型选择时（如 OpenCode 的 `/model`），可用 `inherit`。
-
-通过 `/gsd-settings` 配置。
-
-### 工作流代理
-
-这些设置会在规划或执行时拉起额外代理。它们能提升质量，但也会增加 token 消耗和耗时。
-
-| Setting | Default | 作用 |
-|---------|---------|------|
-| `workflow.research` | `true` | 每个 phase 规划前先调研领域知识 |
-| `workflow.plan_check` | `true` | 执行前验证计划是否真能达成阶段目标 |
-| `workflow.verifier` | `true` | 执行后确认“必须交付项”是否已经落地 |
-| `workflow.auto_advance` | `false` | 自动串联 discuss → plan → execute，不中途停下 |
-| `workflow.research_before_questions` | `false` | 在讨论提问前先运行研究，而非之后 |
-| `workflow.skip_discuss` | `false` | 在自主模式下完全跳过讨论阶段 |
-| `workflow.discuss_mode` | `null` | 控制讨论阶段行为（`assumptions` 使用推断默认值） |
-
-可以用 `/gsd-settings` 开关这些项，也可以在单次命令里覆盖：
-- `/gsd-plan-phase --skip-research`
-- `/gsd-plan-phase --skip-verify`
-
-### 执行
-
-| Setting | Default | 作用 |
-|---------|---------|------|
-| `parallelization.enabled` | `true` | 是否并行执行独立计划 |
-| `planning.commit_docs` | `true` | 是否将 `.planning/` 纳入 git 跟踪 |
-| `hooks.context_warnings` | `true` | 显示上下文窗口使用量警告 |
-
-### Git 分支策略
-
-控制 GSD 在执行过程中如何处理分支。
-
-| Setting | Options | Default | 作用 |
-|---------|---------|---------|------|
-| `git.branching_strategy` | `none`, `phase`, `milestone` | `none` | 分支创建策略 |
-| `git.phase_branch_template` | string | `gsd/phase-{phase}-{slug}` | phase 分支模板 |
-| `git.milestone_branch_template` | string | `gsd/{milestone}-{slug}` | milestone 分支模板 |
-
-**策略说明：**
-- **`none`**：直接提交到当前分支（GSD 默认行为）
-- **`phase`**：每个 phase 创建一个分支，在 phase 完成时合并
-- **`milestone`**：整个里程碑只用一个分支，在里程碑完成时合并
-
-在里程碑完成时，GSD 会提供 squash merge（推荐）或保留历史的 merge 选项。
+**模型档位**统一为一套分配——Opus 用于规划/研究/调试,Sonnet 用于其余——通过 `/gsd-settings` 配置。非 Anthropic provider 用 `inherit`。
 
 ---
 
 ## 安全
 
-### 保护敏感文件
+GSD 生成的 markdown 会变成 LLM 的系统提示,所以用户可控的文本是潜在的间接提示注入向量。内建纵深防御:文件参数的路径穿越校验、对用户文本的集中式注入扫描、对 `.planning/` 写入的 `PreToolUse` 提示守卫 hook,以及对所有 agent/workflow/command 文件的 CI 扫描。高危面扫描还会为车道路由把关(见上文升档铁律)。
 
-GSD 的代码库映射和分析命令会读取文件来理解你的项目。**包含机密信息的文件应当加入 Claude Code 的 deny list**：
-
-1. 打开 Claude Code 设置（项目级 `.claude/settings.json` 或全局设置）
-2. 把敏感文件模式加入 deny list：
+**保护密钥**——在 `.claude/settings.json` 里 deny 读取:
 
 ```json
 {
   "permissions": {
     "deny": [
-      "Read(.env)",
-      "Read(.env.*)",
-      "Read(**/secrets/*)",
-      "Read(**/*credential*)",
-      "Read(**/*.pem)",
-      "Read(**/*.key)"
+      "Read(.env)", "Read(.env.*)", "Read(**/secrets/*)",
+      "Read(**/*credential*)", "Read(**/*.pem)", "Read(**/*.key)"
     ]
   }
 }
 ```
 
-这样无论你运行什么命令，Claude 都无法读取这些文件。
-
-> [!IMPORTANT]
-> GSD 内建了防止提交 secrets 的保护，但纵深防御依然是最佳实践。第一道防线应该是直接禁止读取敏感文件。
-
 ---
 
 ## 故障排查
 
-**安装后找不到命令？**
-- 重启你的运行时，让命令或 skills 重新加载
-- 检查文件是否存在于 `~/.claude/commands/gsd/`（全局）或 `./.claude/commands/gsd/`（本地）
-- 对 Codex，检查 skills 是否存在于 `~/.codex/skills/gsd-*/SKILL.md`（全局）或 `./.codex/skills/gsd-*/SKILL.md`（本地）
-
-**命令行为不符合预期？**
-- 运行 `/gsd-help` 确认安装成功
-- 重新执行 `npx gsd-remix` 进行重装
-
-**想更新到最新版本？**
-```bash
-npx gsd-remix@latest
-```
-
-**在 Docker 或容器环境中使用？**
-
-如果使用波浪线路径（`~/.claude/...`）时读取失败，请在安装前设置 `CLAUDE_CONFIG_DIR`：
-```bash
-CLAUDE_CONFIG_DIR=/home/youruser/.claude npx gsd-remix --global
-```
-这样可以确保使用绝对路径，而不是在容器里可能无法正确展开的 `~`。
-
-### 卸载
-
-如果你想彻底移除 GSD：
-
-```bash
-# 全局安装
-npx gsd-remix --claude --global --uninstall
-npx gsd-remix --opencode --global --uninstall
-npx gsd-remix --gemini --global --uninstall
-npx gsd-remix --kilo --global --uninstall
-npx gsd-remix --codex --global --uninstall
-npx gsd-remix --copilot --global --uninstall
-npx gsd-remix --cursor --global --uninstall
-npx gsd-remix --windsurf --global --uninstall
-npx gsd-remix --antigravity --global --uninstall
-npx gsd-remix --augment --global --uninstall
-npx gsd-remix --trae --global --uninstall
-npx gsd-remix --qwen --global --uninstall
-npx gsd-remix --codebuddy --global --uninstall
-npx gsd-remix --cline --global --uninstall
-
-# 本地安装（当前项目）
-npx gsd-remix --claude --local --uninstall
-npx gsd-remix --opencode --local --uninstall
-npx gsd-remix --gemini --local --uninstall
-npx gsd-remix --kilo --local --uninstall
-npx gsd-remix --codex --local --uninstall
-npx gsd-remix --copilot --local --uninstall
-npx gsd-remix --cursor --local --uninstall
-npx gsd-remix --windsurf --local --uninstall
-npx gsd-remix --antigravity --local --uninstall
-npx gsd-remix --augment --local --uninstall
-npx gsd-remix --trae --local --uninstall
-npx gsd-remix --qwen --local --uninstall
-npx gsd-remix --codebuddy --local --uninstall
-npx gsd-remix --cline --local --uninstall
-```
-
-这会移除所有 GSD 命令、代理、hooks 和设置，但会保留你其他配置。
+- **找不到命令?** 重启 runtime 重新加载 skill/命令,再跑 `/gsd-help`。确认文件在 `~/.claude/skills/gsd-*/`(全局)或 `.claude/skills/gsd-*/`(本地)。
+- **行为不对?** 重跑 `npx gsd-remix@latest`,再用 `/gsd-health --runtime` 检查来源、`/gsd-health --runtime --repair` 重建内置 SDK。
+- **Docker / 容器?** 如果 `~` 路径失败,安装前设 `CLAUDE_CONFIG_DIR=/home/you/.claude`。
+- **从上游 GSD 迁移?** 跑 `/gsd-map-codebase` 再 `/gsd-new-project` 重建规划上下文——你的代码不受影响。
 
 ---
 
-## 社区移植版本
+## 文档
 
-OpenCode、Gemini CLI、Kilo 和 Codex 现在都已经通过 `npx gsd-remix` 获得原生支持。
-
-这些社区移植版本曾率先探索多运行时支持：
-
-| Project | Platform | Description |
-|---------|----------|-------------|
-| [gsd-opencode](https://github.com/rokicool/gsd-opencode) | OpenCode | 最初的 OpenCode 适配版本 |
-| gsd-gemini (archived) | Gemini CLI | uberfuzzy 制作的最初 Gemini 适配版本 |
-
----
-
-## License
-
-MIT License。详情见 [LICENSE](LICENSE)。
+| 文档 | 内容 |
+|------|------|
+| [docs/USER-GUIDE.md](docs/USER-GUIDE.md) | 完整走查 + 配置参考 |
+| [docs/COMMANDS.md](docs/COMMANDS.md) | 每个命令的详细说明 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 各部分如何组合 |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | 完整配置 schema |
+| [docs/REMIX-DIFFERENCES.md](docs/REMIX-DIFFERENCES.md) | 本 fork 与上游 GSD 的差异 |
+| [docs/INVENTORY.md](docs/INVENTORY.md) | 所有已发布的命令、agent、workflow、reference |
 
 ---
 
 <div align="center">
 
-**Claude Code 很强，GSD 让它变得可靠。**
+**AI 编码 agent 很强。GSD 让它可靠。**
 
 </div>
