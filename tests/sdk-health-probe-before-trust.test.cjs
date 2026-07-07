@@ -47,4 +47,18 @@ describe('sdk health probe before trusting an on-PATH bin', () => {
     assert.match(region, /probe\.status\s*===\s*0/, 'success must be gated on probe.status === 0');
     assert.match(region, /broken \(health probe failed\)/, 'a failed probe must announce a rebuild');
   });
+
+  test('after rebuild, a still-broken resolved bin (shadowing shim) is re-probed and warned, not reported as success', () => {
+    const start = SRC.indexOf('function installSdkIfNeeded');
+    const region = SRC.slice(start);
+    // The post-rebuild success log must be gated on a re-probe (postProbe), and a
+    // failing re-probe must warn about a shadowing launcher rather than claim success.
+    assert.match(region, /postProbe\.status\s*===\s*0/, 'post-rebuild success must be gated on a re-probe');
+    assert.match(region, /shadows the working build/i, 'a shadowing shim must be reported, not silently trusted');
+    // The false-success form (unconditional success on any resolved bin) must be gone.
+    assert.ok(
+      !/const resolved = resolveGsdRemixSdk\(\);\s*\n\s*if \(resolved\) \{\s*\n\s*console\.log\([^\n]*Built and installed/.test(region),
+      'must not print "Built and installed" unconditionally when a bin resolves',
+    );
+  });
 });

@@ -6785,7 +6785,23 @@ function installSdkIfNeeded() {
   //    alone is not proof of a working binary (issue #2439 root cause).
   const resolved = resolveGsdRemixSdk();
   if (resolved) {
-    console.log(`  ${green}✓${reset} Built and installed GSD Remix SDK from source (gsd-remix-sdk resolved at ${resolved})`);
+    // Re-probe the resolved bin. A foreign launcher earlier on PATH (e.g. a stale
+    // ~/.local/bin/gsd-remix-sdk shim hardcoding an nvm node version) can SHADOW the
+    // npm global we just built and be broken itself — the rebuild does not fix it.
+    // Without this check the installer falsely reports success while every /gsd-*
+    // SDK query keeps failing through the shadowing shim.
+    const postProbe = spawnSync(resolved, ['query', 'sdk.health'], { encoding: 'utf-8', timeout: 30000 });
+    if (postProbe.status === 0) {
+      console.log(`  ${green}✓${reset} Built and installed GSD Remix SDK from source (gsd-remix-sdk resolved at ${resolved})`);
+      return;
+    }
+    // Resolved bin is on PATH but still broken after a rebuild → it shadows the fresh
+    // npm-global install. Point the user at the real global bin so they can fix PATH.
+    const pfxRes = spawnSync(npmCmd, ['config', 'get', 'prefix'], { encoding: 'utf-8' });
+    const pfx = pfxRes.status === 0 ? (pfxRes.stdout || '').trim() : null;
+    const realBin = pfx ? (process.platform === 'win32' ? pfx : path.join(pfx, 'bin')) : '(npm global bin dir)';
+    console.log(`  ${yellow}⚠${reset} Rebuilt the SDK into the npm global (${realBin}), but the ${cyan}gsd-remix-sdk${reset} first on PATH (${resolved}) is a different launcher that is STILL broken — it shadows the working build.`);
+    console.log(`     Fix: remove or repoint ${resolved} (often a stale shim hardcoding an old nvm node version), or put ${realBin} earlier on PATH, then rerun ${cyan}/gsd-health --runtime${reset}.`);
     return;
   }
 

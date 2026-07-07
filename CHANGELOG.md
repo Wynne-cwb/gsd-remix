@@ -6,6 +6,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 > **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.5.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
 
+## [1.5.3] — Installer detects a shadowing SDK launcher — 2026-07-07
+
+### Fixed
+
+- **Installer falsely reported SDK success when a foreign launcher shadowed it.** The SDK self-heal (1.3.1) rebuilds a broken on-PATH `gsd-remix-sdk`, but it then printed "Built and installed" if *any* bin resolved — without confirming the rebuild took effect. A stale launcher earlier on PATH (e.g. a `~/.local/bin/gsd-remix-sdk` shim hardcoding an nvm node version that never had the build) would keep shadowing the fresh npm-global install, so every `/gsd-*` SDK query kept failing while the installer claimed success. The installer now **re-probes `sdk.health` on the resolved bin after rebuilding**; if it's still broken it warns that a shadowing launcher is intercepting and points at the real npm global bin, instead of reporting success. (`bin/install.js`)
+
 ## [1.5.2] — Second-pass review fixes: risk-scan edges + escalate symlink — 2026-07-07
 
 Residual findings from a re-review of the 1.5.1 fixes.
