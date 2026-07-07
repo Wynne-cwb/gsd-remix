@@ -6713,8 +6713,16 @@ function installSdkIfNeeded() {
   if (!hasSdk) {
     const resolved = resolveGsdRemixSdk();
     if (resolved) {
-      console.log(`  ${green}✓${reset} GSD Remix SDK already installed (gsd-remix-sdk on PATH at ${resolved})`);
-      return;
+      // A bin on PATH is NOT proof the build loads. A prior install can leave the
+      // `gsd-remix-sdk` shim in place while its `dist/cli.js` is missing, which
+      // silently breaks every /gsd-* SDK query. Probe that it actually runs before
+      // trusting it; if the probe fails, fall through and rebuild from source.
+      const probe = spawnSync(resolved, ['query', 'sdk.health'], { encoding: 'utf-8', timeout: 30000 });
+      if (probe.status === 0) {
+        console.log(`  ${green}✓${reset} GSD Remix SDK already installed (gsd-remix-sdk on PATH at ${resolved})`);
+        return;
+      }
+      console.log(`  ${yellow}⚠${reset} gsd-remix-sdk on PATH at ${resolved} is broken (health probe failed) — rebuilding from source`);
     }
   }
 

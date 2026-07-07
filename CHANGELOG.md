@@ -6,6 +6,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 > **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.3.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
 
+## [1.3.1] — Installer detects a broken SDK — 2026-07-07
+
+### Fixed
+
+- **Installer no longer trusts a broken SDK on PATH.** The `gsd-remix-sdk` "already installed" fast path only checked that the bin was on PATH — a prior install could leave the shim while its `dist/cli.js` was missing, silently breaking every `/gsd-*` SDK query. The installer now runs a `sdk.health` probe on the resolved bin and rebuilds from source when it fails, instead of skipping the SDK step. Previously the only recovery was to re-run with `--sdk` by hand.
+
 ## [1.3.0] — Brainstorm in the HEAVY flow + visual companion — 2026-07-07
 
 `/gsd-brainstorm` becomes a seamless part of the HEAVY lane, and its visual companion is back — capability-gated and degradable so it stays self-contained across runtimes.
