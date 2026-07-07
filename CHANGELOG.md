@@ -4,7 +4,20 @@ All notable changes to GSD will be documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-> **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.2.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
+> **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.3.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
+
+## [1.3.0] — Brainstorm in the HEAVY flow + visual companion — 2026-07-07
+
+`/gsd-brainstorm` becomes a seamless part of the HEAVY lane, and its visual companion is back — capability-gated and degradable so it stays self-contained across runtimes.
+
+### Added
+
+- **Visual companion for `/gsd-brainstorm`** — renders the *converged* idea (never divergent) as UI mockups/wireframes + architecture/flow diagrams to confirm before you approve the PRD. Two tiers: a portable **degraded tier** (Mermaid embedded in `PRD.md`, always on under `auto`/`on`) and a gated **enhanced tier** (a self-contained `MOCKUP.html` wireframe, written only when the runtime can preview rich content). Never blocks the PRD hard gate. Spec vendored self-contained in `references/brainstorm-visuals.md` — no external skill, no MCP dependency.
+- **Config key `workflow.brainstorm_visual`** (`auto` default / `on` / `off`).
+
+### Changed
+
+- **`/gsd-do` HEAVY spec-first gate** — a HEAVY change with an unripe spec (greenfield, `vague_scope`, or no approved PRD) now routes to `/gsd-brainstorm` first; the approved PRD then feeds `/gsd-new-milestone --prd` / `/gsd-new-project --prd`. A ripe/spec'd HEAVY request (or one with an existing approved PRD) skips brainstorm and goes straight to the plan/build/verify cycle — no PRD is forced onto an already-clear request.
 
 ## [1.2.0] — Task-Size Router — 2026-07-06
 

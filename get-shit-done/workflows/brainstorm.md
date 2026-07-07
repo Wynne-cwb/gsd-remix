@@ -1,9 +1,13 @@
 <purpose>
 Requirement-level clarification (D3, middle tier): converge a rough idea into an
 approved PRD. This is a **gsd-remix native** capability (D0/D4) — self-contained, no
-external skill dependency, and deliberately WITHOUT any browser/visual-companion
-machinery. It is convergent only (idea → PRD); divergent ideation is out of scope.
-The PRD is a HARD GATE: nothing downstream runs until the user approves it.
+external skill dependency. It is convergent only (idea → PRD); divergent ideation is
+out of scope. A **capability-gated, degradable visual companion** (native to
+gsd-remix — no external skill, no MCP dependency) renders the *converged* idea as UI
+mockups + architecture/flow diagrams to help you confirm before approving; it degrades
+to Mermaid-in-PRD on text-only runtimes and never blocks the gate — see
+`references/brainstorm-visuals.md`. The PRD is a HARD GATE: nothing downstream runs
+until the user approves it.
 </purpose>
 
 <required_reading>
@@ -94,12 +98,33 @@ Fold the findings back into the PRD (tighten Non-Goals, add Constraints/Open
 Questions). Do not spawn agents or create side files.
 </step>
 
+<step name="visualize">
+**Visual companion (capability-gated, degradable) — confirm the converged idea.**
+Follow `references/brainstorm-visuals.md`. This is convergent: visuals depict the
+*agreed* scope, never new ideas. Controlled by config `workflow.brainstorm_visual`
+(`auto` default / `on` / `off`).
+
+1. Under `auto`/`on`, embed a `## Visual Model` section in `PRD.md` with small Mermaid
+   diagrams (architecture graph + the one primary flow). This is the portable degraded
+   tier — always available.
+2. Probe the runtime (per `brainstorm-visuals.md`). If it can preview rich content
+   (or `brainstorm_visual: on`), also write a self-contained wireframe
+   `${PRD_DIR}/MOCKUP.html` (low-fi, inline styles, no network) for the key surfaces.
+   If it cannot, emit a one-line notice and stay at Mermaid.
+3. Under `off`, skip visuals entirely (text PRD only).
+
+Never hard-fail here and never let a missing/failed visual block the gate. If a
+mockup reveals a scope gap, fold it back into the PRD (Scope / Non-Goals / Open
+Questions) — do not expand scope in the picture.
+</step>
+
 <step name="gate">
-**HARD GATE — stop at the PRD.** Present a short summary and the path, and tell the
-user this is where clarification ends:
+**HARD GATE — stop at the PRD.** Present a short summary and the path (and any visual
+artifacts written), and tell the user this is where clarification ends:
 
 ```
 PRD drafted: {PRD_DIR}/PRD.md  (status: draft)
+Visuals: {PRD_DIR}/MOCKUP.html + in-PRD Mermaid  (or "Mermaid only — runtime can't preview", or "skipped")
 
 Review it, then when it's right, mark `status: approved` and set `target_milestone`.
 Feed it to planning:
@@ -113,9 +138,10 @@ Approval is the user's action.
 </process>
 
 <success_criteria>
-- [ ] Convergent only (idea → PRD); no divergent ideation, no visual-companion, no external skill
+- [ ] Convergent only (idea → PRD); no divergent ideation, no external skill dependency
 - [ ] Targeted questions cover problem / users / scope+non-goals / success / constraints
 - [ ] PRD written to `prds/YYYY-MM-DD-<topic>/PRD.md` with `status`/`target_milestone`/`last_reviewed` frontmatter
 - [ ] Self-review applies Red Team / risk / YAGNI lenses (threshold-triggered, checklist only, no new artifact)
+- [ ] Visual companion (capability-gated per `references/brainstorm-visuals.md`): Mermaid in PRD under `auto`/`on`, `MOCKUP.html` only when the runtime can preview, degrades cleanly and never blocks the gate
 - [ ] HARD GATE at the PRD — no downstream workflow auto-invoked; approval is the user's
 </success_criteria>

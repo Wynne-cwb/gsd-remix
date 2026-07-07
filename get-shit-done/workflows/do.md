@@ -101,7 +101,25 @@ Assign a `confidence: low | medium | high`. **`confidence: low` forbids LIGHT** 
 |------|---------|-------|
 | LIGHT | `/gsd-fast` | inline, no plan/subagent |
 | MEDIUM | `/gsd-quick` | planner + executor, `.planning/quick/` |
-| HEAVY | `/gsd-new-project` (no project yet) or `/gsd-add-phase` (project exists) | full plan/build/verify cycle |
+| HEAVY | see **HEAVY spec-first gate** below | clarify → full plan/build/verify cycle |
+
+**HEAVY spec-first gate (brainstorm before roadmap).** A HEAVY change earns a spec
+before a roadmap. Decide the HEAVY entry point:
+
+- **Spec still unripe** — greenfield, `vague_scope` in `unknowns`, or no approved PRD
+  exists for this work → route to **`/gsd-brainstorm`** first. It converges the idea
+  into `prds/<date>-<topic>/PRD.md` and HARD-GATES for approval; the approved PRD then
+  feeds `/gsd-new-milestone --prd` (project exists) or `/gsd-new-project --prd`
+  (greenfield). Check for an existing approved PRD before routing here:
+  ```bash
+  ls prds/*/PRD.md 2>/dev/null | head -1   # if one exists with status: approved, skip brainstorm
+  ```
+- **Spec already ripe** — the request is concrete/spec'd, or an approved PRD already
+  exists → skip brainstorm and route directly to `/gsd-new-project` (no project yet)
+  or `/gsd-add-phase` (project exists) for the full plan/build/verify cycle.
+
+Do not force a PRD onto an already-clear HEAVY request; brainstorm is the front of the
+funnel only when the requirement is still vague.
 
 **5. Confirm (do not silently auto-run).** Present the recommendation **with the evidence
 and its uncertainty** — describe what was and was NOT observed ("scan did not find any
@@ -164,6 +182,7 @@ After invoking the command, stop. The dispatched command handles everything from
 - [ ] Code-change intents routed by size via `size_route` (LIGHT / MEDIUM / HEAVY)
 - [ ] Size lane derived from `route.size-classify` evidence + judgment, not line counts or user's guess
 - [ ] Hard high-risk surface forces HEAVY; `confidence: low` never routes LIGHT; `unknowns` floor to MEDIUM
+- [ ] HEAVY with an unripe spec (greenfield / `vague_scope` / no approved PRD) routes to `/gsd-brainstorm` first; a ripe/spec'd HEAVY request skips brainstorm
 - [ ] Lane confirmed with evidence shown (unless `--auto`/headless — then adopt, escalate conservatively, no stop)
 - [ ] Ambiguity resolved via user question (if needed)
 - [ ] Project existence checked for routes that require it

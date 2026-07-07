@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-06",
+  "generated": "2026-07-07",
   "families": {
     "agents": [
       "gsd-advisor-researcher",
@@ -109,6 +109,7 @@
       "agent-contracts.md",
       "artifact-types.md",
       "autonomous-smart-discuss.md",
+      "brainstorm-visuals.md",
       "checkpoints.md",
       "common-bug-patterns.md",
       "context-budget.md",

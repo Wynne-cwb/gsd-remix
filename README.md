@@ -85,13 +85,15 @@ Started small, turned out big? `/gsd-escalate` promotes a completed quick task i
 
 For real features, HEAVY runs the full discuss → plan → execute → verify cycle. Each step writes durable state so context stays fresh across sessions.
 
-### 1. Clarify the requirement (optional)
+### 1. Clarify the requirement
 
 ```
 /gsd-brainstorm "a referral program for existing customers"
 ```
 
-Converges a rough idea into a reviewable **PRD** (`prds/<date>-<topic>/PRD.md`) — problem, users, scope, non-goals, success criteria — self-reviewed through Red Team / risk / YAGNI lenses. It's a hard gate: nothing builds until you approve. The approved PRD then feeds `/gsd-new-milestone` or `/gsd-plan-phase --prd`.
+Converges a rough idea into a reviewable **PRD** (`prds/<date>-<topic>/PRD.md`) — problem, users, scope, non-goals, success criteria — self-reviewed through Red Team / risk / YAGNI lenses, with a **visual companion** (UI mockups + architecture/flow diagrams) to confirm the shape before you commit. It's a hard gate: nothing builds until you approve. The approved PRD then feeds `/gsd-new-milestone` or `/gsd-plan-phase --prd`.
+
+You rarely invoke this by hand: when `/gsd-do` sizes a request as HEAVY but the spec is still vague (greenfield, unclear scope, no approved PRD), it routes here first automatically. A HEAVY request that's already spec'd skips straight to planning. The visual companion is capability-gated — it degrades to Mermaid diagrams in the PRD on text-only runtimes and never blocks the gate.
 
 ### 2. Initialize
 
