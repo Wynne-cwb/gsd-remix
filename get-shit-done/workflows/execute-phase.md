@@ -9,12 +9,19 @@ Orchestrator coordinates, not executes. Each subagent loads the full execute-pla
 <runtime_compatibility>
 **Subagent spawning is runtime-specific:**
 - **Claude Code:** Uses `Task(subagent_type="gsd-executor", ...)` — blocks until complete, returns result
+- **Codex:** Uses `spawn_agent(agent_type="gsd-executor", message=...)` per plan, then
+  `wait_agent` for completion and `close_agent` to release the slot. `gsd-executor` is a
+  **leaf** (it does not spawn), so this stays within Codex's single-level limit. Batch
+  the wave to `workflow.team_max_parallel` (default 3) concurrent executors. `wait_agent`
+  timeout means "not done yet", never "inactive" — judge completion by SUMMARY.md + git
+  state (per the Fallback rule), not by silence. If `spawn_agent` is unavailable, fall
+  back to sequential inline execution.
 - **Copilot:** Subagent spawning does not reliably return completion signals. **Default to
   sequential inline execution**: read and follow execute-plan.md directly for each plan
   instead of spawning parallel agents. Only attempt parallel spawning if the user
   explicitly requests it — and in that case, rely on the spot-check fallback in step 3
   to detect completion.
-- **Other runtimes:** If `Task`/`task` tool is unavailable, use sequential inline execution as the
+- **Other runtimes:** If `Task`/`task`/`spawn_agent` tools are unavailable, use sequential inline execution as the
   fallback. Check for tool availability at runtime rather than assuming based on runtime name.
 
 **Fallback rule:** If a spawned agent completes its work (commits visible, SUMMARY.md exists) but

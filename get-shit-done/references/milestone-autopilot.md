@@ -33,20 +33,24 @@ The handoff targets the **Team Lead** flow specifically, so it requires that tea
 mode would actually engage. Run the **same** two-tier check as
 `references/team-mode.md` (§ *Capability gate + probe*):
 
-1. **Coarse — runtime + config.** Runtime identity must be Claude Code (`Agent` tool
-   available) **and** `workflow.team_mode` must not be `off`. Read them:
+1. **Coarse — runtime + config.** Runtime identity must be a multi-agent-capable
+   runtime — Claude Code (`Agent` tool) or Codex (`multi_agent_v1.spawn_agent`) —
+   **and** `workflow.team_mode` must not be `off`. Read them:
    ```bash
    TEAM_MODE=$(gsd-remix-sdk query config-get workflow.team_mode 2>/dev/null || echo "auto")
    AUTO_MILESTONE=$(gsd-remix-sdk query config-get workflow.auto_milestone 2>/dev/null || echo "ask")
    RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity?.runtime||'')}catch{console.log('')}})")
    ```
-2. **Fine — deterministic no-op Agent probe.** Spawn one trivial Agent that must
-   return a fixed token (e.g. `Agent(prompt="reply with exactly: TEAM_OK")`).
+   Passes when `RUNTIME` is `claude` or `codex`. On Codex the handoff runs the
+   single-level driver (`team-mode.md` § *Runtime team driver*).
+2. **Fine — deterministic no-op Agent probe.** Spawn one trivial teammate that must
+   return a fixed token — Claude `Agent(prompt="reply with exactly: TEAM_OK")`, Codex
+   `spawn_agent(message="reply with exactly: TEAM_OK")` then `wait_agent`.
 
 **If `AUTO_MILESTONE` is `off`, or `TEAM_MODE` is `off`, or the coarse/fine gate
 fails → do NOT hand off.** Fall through to the workflow's normal next-step messaging.
-Do not print an error; this is the expected fallback on non-Claude runtimes or when
-the user opted out.
+Do not print an error; this is the expected fallback on a runtime without an agent
+spawn tool or when the user opted out.
 
 ---
 
@@ -80,8 +84,8 @@ the user opted out.
 
 ## Guarantees
 
-- **Never on a non-Claude runtime, and never when `team_mode: off`** — those fall
-  through to stop-and-guide.
+- **Never on a runtime without an agent spawn tool, and never when `team_mode: off`**
+  — those fall through to stop-and-guide. (Capable runtimes: Claude Code and Codex.)
 - **`ask` is the default** — the roadmap stays a real human checkpoint; the handoff is
   one confirmation, not a silent takeover.
 - **No double-driving** — the yolo per-phase auto-advance chain

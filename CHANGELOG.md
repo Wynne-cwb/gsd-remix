@@ -6,6 +6,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 > **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.5.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
 
+## [1.6.0] — Native Codex team mode for `/gsd-autonomous` (single-level driver) — 2026-07-07
+
+### Added
+
+- **`/gsd-autonomous` team mode now runs natively on Codex, not just Claude Code.** The capability gate opens to Codex (`multi_agent_v1.spawn_agent`) alongside Claude, and `references/team-mode.md` gains a **Runtime team driver** that maps the abstract spawn/wait/collect/close operations to each runtime. Because a Codex child cannot reliably spawn its own children (verified), Codex runs **single-level**: the Team Lead is the sole spawner and runs each step's orchestration itself, while every teammate is a leaf that never spawns.
+  - **Decision Harvest on Codex** uses `gsd-discuss-phase <phase> --power` (a true leaf — it spawns no advisor sub-agents), run as a **Question Barrier over on-disk `*-QUESTIONS.json`**: fan out batched `--power` leaves → one consolidated ask → write answers back → finalize `*-CONTEXT.md`. State lives in files, so it never depends on `resume_agent` or keeping leaves alive across the answer gap. Accepted trade-off: no parallel advisor research on Codex (documented).
+  - **Execution on Codex** spawns per-plan `gsd-executor` **wave leaves directly** from the Lead (one level, preserving wave parallelism); `execute-phase` gained a Codex spawn branch (`spawn_agent`/`wait_agent`/`close_agent`) that falls back to its existing sequential-inline path when spawning is unavailable.
+  - Hard rules baked into `team-mode.md` and the Codex skill adapter (§C): leaves never spawn; `wait_agent` timeout means "not done yet", never "inactive" (no liveness polling); batch fan-out to `workflow.team_max_parallel`; spawn-unavailable/cap-exhausted → run inline (never hard-block); invoke GSD steps by loading their workflow, never by mentioning `$gsd-*`.
+  - New config key **`workflow.team_max_parallel`** (default `3`) caps concurrent teammate leaves — keeps Codex fan-out under its schema-unspecified concurrency limit; raise once a runtime's real cap is known.
+  - `milestone-autopilot.md` handoff gate opens to Codex on the same terms. (`references/team-mode.md`, `references/milestone-autopilot.md`, `workflows/autonomous.md`, `workflows/execute-phase.md`, `bin/install.js`)
+
 ## [1.5.4] — Codex: stop chained `$gsd-*` commands from being shell-run — 2026-07-07
 
 ### Fixed

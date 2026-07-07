@@ -137,7 +137,7 @@ describe('milestone autopilot — roadmap → autonomous Team Lead handoff', () 
 
   test('reference: falls back to normal next-step when gate fails or auto_milestone off', () => {
     assert.match(AUTOPILOT, /fall (?:through|back).*next-step|next-step messaging/i);
-    assert.match(AUTOPILOT, /Never on a non-Claude runtime/i);
+    assert.match(AUTOPILOT, /Never on a runtime without an agent spawn tool/i);
   });
 
   test('new-project and new-milestone follow the autopilot before their next-step block', () => {
@@ -155,6 +155,34 @@ describe('milestone autopilot — roadmap → autonomous Team Lead handoff', () 
 
   test('config key workflow.auto_milestone is registered', () => {
     assert.ok(VALID_CONFIG_KEYS.has('workflow.auto_milestone'));
+  });
+});
+
+describe('Codex native team mode — single-level driver', () => {
+  test('team-mode.md defines a Runtime team driver with Codex single-level rules', () => {
+    assert.match(TEAM_MODE, /Runtime team driver/i, 'has the runtime driver section');
+    assert.match(TEAM_MODE, /spawn_agent/, 'maps Codex spawn primitive');
+    assert.match(TEAM_MODE, /wait_agent/, 'maps Codex wait primitive');
+    assert.match(TEAM_MODE, /close_agent/, 'maps Codex release primitive');
+    assert.match(TEAM_MODE, /single-level/i, 'states Codex single-level constraint');
+    assert.match(TEAM_MODE, /leaf that never (?:calls `spawn_agent`|spawns)/i, 'leaves never spawn');
+    assert.match(TEAM_MODE, /team_max_parallel/i, 'batches to a concurrency cap');
+    assert.match(TEAM_MODE, /timeout means "not done yet"/i, 'timeout is not inactivity');
+  });
+
+  test('team-mode.md harvests on Codex via discuss-phase --power (leaf, no advisor spawn)', () => {
+    assert.match(TEAM_MODE, /gsd-discuss-phase <phase> --power/, 'harvest uses --power');
+    assert.match(TEAM_MODE, /QUESTIONS\.json/, 'file-state Question Barrier');
+    assert.match(TEAM_MODE, /advisor sub-agents.*second-level|second-level spawning/i, 'explains why --power (default discuss would nest)');
+    assert.match(TEAM_MODE, /without advisor research/i, 'documents the accepted trade-off');
+  });
+
+  test('autonomous.md and milestone-autopilot.md open the coarse gate to Codex', () => {
+    for (const [name, body] of [['autonomous.md', AUTONOMOUS], ['milestone-autopilot.md', AUTOPILOT]]) {
+      assert.match(body, /`?codex`?/i, `${name} names the codex runtime`);
+      assert.match(body, /multi_agent_v1\.spawn_agent|spawn_agent/, `${name} names the Codex spawn primitive`);
+      assert.match(body, /`claude` or `codex`|claude.*or.*codex/i, `${name} coarse gate accepts claude or codex`);
+    }
   });
 });
 

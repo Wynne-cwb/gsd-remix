@@ -31,6 +31,7 @@ const VALID_CONFIG_KEYS = new Set([
   'workflow.code_review_depth',
   'workflow.quick_plan_gate',
   'workflow.team_mode',
+  'workflow.team_max_parallel',
   'workflow.brainstorm_visual',
   'workflow.auto_milestone',
   'workflow.pattern_mapper',

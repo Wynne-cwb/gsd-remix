@@ -112,6 +112,13 @@ describe('getCodexSkillAdapterHeader', () => {
     assert.ok(result.includes('CHECKPOINT'), 'documents result markers');
   });
 
+  test('section C states the Codex single-level spawning rules', () => {
+    const result = getCodexSkillAdapterHeader('gsd-autonomous');
+    assert.match(result, /LEAF: it must NOT call `spawn_agent`/i, 'leaves never spawn');
+    assert.match(result, /wait_agent` timeout means "not done yet"/i, 'timeout is not inactivity');
+    assert.match(result, /run that unit inline|never hard-block/i, 'inline fallback, no hard-block');
+  });
+
   test('section D warns against shell-running $gsd-* command chains', () => {
     const result = getCodexSkillAdapterHeader('gsd-plan-phase');
     assert.ok(result.includes('## D. Chaining to the Next GSD Command'), 'has section D');

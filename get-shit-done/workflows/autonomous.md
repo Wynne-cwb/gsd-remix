@@ -175,27 +175,35 @@ Runs after phase discovery, **before** any Decision Harvest or the first
 
 **If `TEAM_MODE` is `auto` or `on`:** run the two-tier capability check.
 
-1. **Coarse gate — runtime identity** must be Claude Code (Agent tool available):
+1. **Coarse gate — runtime identity** must be a multi-agent-capable runtime — Claude
+   Code (`Agent` tool) or Codex (`multi_agent_v1.spawn_agent`):
    ```bash
    RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity?.runtime||'')}catch{console.log('')}})")
    ```
-2. **Fine gate — deterministic no-op Agent probe:** spawn one trivial Agent that must
-   return a fixed token (e.g. `Agent(prompt="Reply with exactly: TEAM_OK")`). Success
-   = the Agent tool + coordination are usable.
+   Passes when `RUNTIME` is `claude` or `codex`; any other value → coarse fail. The
+   value selects the fan-out shape per `team-mode.md` *Runtime team driver* (Claude
+   nests; **Codex is single-level — Lead is sole spawner, teammates are leaves**).
+2. **Fine gate — deterministic no-op Agent probe:** spawn one trivial teammate that
+   must return a fixed token — Claude `Agent(prompt="Reply with exactly: TEAM_OK")`,
+   Codex `spawn_agent(message="Reply with exactly: TEAM_OK")` then `wait_agent`.
+   Success = the spawn primitive is usable (on Codex, for a **leaf** only).
 
 Resolve:
 - Coarse fails OR probe fails, and `TEAM_MODE=auto` → **silently fall back** to the
   inline loop. No error, no half-written state. Continue to `execute_phase`.
 - Coarse fails OR probe fails, and `TEAM_MODE=on` → **error and stop** (do not
-  downgrade): "Team mode required (workflow.team_mode=on) but the Agent tool/probe is
-  unavailable in this runtime." Exit.
+  downgrade): "Team mode required (workflow.team_mode=on) but the agent spawn tool/probe
+  is unavailable in this runtime." Exit.
 - Both pass → **enter team mode.** Read and follow
   `$HOME/.claude/get-shit-done/references/team-mode.md` for the entire milestone loop
   (Decision Harvest over the `--from/--to/--only` scope → fresh teammate per bounded
   step → deferred consolidated UAT), honoring the flag matrix (`--auto` =
-  after-harvest unattended; team beats `--interactive`; resume checkpoint). When team
-  mode runs the milestone to completion, proceed to the `lifecycle` step; do NOT also
-  run the inline `execute_phase` loop.
+  after-harvest unattended; team beats `--interactive`; resume checkpoint) **and the
+  Runtime team driver for the active runtime** — on Codex that means single-level
+  fan-out (`--power` leaves for harvest, Lead-orchestrated wave leaves for execute,
+  batched to the concurrency cap, inline fallback). When team mode runs the milestone
+  to completion, proceed to the `lifecycle` step; do NOT also run the inline
+  `execute_phase` loop.
 
 **Never write a half state on probe failure.** A passing probe does not guarantee
 every later teammate spawn succeeds — per `team-mode.md`, each spawn failure falls

@@ -1759,6 +1759,20 @@ Result parsing:
 - Look for structured markers in agent output: \`CHECKPOINT\`, \`PLAN COMPLETE\`, \`SUMMARY\`, etc.
 - \`close_agent(id)\` after collecting results from each agent
 
+Single-level rule (Codex spawning limits):
+- A spawned agent is a LEAF: it must NOT call \`spawn_agent\` itself. Codex does not
+  reliably support a child spawning its own children. If a GSD workflow would nest
+  (e.g. an execute teammate that itself spawns wave workers), instead run that
+  workflow's orchestration in THIS agent and spawn only its leaf workers directly.
+- \`wait_agent\` timeout means "not done yet" — never "inactive". There is no
+  liveness/progress API; do not poll for stalls or restart on silence. Judge
+  completion by terminal status + on-disk evidence (artifacts, git diff), and prefer
+  reading a teammate's on-disk output over its returned text.
+- Batch fan-out to a small cap (default 3); \`close_agent\` each finished agent to free
+  a slot before spawning the next. If \`spawn_agent\` is unavailable or the cap is
+  exhausted, run that unit inline in this agent — never hard-block work that can run
+  inline.
+
 ## D. Chaining to the Next GSD Command
 When a workflow tells you to run another GSD command (e.g. \`$gsd-plan-phase 2\`, or a \`mention ...\` / \`invoke the skill\` directive):
 - A \`$gsd-*\` token is a SKILL MENTION, never a shell command. NEVER pass it to \`Shell\`/\`Bash\` — the shell expands the leading \`$gsd\` as an empty variable, leaving \`-plan-phase ...\`, which fails with \`command not found: -plan-phase\`.
