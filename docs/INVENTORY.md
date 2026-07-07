@@ -166,7 +166,7 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 
 ---
 
-## References (36 shipped)
+## References (37 shipped)
 
 Full roster at `get-shit-done/references/*.md`. References are shared knowledge documents that workflows and agents `@-reference`. The groupings below match [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#references-get-shit-donereferencesmd) — core, workflow clusters, and the modular planner decomposition.
 
@@ -208,6 +208,7 @@ Full roster at `get-shit-done/references/*.md`. References are shared knowledge 
 | `team-mode.md` | Capability-gated team-mode spec for `/gsd-autonomous` (Decision Harvest, fresh per-step teammates, deferred UAT). |
 | `teammate-prompts.md` | Agent teammate prompt templates used by team mode. |
 | `brainstorm-visuals.md` | Capability-gated visual companion for `/gsd-brainstorm` (Mermaid in PRD + gated `MOCKUP.html` wireframe, convergent, degradable). |
+| `milestone-autopilot.md` | Capability-gated roadmap→`/gsd-autonomous` handoff for `/gsd-new-project` and `/gsd-new-milestone` (Team Lead runs the milestone; `workflow.auto_milestone` ask/auto/off). |
 | `ios-scaffold.md` | iOS application scaffolding patterns. |
 | `executor-examples.md` | Worked examples for the gsd-executor agent. |
 | `stolen-parts.md` | Local spec anchors for conventions borrowed from external frameworks (final-form router/lanes). |

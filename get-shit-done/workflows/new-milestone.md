@@ -547,6 +547,12 @@ Print a summary:
 
 **[N] phases** | **[X] requirements** | Ready to build ✓
 
+**Milestone autopilot handoff.** Follow `references/milestone-autopilot.md`. If the
+capability gate passes and `workflow.auto_milestone != off`, confirm once (default
+`ask`) and hand off to `/gsd-autonomous --auto` (Team Lead runs the whole milestone).
+**If it hands off, stop here — do NOT show the "Next Up" block below.** Otherwise
+(gate fails, `auto_milestone: off`, or user declines) show it as usual.
+
 ## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
 
 **Phase [N]: [Phase Name]** — [Goal]
@@ -573,7 +579,7 @@ Also: `/gsd-plan-phase [N] ${GSD_WS}` — skip discussion, plan directly
 - [ ] Phase numbering mode respected (continued or reset)
 - [ ] All commits made (if planning docs committed)
 - [ ] Pending todos scanned for phase matches; matched todos tagged with `resolves_phase: N`
-- [ ] User knows next step: `/gsd-discuss-phase [N] ${GSD_WS}`
+- [ ] Milestone autopilot handoff evaluated (`references/milestone-autopilot.md`): team-capable + `auto_milestone != off` → confirm-once → `/gsd-autonomous --auto`; else user knows next step: `/gsd-discuss-phase [N] ${GSD_WS}`
 
 **Atomic commits:** Each phase commits its artifacts immediately.
 </success_criteria>

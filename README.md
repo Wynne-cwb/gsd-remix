@@ -127,6 +127,8 @@ Or let GSD drive the whole thing:
 
 When the runtime supports agent teams (Claude Code), `/gsd-autonomous` runs as a **Team Lead**: front-load every human decision up front (Decision Harvest), spawn a fresh teammate per bounded step, and defer UAT to one consolidated packet at the end. On by default via `workflow.team_mode: auto` — it engages when a capability probe passes and silently falls back to inline otherwise; set `off` to force the inline loop.
 
+And you don't have to launch it by hand: when `/gsd-new-project` or `/gsd-new-milestone` finishes a roadmap on a team-capable runtime, it offers to hand straight off to the autonomous Team Lead for the whole milestone (`workflow.auto_milestone: ask` by default — one confirmation; `auto` for seamless, `off` to always stop at the roadmap).
+
 ---
 
 ## Code Review

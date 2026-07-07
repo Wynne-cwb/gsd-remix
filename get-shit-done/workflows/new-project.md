@@ -1261,6 +1261,12 @@ Present completion summary:
 **[N] phases** | **[X] requirements** | Ready to build ✓
 ```
 
+**Milestone autopilot handoff.** Follow `references/milestone-autopilot.md`. If the
+capability gate passes and `workflow.auto_milestone != off`, confirm once (default
+`ask`) and hand off to `/gsd-autonomous --auto` (Team Lead runs the whole milestone).
+**If it hands off, stop here — do NOT run the auto/interactive next-step block below.**
+Otherwise (gate fails, `auto_milestone: off`, or user declines) continue below.
+
 **If auto mode:**
 
 ```
@@ -1330,7 +1336,7 @@ Exit skill and invoke SlashCommand("/gsd-discuss-phase 1 --auto")
 - [ ] STATE.md initialized
 - [ ] REQUIREMENTS.md traceability updated
 - [ ] `$INSTRUCTION_FILE` generated with GSD workflow guidance (AGENTS.md for Codex, CLAUDE.md otherwise)
-- [ ] User knows next step is `/gsd-discuss-phase 1`
+- [ ] Milestone autopilot handoff evaluated (`references/milestone-autopilot.md`): team-capable + `auto_milestone != off` → confirm-once → `/gsd-autonomous --auto`; else user knows next step is `/gsd-discuss-phase 1`
 
 **Atomic commits:** Each phase commits its artifacts immediately. If context is lost, artifacts persist.
 

@@ -32,6 +32,7 @@ const VALID_CONFIG_KEYS = new Set([
   'workflow.quick_plan_gate',
   'workflow.team_mode',
   'workflow.brainstorm_visual',
+  'workflow.auto_milestone',
   'workflow.pattern_mapper',
   'workflow.security_enforcement',
   'workflow.security_review',

@@ -4,7 +4,13 @@ All notable changes to GSD will be documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-> **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.4.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
+> **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.5.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
+
+## [1.5.0] — Milestone autopilot: roadmap → autonomous Team Lead — 2026-07-07
+
+### Added
+
+- **Milestone autopilot** — when `/gsd-new-project` or `/gsd-new-milestone` finishes and approves a ROADMAP on a team-capable runtime (Claude Code, `workflow.team_mode` ≠ `off`, no-op Agent probe passes), it hands straight off to `/gsd-autonomous --auto` so the **Team Lead** orchestrates the whole milestone (Decision Harvest → fresh teammate per bounded step → deferred UAT). New config `workflow.auto_milestone: ask | auto | off` (default `ask` — confirm once at the roadmap boundary, then hand off; `auto` seamless; `off` always stop and guide). On a non-Claude runtime or with `team_mode: off` it falls back to the normal "next step" messaging, and it clears the per-phase auto-advance chain so autonomous is the sole driver. Spec vendored self-contained in `references/milestone-autopilot.md`.
 
 ## [1.4.0] — Team mode on by default — 2026-07-07
 

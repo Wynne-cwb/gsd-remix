@@ -21,6 +21,9 @@ const AUTONOMOUS = fs.readFileSync(path.join(WORKFLOWS, 'autonomous.md'), 'utf-8
 const PLAN_PHASE = fs.readFileSync(path.join(WORKFLOWS, 'plan-phase.md'), 'utf-8');
 const TEAM_MODE = fs.readFileSync(path.join(REFS, 'team-mode.md'), 'utf-8');
 const TEAMMATE_PROMPTS = fs.readFileSync(path.join(REFS, 'teammate-prompts.md'), 'utf-8');
+const AUTOPILOT = fs.readFileSync(path.join(REFS, 'milestone-autopilot.md'), 'utf-8');
+const NEW_PROJECT = fs.readFileSync(path.join(WORKFLOWS, 'new-project.md'), 'utf-8');
+const NEW_MILESTONE = fs.readFileSync(path.join(WORKFLOWS, 'new-milestone.md'), 'utf-8');
 const { VALID_CONFIG_KEYS } = require('../get-shit-done/bin/lib/config-schema.cjs');
 
 describe('5.1 multi-lens architecture selection (conditional)', () => {
@@ -109,5 +112,48 @@ describe('D0 self-containment — vendored refs do not depend on a user-local sk
 
   test('team-mode.md states it is self-contained / gsd-remix ships it', () => {
     assert.match(TEAM_MODE, /self-contained/i);
+  });
+});
+
+describe('milestone autopilot — roadmap → autonomous Team Lead handoff', () => {
+  test('reference: config ask/auto/off, default ask, capability-gated on team + Claude runtime', () => {
+    assert.match(AUTOPILOT, /workflow\.auto_milestone/);
+    assert.match(AUTOPILOT, /default `ask`/i);
+    assert.match(AUTOPILOT, /\bask\b/);
+    assert.match(AUTOPILOT, /\bauto\b/);
+    assert.match(AUTOPILOT, /\boff\b/);
+    // gated on the same team-mode probe + Claude Code runtime + team_mode != off
+    assert.match(AUTOPILOT, /references\/team-mode\.md/);
+    assert.match(AUTOPILOT, /no-op Agent probe/i);
+    assert.match(AUTOPILOT, /team_mode` (?:is|must not be)? *`?off/i);
+  });
+
+  test('reference: confirm-once, hands off to /gsd-autonomous --auto, clears the yolo chain, headless skips confirm', () => {
+    assert.match(AUTOPILOT, /AskUserQuestion/);
+    assert.match(AUTOPILOT, /SlashCommand\("\/gsd-autonomous --auto"\)/);
+    assert.match(AUTOPILOT, /_auto_chain_active false/);
+    assert.match(AUTOPILOT, /[Hh]eadless.*skip|skip.*confirm/);
+  });
+
+  test('reference: falls back to normal next-step when gate fails or auto_milestone off', () => {
+    assert.match(AUTOPILOT, /fall (?:through|back).*next-step|next-step messaging/i);
+    assert.match(AUTOPILOT, /Never on a non-Claude runtime/i);
+  });
+
+  test('new-project and new-milestone follow the autopilot before their next-step block', () => {
+    for (const [name, body] of [['new-project.md', NEW_PROJECT], ['new-milestone.md', NEW_MILESTONE]]) {
+      assert.match(body, /references\/milestone-autopilot\.md/, `${name} must follow the autopilot`);
+      assert.match(body, /If it hands off, stop here/i, `${name} must not double-run next-step after handoff`);
+    }
+  });
+
+  test('D0: autopilot reference is self-contained (no user-local skill dependency)', () => {
+    assert.match(AUTOPILOT, /self-contained/i);
+    assert.ok(!/\.claude\/skills/.test(AUTOPILOT), 'milestone-autopilot.md must not reference ~/.claude/skills');
+    assert.ok(!/gsd-team-lead/.test(AUTOPILOT), 'milestone-autopilot.md must not reference gsd-team-lead');
+  });
+
+  test('config key workflow.auto_milestone is registered', () => {
+    assert.ok(VALID_CONFIG_KEYS.has('workflow.auto_milestone'));
   });
 });
