@@ -105,4 +105,20 @@ describe('routeEscalate — quick → heavy migration', () => {
     await expect(routeEscalate([rel, '--evidence', 'accepted_prior_work'], dir))
       .rejects.toThrow(/not found|nothing to escalate/i);
   });
+
+  it('security: a symlink inside .planning/quick/ pointing outside is rejected', async () => {
+    const dir = await makeProject();
+    const { symlink, mkdir: mkdirp, writeFile: wf } = await import('node:fs/promises');
+    // Real quick target OUTSIDE the repo.
+    const external = join(dir, '..', `ext-quick-tgt-${Date.now?.() ?? 'x'}`);
+    await mkdirp(external, { recursive: true });
+    await wf(join(external, '250706-abc-CONTEXT.md'), '---\ntype: quick\n---\n\n## Decisions\n- external\n', 'utf-8');
+    // A symlink inside .planning/quick/ that points at the external dir.
+    await mkdirp(join(dir, '.planning', 'quick'), { recursive: true });
+    const link = join(dir, '.planning', 'quick', '250706-abc-link');
+    await symlink(external, link);
+
+    await expect(routeEscalate(['.planning/quick/250706-abc-link', '--evidence', 'accepted_prior_work'], dir))
+      .rejects.toThrow(/escapes|not found/i);
+  });
 });

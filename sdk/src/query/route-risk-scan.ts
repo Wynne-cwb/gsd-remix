@@ -101,7 +101,13 @@ const LEXICON: SurfaceRule[] = [
   },
   {
     name: 'PII/logging',
-    hard: [/\blog(ging|ged|s)?\b[^.]*\b(request|body|payload|pii|personal|email|ssn|credit card|password|token)\b/, /\b(pii|personally identifiable)\b/],
+    // Sensitive data + a logging verb in EITHER order ("log the request body" and
+    // "add request body logging"); also matches `logger`.
+    hard: [
+      /\blog(ging|ged|s|ger)?\b[^.]*\b(request|body|payload|pii|personal|email|ssn|credit ?card|password|token)\b/,
+      /\b(request|body|payload|pii|personal|email|ssn|credit ?card|password|token)\b[^.]*\blog(ging|ged|s|ger)?\b/,
+      /\b(pii|personally identifiable)\b/,
+    ],
     soft: [],
     hardPaths: [],
   },
@@ -128,20 +134,25 @@ const LEXICON: SurfaceRule[] = [
 // A risky word sitting in a non-risky context downgrades to noise (R2 H1).
 const NOISE_SIGNALS = /\b(typo|readme|changelog|marketing|documentation|docs?|wording|reword|comment|copy|spelling|grammar)\b/i;
 const DOC_PATH = /\.(md|mdx|txt|rst)$|(^|\/)docs?\//i;
+// Words that signal a real code/structure change (not pure copy). If any of these
+// appear, a docs/comment word must NOT downgrade the hit even without candidate paths.
+const CODE_SIGNAL = /\b(logic|handler|middleware|endpoint|function|module|component|service|schema|migration|validate|validation|sanitiz|parse|serialize|serialise|implement|wire|enforce|refactor|filter|store|hook|guard|interceptor|resolver|controller|integrat)\b/i;
 
 // Noise downgrade requires *positive evidence the change is docs-only*. A stray
 // "docs"/"README"/"comment" word must NOT downgrade a real code change — that would
 // let a mixed "update the docs and change token validation" task slip past the
-// Escalation 铁律 (R2 H1 hardened after review). Rule:
+// Escalation 铁律 (R2 H1, hardened twice after review). Rule:
 //   - any non-docs (code) candidate path present  → NOT noise (real code is touched)
 //   - candidate paths present and ALL docs         → noise
-//   - no candidate paths at all                    → fall back to copy/docs phrasing
+//   - no candidate paths: noise ONLY when the wording is clearly copy-only —
+//     a docs signal AND no code/structure signal ("fix a typo in the billing copy"
+//     is noise; "change token validation logic" with no path stays hard)
 function isNoiseContext(text: string, paths: string[]): boolean {
   if (paths.length > 0) {
     const codePaths = paths.filter(p => !DOC_PATH.test(p));
     return codePaths.length === 0;
   }
-  return NOISE_SIGNALS.test(text);
+  return NOISE_SIGNALS.test(text) && !CODE_SIGNAL.test(text);
 }
 
 function firstMatch(patterns: RegExp[], text: string): string | null {

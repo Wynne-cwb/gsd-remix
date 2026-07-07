@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 > **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.5.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
 
+## [1.5.2] — Second-pass review fixes: risk-scan edges + escalate symlink — 2026-07-07
+
+Residual findings from a re-review of the 1.5.1 fixes.
+
+### Fixed
+
+- **No-path noise still hid real risk.** With no candidate paths, any docs/README/comment word downgraded a hit to `noise` — so "update docs and change token validation logic" with no path escaped the Escalation 铁律. Noise now downgrades a no-path change only when the wording is clearly copy-only (a docs signal **and** no code/structure signal like `logic`/`handler`/`validation`/`filter`/…); a docs word next to a real code action stays hard. (`sdk/src/query/route-risk-scan.ts`)
+- **PII/logging phrasing gap.** The rule matched "log the request body" but not "add request body logging" (logging verb after the data). The sensitive-data + logging patterns are now bidirectional and also match `logger`. (`sdk/src/query/route-risk-scan.ts`)
+- **`/gsd-escalate` symlink escape.** Lexical containment let a symlink inside `.planning/quick/` pointing outside the repo through. Resolution now uses `realpathSync` and requires the **physical** path to stay under the physical quick root, closing the symlink escape. (`sdk/src/query/route-escalate.ts`)
+
 ## [1.5.1] — Review fixes: risk-scan, capability probe, code-review shells — 2026-07-07
 
 Fixes from an independent implementation review of the router / autonomy features.

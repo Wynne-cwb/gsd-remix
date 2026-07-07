@@ -19,7 +19,7 @@
  */
 
 import { readFile, writeFile, readdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { GSDError, ErrorClassification } from '../errors.js';
@@ -68,22 +68,36 @@ function parseArgs(args: string[]): EscalateArgs {
 /** Resolve a quick-task directory from an id, slug fragment, or path. */
 async function resolveQuickDir(quick: string, projectDir: string): Promise<string> {
   const quickRoot = resolve(join(planningPaths(projectDir).planning, 'quick'));
-  // A directly-supplied path is honored ONLY if it resolves INSIDE .planning/quick/.
-  // Never follow a path that escapes the quick root (e.g. "../external-quick-x") —
-  // that would inject repo-external content into the new heavy phase (review finding).
+
+  // Physical containment: resolve symlinks and require the REAL path under the REAL
+  // quick root. Lexical containment alone is not enough — a symlink inside
+  // .planning/quick/ pointing outside the repo would otherwise inject external
+  // content into the new heavy phase (review findings: `../escape` and symlink escape).
+  const ensureInside = (p: string): string => {
+    const rootReal = existsSync(quickRoot) ? realpathSync(quickRoot) : quickRoot;
+    const real = realpathSync(p);
+    if (real === rootReal || real.startsWith(rootReal + sep)) return real;
+    throw new GSDError(
+      `Quick task path escapes .planning/quick/ — refusing to escalate external content`,
+      ErrorClassification.Validation,
+    );
+  };
+
+  // A directly-supplied path is honored ONLY if it lexically resolves inside the
+  // quick root; the physical check below then rejects any symlink escape.
   const abs = resolve(projectDir, quick);
-  if ((abs === quickRoot || abs.startsWith(quickRoot + sep)) && existsSync(abs)) return abs;
+  if ((abs === quickRoot || abs.startsWith(quickRoot + sep)) && existsSync(abs)) return ensureInside(abs);
   if (!existsSync(quickRoot)) {
     throw new GSDError(`No .planning/quick/ directory — nothing to escalate`, ErrorClassification.Validation);
   }
   const entries = await readdir(quickRoot, { withFileTypes: true });
   const match = entries.find(
-    (e) => e.isDirectory() && (e.name === quick || e.name.startsWith(`${quick}-`) || e.name.includes(quick)),
+    (e) => (e.isDirectory() || e.isSymbolicLink()) && (e.name === quick || e.name.startsWith(`${quick}-`) || e.name.includes(quick)),
   );
   if (!match) {
     throw new GSDError(`Quick task not found for "${quick}" under .planning/quick/`, ErrorClassification.Validation);
   }
-  return join(quickRoot, match.name);
+  return ensureInside(join(quickRoot, match.name));
 }
 
 async function readIfExists(path: string): Promise<string | null> {

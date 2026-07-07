@@ -77,6 +77,28 @@ describe('scanRisk — noise downgrade does not bypass real code changes', () =>
     const hits = scanRisk('fix a typo in the billing copy', []);
     expect(dominantStrength(hits)).toBe('noise');
   });
+
+  // No candidate paths: a docs word must NOT downgrade a real code-action change.
+  it('keeps a no-path mixed change hard when a code-action signal is present', () => {
+    expect(dominantStrength(scanRisk('update docs and change token validation logic', []))).toBe('hard');
+    expect(dominantStrength(scanRisk('fix comment and add org_id tenant filter', []))).toBe('hard');
+    expect(dominantStrength(scanRisk('fix README and add webhook handler', []))).toBe('hard');
+  });
+
+  it('keeps a no-path pure-copy edit as noise (no code-action signal)', () => {
+    expect(dominantStrength(scanRisk('reword the token section of the landing copy', []))).toBe('noise');
+  });
+});
+
+describe('scanRisk — PII/logging matches data+logging in either order', () => {
+  it('flags "log the request body"', () => {
+    const hits = scanRisk('log the request body', ['src/middleware/logger.ts']);
+    expect(hits.some(h => h.surface === 'PII/logging' && h.strength === 'hard')).toBe(true);
+  });
+  it('flags "add request body logging" (logging verb after the data)', () => {
+    const hits = scanRisk('add request body logging', ['src/middleware/logger.ts']);
+    expect(hits.some(h => h.surface === 'PII/logging' && h.strength === 'hard')).toBe(true);
+  });
 });
 
 describe('parseRiskArgs', () => {
