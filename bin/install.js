@@ -1675,8 +1675,32 @@ function convertSlashCommandsToCodexSkillMentions(content) {
   return converted;
 }
 
+function convertChainedInvocationsToCodex(content) {
+  // Claude workflows chain to the next GSD command with Claude-only tool calls
+  // (`SlashCommand("/gsd-foo ...")`, `Skill(skill="gsd-foo", args="...")`).
+  // Codex has neither tool. Left bare, the agent tends to shell-run the `$gsd-*`
+  // token, where the shell expands the leading `$gsd` to nothing → the reported
+  // `command not found: -plan-phase`. Rewrite them to an explicit skill-mention
+  // directive so the agent never routes them through the shell.
+  //
+  // Runs AFTER convertSlashCommandsToCodexSkillMentions, so any inner slash
+  // command is already `$gsd-*`.
+  const mention = (text) => `the \`${text.trim()}\` skill by mentioning it (do NOT run it in the shell)`;
+  let out = content.replace(/SlashCommand\(\s*"([^"]*)"\s*\)/g, (_, inner) => mention(inner));
+  out = out.replace(
+    /Skill\(\s*skill\s*=\s*"(gsd[:-][a-z0-9-]+)"\s*(?:,\s*args\s*=\s*"([^"]*)")?\s*\)/gi,
+    (_, skill, args) => {
+      const name = `$${skill.replace(/^gsd:/, 'gsd-')}`;
+      const argStr = args && args.trim() ? ` ${args.trim()}` : '';
+      return mention(`${name}${argStr}`);
+    },
+  );
+  return out;
+}
+
 function convertClaudeToCodexMarkdown(content) {
   let converted = convertSlashCommandsToCodexSkillMentions(content);
+  converted = convertChainedInvocationsToCodex(converted);
   converted = converted.replace(/\$ARGUMENTS\b/g, '{{GSD_ARGS}}');
   // Remove /clear references — Codex has no equivalent command
   // Handle backtick-wrapped: `\/clear` then: → (removed)
@@ -1734,6 +1758,12 @@ Parallel fan-out:
 Result parsing:
 - Look for structured markers in agent output: \`CHECKPOINT\`, \`PLAN COMPLETE\`, \`SUMMARY\`, etc.
 - \`close_agent(id)\` after collecting results from each agent
+
+## D. Chaining to the Next GSD Command
+When a workflow tells you to run another GSD command (e.g. \`$gsd-plan-phase 2\`, or a \`mention ...\` / \`invoke the skill\` directive):
+- A \`$gsd-*\` token is a SKILL MENTION, never a shell command. NEVER pass it to \`Shell\`/\`Bash\` — the shell expands the leading \`$gsd\` as an empty variable, leaving \`-plan-phase ...\`, which fails with \`command not found: -plan-phase\`.
+- To continue, finish the current skill and mention the next skill (\`$gsd-plan-phase 2\`) as a new turn — do not shell it out.
+- If you need to act programmatically instead of handing back to the user, the workflows are thin shells over \`gsd-remix-sdk\`: run the SDK route directly (e.g. \`gsd-remix-sdk query ...\`) rather than shell-running a \`$gsd-*\` mention.
 </codex_skill_adapter>`;
 }
 

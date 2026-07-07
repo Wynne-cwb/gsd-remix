@@ -6,6 +6,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 > **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.5.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
 
+## [1.5.4] — Codex: stop chained `$gsd-*` commands from being shell-run — 2026-07-07
+
+### Fixed
+
+- **Codex agents shell-ran chained `$gsd-*` commands and crashed.** GSD workflows chain to the next command with Claude-only tool calls (`SlashCommand("/gsd-plan-phase N --auto")`, `Skill(skill="gsd-plan-phase", args=…)`). Codex has neither tool and no guidance said "`$gsd-*` is a skill mention, not a shell command," so agents pasted `$gsd-plan-phase 18 --auto` into the shell — where `$gsd` expands to an empty variable, leaving `-plan-phase …` and failing with `command not found: -plan-phase`. Two fixes: (1) the Codex skill adapter header gains a **`D. Chaining to the Next GSD Command`** section that forbids routing `$gsd-*` through the shell and points at re-mentioning the skill or calling `gsd-remix-sdk` directly; (2) the Codex converter now rewrites `SlashCommand(...)` / `Skill(skill="gsd-…", args=…)` into an explicit "invoke the skill by mentioning it (do NOT run it in the shell)" directive instead of leaving a bare, shell-hostile token. (`bin/install.js`)
+
 ## [1.5.3] — Installer detects a shadowing SDK launcher — 2026-07-07
 
 ### Fixed

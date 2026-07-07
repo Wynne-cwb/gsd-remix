@@ -111,6 +111,15 @@ describe('getCodexSkillAdapterHeader', () => {
     assert.ok(result.includes('close_agent'), 'documents close_agent cleanup');
     assert.ok(result.includes('CHECKPOINT'), 'documents result markers');
   });
+
+  test('section D warns against shell-running $gsd-* command chains', () => {
+    const result = getCodexSkillAdapterHeader('gsd-plan-phase');
+    assert.ok(result.includes('## D. Chaining to the Next GSD Command'), 'has section D');
+    // The exact failure mode from the field report must be spelled out.
+    assert.ok(result.includes('command not found: -plan-phase'), 'names the shell-expansion failure');
+    assert.ok(/never.*shell|do not.*shell/i.test(result), 'forbids routing the mention through the shell');
+    assert.ok(result.includes('gsd-remix-sdk'), 'points at the SDK for programmatic chaining');
+  });
 });
 
 // ─── convertClaudeAgentToCodexAgent ─────────────────────────────────────────────
@@ -264,6 +273,51 @@ tools: Read
     const result = convertClaudeCommandToCodexSkill(input, 'gsd-test');
     assert.ok(!result.includes('/clear'), 'no /clear remains');
     assert.ok(result.includes('$gsd-execute-phase'), 'command converted');
+  });
+
+  test('rewrites SlashCommand() chaining to a skill-mention directive (not shell)', () => {
+    const input = `---
+name: gsd-test
+description: Test
+tools: Read
+---
+
+Exit skill and invoke SlashCommand("/gsd-plan-phase [X+1] --auto \${GSD_WS}")`;
+
+    const result = convertClaudeCommandToCodexSkill(input, 'gsd-test');
+    assert.ok(!result.includes('SlashCommand('), 'SlashCommand wrapper removed');
+    assert.ok(result.includes('$gsd-plan-phase [X+1] --auto ${GSD_WS}'), 'inner mention + args preserved');
+    assert.ok(/skill by mentioning it/.test(result), 'framed as a skill mention');
+    assert.ok(/do NOT run it in the shell/i.test(result), 'warns off the shell');
+  });
+
+  test('rewrites Skill(skill=, args=) chaining to a skill-mention directive', () => {
+    const input = `---
+name: gsd-test
+description: Test
+tools: Read
+---
+
+Launch: Skill(skill="gsd-plan-phase", args="\${PHASE} --auto")`;
+
+    const result = convertClaudeCommandToCodexSkill(input, 'gsd-test');
+    assert.ok(!result.includes('Skill(skill='), 'Skill wrapper removed');
+    assert.ok(result.includes('$gsd-plan-phase ${PHASE} --auto'), 'converts to $-mention with args');
+    assert.ok(/do NOT run it in the shell/i.test(result), 'warns off the shell');
+  });
+
+  test('rewrites colon-style Skill(skill="gsd:...") chaining', () => {
+    const input = `---
+name: gsd-test
+description: Test
+tools: Read
+---
+
+Skill(skill="gsd:discuss-phase", args="\${PHASE_NUM}")`;
+
+    const result = convertClaudeCommandToCodexSkill(input, 'gsd-test');
+    assert.ok(result.includes('$gsd-discuss-phase ${PHASE_NUM}'), 'normalizes gsd: to $gsd- mention');
+    assert.ok(!result.includes('Skill(skill='), 'Skill wrapper removed');
   });
 });
 
