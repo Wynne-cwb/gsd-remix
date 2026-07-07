@@ -363,7 +363,7 @@ After ALL iterations complete (or single pass in non-auto mode), validate and co
 ```bash
 if [ -f "${FIX_REPORT_PATH}" ]; then
   # Validate REVIEW-FIX.md has valid YAML frontmatter with status field
-  HAS_STATUS=$(REVIEW_PATH="${REVIEW_PATH}" node -e "
+  HAS_STATUS=$(FIX_REPORT_PATH="${FIX_REPORT_PATH}" node -e "
     const fs = require('fs');
     const content = fs.readFileSync(process.env.FIX_REPORT_PATH, 'utf-8');
     const match = content.match(/^---\n([\s\S]*?)\n---/);
@@ -420,7 +420,7 @@ Extract frontmatter fields:
 
 ```bash
 # Extract only the YAML frontmatter block (between first two --- lines)
-FIX_FRONTMATTER=$(REVIEW_PATH="${REVIEW_PATH}" node -e "
+FIX_FRONTMATTER=$(FIX_REPORT_PATH="${FIX_REPORT_PATH}" node -e "
   const fs = require('fs');
   const content = fs.readFileSync(process.env.FIX_REPORT_PATH, 'utf-8');
   const match = content.match(/^---\n([\s\S]*?)\n---/);

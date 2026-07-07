@@ -177,7 +177,7 @@ Runs after phase discovery, **before** any Decision Harvest or the first
 
 1. **Coarse gate — runtime identity** must be Claude Code (Agent tool available):
    ```bash
-   RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity||'')}catch{console.log('')}})")
+   RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity?.runtime||'')}catch{console.log('')}})")
    ```
 2. **Fine gate — deterministic no-op Agent probe:** spawn one trivial Agent that must
    return a fixed token (e.g. `Agent(prompt="Reply with exactly: TEAM_OK")`). Success

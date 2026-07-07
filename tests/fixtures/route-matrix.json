@@ -201,10 +201,10 @@
       "id": "risk-noise-marketing-token",
       "category": "risk-strength",
       "description": "update the word 'token' in the marketing landing copy",
-      "candidate_paths": ["src/pages/marketing.jsx"],
+      "candidate_paths": ["content/marketing/landing.md"],
       "expected_lane": "LIGHT",
-      "risk": { "expected_strength": "noise", "surface": "auth/session/token", "note": "'token' appears but purely as marketing copy — noise" },
-      "rationale": "noise hit must not escalate — trivial copy edit stays LIGHT"
+      "risk": { "expected_strength": "noise", "surface": "auth/session/token", "note": "'token' appears purely as marketing copy in a docs/content file — noise. NOTE: a copy-ish edit that touches a CODE file (e.g. src/pages/marketing.jsx) is treated as hard and escalates — the noise downgrade requires docs-only paths, to close the Escalation-铁律 bypass where a stray docs word hid a real code change." },
+      "rationale": "docs-only copy edit stays noise → LIGHT; noise never downgrades a change that touches real code"
     },
     {
       "id": "migration-add-column",

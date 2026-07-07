@@ -142,9 +142,19 @@ if [ -n "$FILES_OVERRIDE" ]; then
   REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
   
   for file_path in "${FILES_ARRAY[@]}"; do
-    # Security: validate path is within repository (prevent path traversal)
-    ABS_PATH=$(realpath -m "${file_path}" 2>/dev/null || echo "${file_path}")
-    if [[ "$ABS_PATH" != "$REPO_ROOT"* ]]; then
+    # Security: validate path is within repository (prevent path traversal).
+    # Portable containment check via node (the GNU-only path tool is absent on
+    # macOS/BSD, where the old fallback both rejected valid relative paths and let
+    # prefix-sibling dirs like <repo>-evil/ through). Resolve file_path relative to
+    # REPO_ROOT and confirm the result stays inside it.
+    CONTAINED=$(REPO_ROOT="$REPO_ROOT" FILE_PATH="$file_path" node -e "
+      const p = require('path');
+      const root = p.resolve(process.env.REPO_ROOT);
+      const abs = p.resolve(root, process.env.FILE_PATH);
+      const rel = p.relative(root, abs);
+      process.stdout.write(rel !== '..' && !rel.startsWith('..' + p.sep) && !p.isAbsolute(rel) ? 'yes' : 'no');
+    " 2>/dev/null)
+    if [ "$CONTAINED" != "yes" ]; then
       echo "Error: File path outside repository, skipping: ${file_path}"
       continue
     fi
@@ -520,10 +530,9 @@ runs under Git Bash on Windows runners, which provides bash compatibility.
 
 **macOS:** macOS ships with bash 3.2 (GPL licensing). This workflow does NOT use `mapfile` (bash 4+
 only) — all array construction uses portable `while IFS= read -r` loops compatible with bash 3.2.
-The `--files` path validation uses `realpath -m` which requires GNU coreutils (install via
-`brew install coreutils`). Without coreutils, the path guard falls back to fail-closed behavior
-(rejects paths it cannot verify), so security is maintained but valid relative paths may be rejected.
-If `--files` validation fails unexpectedly on macOS, install coreutils or use absolute paths.
+The `--files` path-containment guard resolves each path with `node` (`path.resolve` +
+`path.relative`), so it works identically on macOS/BSD and Linux with no GNU coreutils
+dependency, and rejects both `..` traversal and prefix-sibling directories (`<repo>-evil/`).
 </platform_notes>
 
 <success_criteria>

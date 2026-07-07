@@ -6,6 +6,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 > **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.5.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
 
+## [1.5.1] — Review fixes: risk-scan, capability probe, code-review shells — 2026-07-07
+
+Fixes from an independent implementation review of the router / autonomy features.
+
+### Fixed
+
+- **Escalation 铁律 bypass in the risk scanner.** The noise downgrade fired whenever a docs/README/comment word appeared *anywhere* in the description, so a mixed task like "update docs and change token validation logic" touching `src/token-validation.ts` was demoted to `noise` and never forced HEAVY. Noise now requires **docs-only evidence** (all candidate paths are docs, or no paths + copy phrasing); any real code path present keeps the hit at its true strength. (`sdk/src/query/route-risk-scan.ts`)
+- **Capability probe read the wrong field.** `runtime.health`'s `runtime_identity` is an object, but the team-mode / milestone-autopilot / brainstorm-visual probes read it as a string (`runtime_identity || ''` → `[object Object]`), so the coarse gate couldn't tell the runtime was Claude Code. Now reads `runtime_identity?.runtime` (e.g. `claude`). (`autonomous.md`, `references/team-mode.md`, `milestone-autopilot.md`, `brainstorm-visuals.md`)
+- **`/gsd-code-review-fix` never committed its report.** The commit/present steps set `REVIEW_PATH` in the env but the node checks read `process.env.FIX_REPORT_PATH` (unset) → `REVIEW-FIX.md` was judged malformed and the summary fields came out empty. Now passes `FIX_REPORT_PATH`. (`code-review-fix.md`)
+- **`/gsd-code-review --files` broke on macOS and let sibling dirs through.** The guard used GNU-only `realpath -m` (absent on macOS/BSD → valid relative paths rejected) and a prefix check without a separator boundary (`<repo>-evil/` passed). Replaced with a portable `node` `path.relative` containment check. (`code-review.md`)
+- **`/gsd-escalate` could read a quick dir outside the repo.** `resolveQuickDir` accepted any existing path containing "quick", so `../external-quick-x` escaped `.planning/quick/`. Now a directly-supplied path is honored only if it resolves inside `.planning/quick/`. (`sdk/src/query/route-escalate.ts`)
+
 ## [1.5.0] — Milestone autopilot: roadmap → autonomous Team Lead — 2026-07-07
 
 ### Added

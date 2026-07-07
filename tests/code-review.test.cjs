@@ -238,9 +238,12 @@ describe('CR-WORKFLOW: code review workflow structure', () => {
 
   test('code-review.md --files path traversal guard rejects paths outside repo', () => {
     const content = fs.readFileSync(path.join(WORKFLOWS_DIR, 'code-review.md'), 'utf-8');
-    // Guard must resolve and compare against REPO_ROOT
-    assert.ok(content.includes('REPO_ROOT') && content.includes('realpath'),
-      'code-review.md missing path traversal guard (realpath + REPO_ROOT check)');
+    // Guard must resolve against REPO_ROOT with a portable node containment check
+    // (path.relative), not GNU-only `realpath -m`.
+    assert.ok(content.includes('REPO_ROOT') && content.includes('path.relative'),
+      'code-review.md missing portable path-containment guard (path.relative + REPO_ROOT)');
+    assert.ok(!/realpath\s+-m/.test(content),
+      'code-review.md must not use GNU-only `realpath -m` (breaks on macOS/BSD)');
     assert.ok(content.includes('File path outside repository'),
       'code-review.md missing rejection message for paths outside repo');
   });

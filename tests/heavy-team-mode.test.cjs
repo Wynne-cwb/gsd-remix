@@ -157,3 +157,13 @@ describe('milestone autopilot — roadmap → autonomous Team Lead handoff', () 
     assert.ok(VALID_CONFIG_KEYS.has('workflow.auto_milestone'));
   });
 });
+
+describe('capability probe reads runtime_identity.runtime string, not the object (finding A)', () => {
+  test('autonomous / team-mode / autopilot probe the .runtime field', () => {
+    for (const [name, body] of [['autonomous.md', AUTONOMOUS], ['team-mode.md', TEAM_MODE], ['milestone-autopilot.md', AUTOPILOT]]) {
+      assert.match(body, /runtime_identity\?\.runtime/, `${name} must read runtime_identity.runtime (a string)`);
+      // The original bug read the whole object: `.runtime_identity||''` → [object Object].
+      assert.ok(!/runtime_identity\|\|''/.test(body), `${name} must not read the runtime_identity object as a string`);
+    }
+  });
+});

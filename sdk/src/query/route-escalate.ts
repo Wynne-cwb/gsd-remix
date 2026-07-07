@@ -20,7 +20,7 @@
 
 import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { GSDError, ErrorClassification } from '../errors.js';
 import { planningPaths } from './helpers.js';
@@ -67,9 +67,12 @@ function parseArgs(args: string[]): EscalateArgs {
 
 /** Resolve a quick-task directory from an id, slug fragment, or path. */
 async function resolveQuickDir(quick: string, projectDir: string): Promise<string> {
-  const abs = join(projectDir, quick);
-  if (existsSync(abs) && quick.includes('quick')) return abs;
-  const quickRoot = join(planningPaths(projectDir).planning, 'quick');
+  const quickRoot = resolve(join(planningPaths(projectDir).planning, 'quick'));
+  // A directly-supplied path is honored ONLY if it resolves INSIDE .planning/quick/.
+  // Never follow a path that escapes the quick root (e.g. "../external-quick-x") —
+  // that would inject repo-external content into the new heavy phase (review finding).
+  const abs = resolve(projectDir, quick);
+  if ((abs === quickRoot || abs.startsWith(quickRoot + sep)) && existsSync(abs)) return abs;
   if (!existsSync(quickRoot)) {
     throw new GSDError(`No .planning/quick/ directory — nothing to escalate`, ErrorClassification.Validation);
   }

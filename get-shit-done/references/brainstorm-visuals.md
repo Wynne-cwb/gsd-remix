@@ -25,7 +25,7 @@ runtime that can actually preview it.
 Coarse gate — runtime identity (same signal as `references/team-mode.md`):
 
 ```bash
-RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity||'')}catch{console.log('')}})")
+RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity?.runtime||'')}catch{console.log('')}})")
 ```
 
 A runtime that can render/preview rich content (e.g. Claude Code, with interactive

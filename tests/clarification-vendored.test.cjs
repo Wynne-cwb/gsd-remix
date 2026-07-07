@@ -102,6 +102,11 @@ describe('VIS visual companion (native, convergent, capability-gated, degradable
     assert.match(VISUALS, /no MCP|no external skill/i);
   });
 
+  test('capability probe reads runtime_identity.runtime string, not the object (finding A)', () => {
+    assert.match(VISUALS, /runtime_identity\?\.runtime/, 'brainstorm-visuals.md must read runtime_identity.runtime');
+    assert.ok(!/runtime_identity\|\|''/.test(VISUALS), 'must not read the runtime_identity object as a string');
+  });
+
   test('two tiers: Mermaid degraded (portable) + gated MOCKUP.html enhanced', () => {
     assert.match(VISUALS, /Mermaid/);
     assert.match(VISUALS, /MOCKUP\.html/);

@@ -48,6 +48,37 @@ describe('scanRisk — strength classification', () => {
   });
 });
 
+// Regression: a stray docs/README/comment word must NOT downgrade a real code
+// change to noise (that would let a mixed task slip past the Escalation 铁律).
+describe('scanRisk — noise downgrade does not bypass real code changes', () => {
+  it('keeps auth hard when docs word mixes with a real code path', () => {
+    const hits = scanRisk('update docs and change token validation logic', ['src/token-validation.ts']);
+    expect(dominantStrength(hits)).toBe('hard');
+    expect(hits.some(h => h.surface === 'auth/session/token' && h.strength === 'hard')).toBe(true);
+  });
+
+  it('keeps webhook hard when README mixes with a real handler change', () => {
+    const hits = scanRisk('fix README and add webhook handler', ['src/handlers/stripe.ts']);
+    expect(dominantStrength(hits)).toBe('hard');
+  });
+
+  it('keeps tenant boundary hard when a comment edit mixes with an org_id filter', () => {
+    const hits = scanRisk('fix comment and add org_id tenant filter', ['src/api/invoices.ts']);
+    expect(hits.some(h => h.surface === 'tenant/org boundary' && h.strength === 'hard')).toBe(true);
+  });
+
+  it('still treats a docs-only change (all doc paths) as noise', () => {
+    // docs-only path, risky word ("token") only in prose → noise (not a code change).
+    const hits = scanRisk('reword the token-expiry note', ['docs/notes.md']);
+    expect(dominantStrength(hits)).toBe('noise');
+  });
+
+  it('still treats a no-path copy edit as noise', () => {
+    const hits = scanRisk('fix a typo in the billing copy', []);
+    expect(dominantStrength(hits)).toBe('noise');
+  });
+});
+
 describe('parseRiskArgs', () => {
   it('splits description from --paths (space and = forms)', () => {
     expect(parseRiskArgs(['add pagination', '--paths', 'a.js,b.js'])).toEqual({

@@ -35,9 +35,11 @@ Two-tier detection:
 1. **Coarse gate — runtime identity.** Team mode requires the Claude Code runtime
    (the Agent tool + SendMessage). Read runtime identity:
    ```bash
-   RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity||'')}catch{console.log('')}})")
+   RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity?.runtime||'')}catch{console.log('')}})")
    ```
-   If the runtime is not Claude Code, team mode is unavailable.
+   `runtime_identity.runtime` is a string (e.g. `claude`, `codex`, `gemini`) — the
+   coarse gate passes only when `RUNTIME` equals `claude`. Any other value (or empty)
+   means team mode is unavailable.
 
 2. **Fine gate — deterministic no-op Agent probe.** Spawn one trivial Agent that
    must return a fixed token (e.g. `Agent(prompt="reply with exactly: TEAM_OK")`).

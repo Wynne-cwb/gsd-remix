@@ -129,9 +129,19 @@ const LEXICON: SurfaceRule[] = [
 const NOISE_SIGNALS = /\b(typo|readme|changelog|marketing|documentation|docs?|wording|reword|comment|copy|spelling|grammar)\b/i;
 const DOC_PATH = /\.(md|mdx|txt|rst)$|(^|\/)docs?\//i;
 
+// Noise downgrade requires *positive evidence the change is docs-only*. A stray
+// "docs"/"README"/"comment" word must NOT downgrade a real code change — that would
+// let a mixed "update the docs and change token validation" task slip past the
+// Escalation 铁律 (R2 H1 hardened after review). Rule:
+//   - any non-docs (code) candidate path present  → NOT noise (real code is touched)
+//   - candidate paths present and ALL docs         → noise
+//   - no candidate paths at all                    → fall back to copy/docs phrasing
 function isNoiseContext(text: string, paths: string[]): boolean {
-  if (NOISE_SIGNALS.test(text)) return true;
-  return paths.length > 0 && paths.every(p => DOC_PATH.test(p));
+  if (paths.length > 0) {
+    const codePaths = paths.filter(p => !DOC_PATH.test(p));
+    return codePaths.length === 0;
+  }
+  return NOISE_SIGNALS.test(text);
 }
 
 function firstMatch(patterns: RegExp[], text: string): string | null {

@@ -92,4 +92,17 @@ describe('routeEscalate — quick → heavy migration', () => {
     const dir = await makeProject();
     await expect(routeEscalate(['--evidence', 'accepted_prior_work'], dir)).rejects.toThrow(/requires a quick task/i);
   });
+
+  it('security: a path escaping .planning/quick/ is rejected, not followed', async () => {
+    const dir = await makeProject();
+    // A real quick dir OUTSIDE the project, reachable via ".." traversal.
+    const external = join(dir, '..', `external-quick-${Date.now?.() ?? 'x'}`);
+    await mkdir(external, { recursive: true });
+    await writeFile(join(external, '250706-abc-CONTEXT.md'), '---\ntype: quick\n---\n\n## Decisions\n- external\n', 'utf-8');
+    await writeFile(join(external, '250706-abc-PLAN.md'), '---\nwave: 1\n---\n\n## Task\nexternal\n', 'utf-8');
+
+    const rel = join('..', external.split('/').pop() as string);
+    await expect(routeEscalate([rel, '--evidence', 'accepted_prior_work'], dir))
+      .rejects.toThrow(/not found|nothing to escalate/i);
+  });
 });

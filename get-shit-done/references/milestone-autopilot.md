@@ -38,7 +38,7 @@ mode would actually engage. Run the **same** two-tier check as
    ```bash
    TEAM_MODE=$(gsd-remix-sdk query config-get workflow.team_mode 2>/dev/null || echo "auto")
    AUTO_MILESTONE=$(gsd-remix-sdk query config-get workflow.auto_milestone 2>/dev/null || echo "ask")
-   RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity||'')}catch{console.log('')}})")
+   RUNTIME=$(gsd-remix-sdk query runtime.health 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).runtime_identity?.runtime||'')}catch{console.log('')}})")
    ```
 2. **Fine — deterministic no-op Agent probe.** Spawn one trivial Agent that must
    return a fixed token (e.g. `Agent(prompt="reply with exactly: TEAM_OK")`).

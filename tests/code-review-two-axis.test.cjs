@@ -123,3 +123,30 @@ describe('worst-of status merge semantics', () => {
     assert.equal(worstOf('clean', 'clean'), 'clean');
   });
 });
+
+// Regression guards for review-session findings (shell-snippet bugs the
+// string-only tests missed).
+describe('code-review-fix — commit/present read FIX_REPORT_PATH, not REVIEW_PATH (finding B)', () => {
+  test('both node checks pass FIX_REPORT_PATH into the child env', () => {
+    // commit_fix_report + present_results both read process.env.FIX_REPORT_PATH —
+    // the invoking env must set that same var.
+    const correct = FIX_WF.match(/FIX_REPORT_PATH="\$\{FIX_REPORT_PATH\}"\s+node -e/g) || [];
+    assert.ok(correct.length >= 2, `expected >=2 node checks with FIX_REPORT_PATH env, got ${correct.length}`);
+    // The original bug: env set REVIEW_PATH on the SAME node call whose next line read
+    // FIX_REPORT_PATH. That exact single-call mismatch must not recur.
+    assert.ok(
+      !/REVIEW_PATH="\$\{REVIEW_PATH\}"\s+node -e "\s*\n\s*const fs[\s\S]{0,120}?process\.env\.FIX_REPORT_PATH/.test(FIX_WF),
+      'a node check sets REVIEW_PATH but reads FIX_REPORT_PATH (env mismatch)',
+    );
+  });
+});
+
+describe('code-review — --files boundary check is portable + separator-safe (finding C)', () => {
+  test('does not rely on GNU-only `realpath -m`', () => {
+    assert.ok(!/realpath\s+-m/.test(REVIEW_WF), 'realpath -m is GNU-only (fails on macOS/BSD)');
+  });
+  test('uses a path.relative containment check (rejects sibling-prefix + ..)', () => {
+    assert.match(REVIEW_WF, /path\.relative/);
+    assert.match(REVIEW_WF, /startsWith\('\.\.' \+ p\.sep\)|startsWith\("\.\." \+ p\.sep\)/);
+  });
+});
