@@ -45,14 +45,14 @@ if echo "$ARGUMENTS" | grep -q '\-\-auto'; then
   AUTO_AFTER_HARVEST="true"
 fi
 
-TEAM_MODE=$(gsd-remix-sdk query config-get workflow.team_mode 2>/dev/null || echo "off")
+TEAM_MODE=$(gsd-remix-sdk query config-get workflow.team_mode 2>/dev/null || echo "auto")
 ```
 
 When `--only` is set, also set `FROM_PHASE` to the same value so existing filter logic applies.
 
 When `--interactive` is set, discuss runs inline with questions (not auto-answered), while plan and execute are dispatched as background agents. This keeps the main context lean — only discuss conversations accumulate — while preserving user input on all design decisions.
 
-**Team mode (`workflow.team_mode: auto|on|off`, default `off`):** when enabled and
+**Team mode (`workflow.team_mode: auto|on|off`, default `auto`):** when enabled and
 the capability gate passes (see the `team_mode` step), the milestone runs as a Team
 Lead coordinating fresh per-step Agent teammates, with all human decisions
 front-loaded (Decision Harvest) and UAT deferred to one end-of-milestone packet.
@@ -709,7 +709,7 @@ When any phase operation fails or a blocker is detected, present 3 options via A
 - [ ] `--interactive` main context only accumulates discuss conversations (lean)
 - [ ] `--interactive` waits for background agents before post-execution routing
 - [ ] `--interactive` compatible with `--only`, `--from`, and `--to` flags
-- [ ] `workflow.team_mode` (auto|on|off, default off) resolved in initialize
+- [ ] `workflow.team_mode` (auto|on|off, default auto) resolved in initialize
 - [ ] Team gate runs coarse (runtime) + fine (no-op Agent probe) BEFORE any harvest/artifact write
 - [ ] Probe fail: `auto` silently falls back to inline (no half-state), `on` errors and stops, `off` never probes
 - [ ] Team mode follows references/team-mode.md (harvest scoped to --from/--to/--only, fresh teammate per step, deferred UAT)

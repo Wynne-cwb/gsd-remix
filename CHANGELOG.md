@@ -4,7 +4,13 @@ All notable changes to GSD will be documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-> **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.3.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
+> **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.4.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
+
+## [1.4.0] — Team mode on by default — 2026-07-07
+
+### Changed
+
+- **`workflow.team_mode` now defaults to `auto`** (was `off`). Autonomous milestone runs (`/gsd-autonomous`) now use Team Lead coordination — front-loaded Decision Harvest, a fresh teammate per bounded step, deferred UAT — whenever the runtime and no-op Agent probe pass, and silently fall back to the inline loop otherwise. `auto` is safe by construction: it never leaves a half-state on probe failure. Set `workflow.team_mode: off` to force the inline loop even on a capable runtime.
 
 ## [1.3.1] — Installer detects a broken SDK — 2026-07-07
 

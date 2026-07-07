@@ -3,7 +3,7 @@
  *
  *   5.1 plan-phase: conditional multi-lens architecture selection (new arch/dep/data model only)
  *   5.2 autonomous: team mode merged in — capability gate + no-op probe, three mechanisms
- *       (Decision Harvest / fresh per-step teammate / deferred UAT), flag matrix, staged default off.
+ *       (Decision Harvest / fresh per-step teammate / deferred UAT), flag matrix, default auto (probe-gated).
  *   D0: vendored team-mode references are self-contained (no dependency on a user-local skill).
  */
 
@@ -89,9 +89,9 @@ describe('references/team-mode.md — vendored spec', () => {
     assert.match(TEAM_MODE, /Deferred UAT/i);
   });
 
-  test('probe + staged default off + flag matrix + conservative labeling', () => {
+  test('probe + default auto (probe-gated, safe fallback) + flag matrix + conservative labeling', () => {
     assert.match(TEAM_MODE, /no-op Agent probe/i);
-    assert.match(TEAM_MODE, /default is `off`|Shipped default is `off`/i);
+    assert.match(TEAM_MODE, /default is `auto`|Shipped default is `auto`/i);
     assert.match(TEAM_MODE, /Flag matrix/i);
     assert.match(TEAM_MODE, /stable_now/);
     assert.match(TEAM_MODE, /depends_on_phase_output/);

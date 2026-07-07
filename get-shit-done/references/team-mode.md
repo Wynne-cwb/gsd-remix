@@ -24,9 +24,11 @@ Three mechanisms, one contract:
 
 Team mode is controlled by config `workflow.team_mode: auto | on | off`.
 
-**Shipped default is `off` (staged opt-in).** The target end-state is `auto`; flip
-the default only after the probe / checkpoint / harvest queue are proven in the
-field. Until then, users opt in explicitly.
+**Shipped default is `auto`.** `auto` is safe by construction — it only engages when
+the coarse runtime gate and the no-op Agent probe both pass, and silently falls back
+to the inline loop otherwise, so it never leaves a half-state. Set `off` to force the
+inline loop even on a capable runtime, or `on` to require team mode (error if the
+probe fails).
 
 Two-tier detection:
 

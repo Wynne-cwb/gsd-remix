@@ -1,6 +1,6 @@
 {
   "name": "gsd-remix",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "An opinionated remix of GSD — one router sizes your task and runs the right lane (light/medium/heavy) for Claude Code, Codex, Gemini, OpenCode and more.",
   "bin": {
     "gsd-remix": "bin/install.js"

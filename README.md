@@ -125,7 +125,7 @@ Or let GSD drive the whole thing:
 
 ### Team mode (autonomous, capability-gated)
 
-When the runtime supports agent teams (Claude Code), `/gsd-autonomous` can run as a **Team Lead**: front-load every human decision up front (Decision Harvest), spawn a fresh teammate per bounded step, and defer UAT to one consolidated packet at the end. Enable with `workflow.team_mode` (`off` by default; `auto` uses it when a capability probe passes and silently falls back to inline otherwise).
+When the runtime supports agent teams (Claude Code), `/gsd-autonomous` runs as a **Team Lead**: front-load every human decision up front (Decision Harvest), spawn a fresh teammate per bounded step, and defer UAT to one consolidated packet at the end. On by default via `workflow.team_mode: auto` — it engages when a capability probe passes and silently falls back to inline otherwise; set `off` to force the inline loop.
 
 ---
 
@@ -297,7 +297,7 @@ Project settings live in `.planning/config.json` — set during `/gsd-new-projec
 | `granularity` | `standard` | How finely scope is sliced into phases × plans |
 | `workflow.code_review` | `true` | Enable `/gsd-code-review[-fix]` |
 | `workflow.quick_plan_gate` | `auto` | MEDIUM plan→execute gate: `auto` (no stop) / `ask` / `off` |
-| `workflow.team_mode` | `off` | Autonomous team mode: `off` / `auto` (probe-gated) / `on` |
+| `workflow.team_mode` | `auto` | Autonomous team mode: `auto` (probe-gated, default) / `off` / `on` |
 | `workflow.use_worktrees` | `true` | Git worktree isolation for parallel execution |
 | `git.branching_strategy` | `none` | `none` / `phase` / `milestone` branch creation |
 
