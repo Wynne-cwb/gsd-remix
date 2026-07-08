@@ -112,7 +112,7 @@ Usage: `/gsd-execute-phase 5 --wave 2`
 ### Smart Router
 
 **`/gsd-do <description>`**
-Route freeform text to the right GSD command automatically.
+Auto-detect any freeform build/fix/change/refactor request and route it to the right GSD lane (fast/quick/full) — fires by default even when no command is named.
 
 - Analyzes natural language input to find the best matching GSD command
 - Acts as a dispatcher — never does the work itself

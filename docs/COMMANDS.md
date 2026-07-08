@@ -342,7 +342,7 @@ Run all remaining phases autonomously.
 
 ### `/gsd-do`
 
-Route freeform text to the right GSD command.
+Auto-detect any freeform build/fix/change/refactor request and route it to the right GSD lane (fast/quick/full). Fires by default for dev requests even when no command is named.
 
 ```bash
 /gsd-do                             # Then describe what you want
