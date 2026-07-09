@@ -1070,34 +1070,33 @@ Test suite that scans all agent, workflow, and command files for embedded inject
 
 ---
 
-### 60. Security Enforcement
+### 60. Security Review
 
-**Part of:** `/gsd-execute-phase` (security review step)
+**Part of:** `/gsd-execute-phase` (`security_review_gate` step)
 
-**Purpose:** Threat-model-anchored security verification for phase implementations.
+**Purpose:** Diff-scoped security review of a phase's real changes.
 
 **Requirements:**
-- REQ-SEC-01: System MUST perform threat-model-anchored verification (not blind scanning)
-- REQ-SEC-02: System MUST support configurable OWASP ASVS verification levels (1-3)
-- REQ-SEC-03: System MUST block phase advancement based on configurable severity threshold
-- REQ-SEC-04: System MUST spawn `gsd-security-auditor` agent for analysis
+- REQ-SECREV-01: System MUST scope the review to the phase diff (not a blind full-repo scan)
+- REQ-SECREV-02: System MUST prefer a company security skill when available, falling back to the `gsd-security-auditor` agent
+- REQ-SECREV-03: The review MUST be advisory — findings are reported but never block phase advancement
+- REQ-SECREV-04: System MUST trigger per `workflow.security_review` (`auto` reviews only when the diff touches a security-relevant surface)
 
 **Produces:**
 | Artifact | Description |
 |----------|-------------|
-| Security audit report | Threat-model-anchored findings with severity classification |
+| Security review findings | Severity-graded, diff-scoped findings surfaced to the user (advisory) |
 
 **Process:**
-1. **Model** — Build threat model from phase implementation context
-2. **Audit** — Spawn `gsd-security-auditor` to verify against threat model
-3. **Gate** — Block phase advancement if findings meet or exceed `security_block_on` severity
+1. **Trigger** — Read `workflow.security_review`; skip when `off`, review every phase when `always`, and (for `auto`) only when the diff touches a security-relevant surface
+2. **Review** — Invoke the company security skill if present, else spawn `gsd-security-auditor` on the phase diff
+3. **Report** — Surface findings and always proceed; the gate never blocks
 
 **Config:**
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| `security_enforcement` | boolean | `true` | Enable threat-model security verification |
-| `security_asvs_level` | number (1-3) | `1` | OWASP ASVS verification level |
-| `security_block_on` | string | `"high"` | Minimum severity to block phase advancement |
+| `workflow.security_review` | string (`auto` \| `always` \| `off`) | `"auto"` | Diff-scoped security review trigger |
+| `workflow.security_enforcement` | boolean | `false` | Legacy threat-model gate, superseded by `security_review`; retained for config compatibility |
 
 ---
 

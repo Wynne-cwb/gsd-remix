@@ -41,8 +41,12 @@ export const checkConfigGates: QueryHandler = async (args, projectDir) => {
     workflow: args[0] ?? null,
     research_enabled: workflowBool(wf.research, true),
     plan_checker_enabled: workflowBool(planCheckFlag, true),
-    nyquist_validation: workflowBool(wf.nyquist_validation, true),
-    security_enforcement: workflowBool(wf.security_enforcement, true),
+    // Legacy gates (superseded by security_review). Absent → false, matching the
+    // canonical CJS defaults in core.cjs (P4-2: security_enforcement is not in the
+    // SDK CONFIG_DEFAULTS.workflow, so a `true` fallback here exposed `true` when
+    // absent — the opposite of the CJS default `false`).
+    nyquist_validation: workflowBool(wf.nyquist_validation, false),
+    security_enforcement: workflowBool(wf.security_enforcement, false),
     security_review: wf.security_review ?? 'auto',
     text_mode: workflowBool(wf.text_mode, false),
     auto_advance: workflowBool(wf.auto_advance, false),

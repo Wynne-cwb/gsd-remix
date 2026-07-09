@@ -24,6 +24,9 @@ describe('checkConfigGates', () => {
         research_enabled: true,
         plan_checker_enabled: true,
         nyquist_validation: false,
+        // P4-2: security_enforcement is absent from CONFIG_DEFAULTS.workflow;
+        // the gate must still default it to false (canonical CJS default), not true.
+        security_enforcement: false,
         auto_advance: false,
         auto_chain_active: false,
         code_review: true,
