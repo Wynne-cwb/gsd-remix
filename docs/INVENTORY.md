@@ -112,7 +112,7 @@ Full roster at `commands/gsd/*.md`. The groupings below mirror `docs/COMMANDS.md
 
 ---
 
-## Workflows (43 shipped)
+## Workflows (42 shipped)
 
 Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators that commands reference internally; most are not read directly by end users. Rows below map each workflow file to its role (derived from the `<purpose>` block) and, where applicable, to the command that invokes it.
 
@@ -130,7 +130,6 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 | `code-review.md` | Review phase source changes via gsd-code-reviewer; produces REVIEW.md. | `/gsd-code-review` |
 | `complete-milestone.md` | Mark a shipped version as complete — MILESTONES.md entry, PROJECT.md evolution, tag. | `/gsd-complete-milestone` |
 | `diagnose-issues.md` | Orchestrate parallel debug agents to investigate UAT gaps and find root causes. | `/gsd-verify-work` (auto-diagnosis) |
-| `discovery-phase.md` | Execute discovery at the appropriate depth level. | `/gsd-new-project` (discovery path) |
 | `discuss-phase-assumptions.md` | Assumptions-mode discuss — extract implementation decisions via codebase-first analysis. | `/gsd-discuss-phase` (when `discuss_mode=assumptions`) |
 | `discuss-phase-power.md` | Power-user discuss — pre-generate all questions into a JSON state file + HTML UI. | `/gsd-discuss-phase --power` |
 | `discuss-phase.md` | Extract implementation decisions through iterative gray-area discussion. | `/gsd-discuss-phase` |
@@ -162,11 +161,11 @@ Full roster at `get-shit-done/workflows/*.md`. Workflows are thin orchestrators 
 | `verify-phase.md` | Verify phase goal achievement through goal-backward analysis. | `execute-phase.md` (post-execution) |
 | `verify-work.md` | Conversational UAT with auto-diagnosis — produces UAT.md and fix plans. | `/gsd-verify-work` |
 
-> **Note:** Some workflows have no direct user-facing command (e.g. `execute-plan.md`, `verify-phase.md`, `transition.md`, `node-repair.md`, `diagnose-issues.md`) — they are invoked internally by orchestrator workflows. `discovery-phase.md` is an alternate entry for `/gsd-new-project`.
+> **Note:** Some workflows have no direct user-facing command (e.g. `execute-plan.md`, `verify-phase.md`, `transition.md`, `node-repair.md`, `diagnose-issues.md`) — they are invoked internally by orchestrator workflows.
 
 ---
 
-## References (37 shipped)
+## References (35 shipped)
 
 Full roster at `get-shit-done/references/*.md`. References are shared knowledge documents that workflows and agents `@-reference`. The groupings below match [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#references-get-shit-donereferencesmd) — core, workflow clusters, and the modular planner decomposition.
 
@@ -181,7 +180,6 @@ Full roster at `get-shit-done/references/*.md`. References are shared knowledge 
 | `verification-overrides.md` | Per-artifact verification override rules. |
 | `planning-config.md` | Full config schema and behavior. |
 | `git-integration.md` | Git commit, branching, and history patterns. |
-| `git-planning-commit.md` | Planning directory commit conventions. |
 | `questioning.md` | Dream-extraction philosophy for project initialization. |
 | `tdd.md` | Test-driven development integration patterns. |
 | `ui-brand.md` | Visual output formatting patterns. |
@@ -203,7 +201,6 @@ Full roster at `get-shit-done/references/*.md`. References are shared knowledge 
 | `universal-anti-patterns.md` | Universal anti-patterns to detect and avoid. |
 | `artifact-types.md` | Planning artifact type definitions. |
 | `phase-argument-parsing.md` | Phase argument parsing conventions. |
-| `decimal-phase-calculation.md` | Decimal sub-phase numbering rules. |
 | `autonomous-smart-discuss.md` | Smart-discuss logic for autonomous mode. |
 | `team-mode.md` | Capability-gated team-mode spec for `/gsd-autonomous` (Decision Harvest, fresh per-step teammates, deferred UAT). |
 | `teammate-prompts.md` | Agent teammate prompt templates used by team mode. |
@@ -224,7 +221,7 @@ The `gsd-planner` agent is decomposed into a core agent plus reference modules t
 | `planner-revision.md` | Plan revision patterns for iterative refinement. |
 | `planner-source-audit.md` | Planner source-audit and authority-limit rules. |
 
-> **Subdirectory:** `get-shit-done/references/few-shot-examples/` contains additional few-shot examples (`plan-checker.md`, `verifier.md`) that are referenced from specific agents. These are not counted in the 37 top-level references.
+> **Subdirectory:** `get-shit-done/references/few-shot-examples/` contains additional few-shot examples (`plan-checker.md`, `verifier.md`) that are referenced from specific agents. These are not counted in the 35 top-level references.
 
 ---
 

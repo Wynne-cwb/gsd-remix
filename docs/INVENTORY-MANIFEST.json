@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-07",
+  "generated": "2026-07-09",
   "families": {
     "agents": [
       "gsd-advisor-researcher",
@@ -72,7 +72,6 @@
       "code-review.md",
       "complete-milestone.md",
       "diagnose-issues.md",
-      "discovery-phase.md",
       "discuss-phase-assumptions.md",
       "discuss-phase-power.md",
       "discuss-phase.md",
@@ -115,13 +114,11 @@
       "context-budget.md",
       "continuation-format.md",
       "debugger-philosophy.md",
-      "decimal-phase-calculation.md",
       "domain-probes.md",
       "executor-examples.md",
       "gate-prompts.md",
       "gates.md",
       "git-integration.md",
-      "git-planning-commit.md",
       "ios-scaffold.md",
       "mandatory-initial-read.md",
       "milestone-autopilot.md",

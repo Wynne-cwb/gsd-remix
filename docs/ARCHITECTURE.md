@@ -144,7 +144,7 @@ Specialized agent definitions with frontmatter specifying:
 
 ### References (`get-shit-done/references/*.md`)
 
-Shared knowledge documents that workflows and agents `@-reference` (see [`docs/INVENTORY.md`](INVENTORY.md#references-37-shipped) for the authoritative count and full roster):
+Shared knowledge documents that workflows and agents `@-reference` (see [`docs/INVENTORY.md`](INVENTORY.md#references-35-shipped) for the authoritative count and full roster):
 
 **Core references:**
 
@@ -155,7 +155,6 @@ Shared knowledge documents that workflows and agents `@-reference` (see [`docs/I
 - `verification-overrides.md` — Per-artifact verification override rules
 - `planning-config.md` — Full config schema and behavior
 - `git-integration.md` — Git commit, branching, and history patterns
-- `git-planning-commit.md` — Planning directory commit conventions
 - `questioning.md` — Dream extraction philosophy for project initialization
 - `tdd.md` — Test-driven development integration patterns
 - `ui-brand.md` — Visual output formatting patterns
@@ -172,7 +171,6 @@ Shared knowledge documents that workflows and agents `@-reference` (see [`docs/I
 - `universal-anti-patterns.md` — Common anti-patterns to detect and avoid
 - `artifact-types.md` — Planning artifact type definitions
 - `phase-argument-parsing.md` — Phase argument parsing conventions
-- `decimal-phase-calculation.md` — Decimal sub-phase numbering rules
 
 **Modular planner decomposition:**
 
