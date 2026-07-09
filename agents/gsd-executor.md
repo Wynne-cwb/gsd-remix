@@ -110,8 +110,7 @@ grep -n "type=\"checkpoint" [plan-path]
 </step>
 
 <step name="execute_tasks">
-**iOS app scaffolding:** If this plan creates an iOS app target, follow ios-scaffold guidance:
-@~/.claude/get-shit-done/references/ios-scaffold.md
+**iOS app scaffolding:** If (and only if) this plan creates an iOS app target, Read `~/.claude/get-shit-done/references/ios-scaffold.md` and follow its XcodeGen guidance. Do NOT preload this file for non-iOS plans.
 
 For each task:
 

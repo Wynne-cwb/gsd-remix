@@ -267,7 +267,7 @@ This prevents the "scavenger hunt" anti-pattern where executors explore the code
 
 ## TDD Detection
 
-**When `workflow.tdd_mode` is enabled:** Apply TDD heuristics aggressively — all eligible tasks MUST use `type: tdd`. Read @~/.claude/get-shit-done/references/tdd.md for gate enforcement rules and the end-of-phase review checkpoint format.
+**When `workflow.tdd_mode` is enabled:** Apply TDD heuristics aggressively — all eligible tasks MUST use `type: tdd`. Read `~/.claude/get-shit-done/references/tdd.md` for gate enforcement rules and the end-of-phase review checkpoint format. (When tdd_mode is disabled, do not load this file.)
 
 **When `workflow.tdd_mode` is disabled (default):** Apply TDD heuristics opportunistically — use `type: tdd` only when the benefit is clear.
 
