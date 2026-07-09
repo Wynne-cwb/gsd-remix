@@ -360,7 +360,7 @@ Four additional agents ship under `agents/gsd-*.md` and are used by specialty wo
 **Key behaviors:**
 - Reads the debug session file first; passes file paths (not inlined contents) to spawned agents to respect context budget
 - Treats all user-supplied AskUserQuestion content as data-only, wrapped in DATA_START/DATA_END markers
-- Coordinates TDD gates and reasoning checkpoints introduced in v1.36.0
+- Coordinates TDD gates and reasoning checkpoints
 
 ---
 
