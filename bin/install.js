@@ -1675,32 +1675,48 @@ function convertSlashCommandsToCodexSkillMentions(content) {
   return converted;
 }
 
-function convertChainedInvocationsToCodex(content) {
+function convertChainedInvocationsToCodex(content, workflowsBase) {
   // Claude workflows chain to the next GSD command with Claude-only tool calls
-  // (`SlashCommand("/gsd-foo ...")`, `Skill(skill="gsd-foo", args="...")`).
-  // Codex has neither tool. Left bare, the agent tends to shell-run the `$gsd-*`
-  // token, where the shell expands the leading `$gsd` to nothing → the reported
-  // `command not found: -plan-phase`. Rewrite them to an explicit skill-mention
-  // directive so the agent never routes them through the shell.
+  // (`SlashCommand("/gsd-foo ...")`, `Skill(skill="gsd-foo", args="...")`). Codex
+  // has neither tool, and a bare `$gsd-*` mention does NOT reliably trigger a
+  // skill mid-run — there is no human turn inside a gate or an autonomous chain
+  // to pick it up, so the step silently no-ops. Rewrite each call to the one
+  // mechanism that always works: read the target workflow's `.md` and execute it
+  // in this context, carrying the ORIGINAL arguments verbatim. Dropping an arg
+  // like `--auto` would turn a silent no-op into a mid-run interactive hang
+  // (Fable5 E1/①).
   //
   // Runs AFTER convertSlashCommandsToCodexSkillMentions, so any inner slash
   // command is already `$gsd-*`.
-  const mention = (text) => `the \`${text.trim()}\` skill by mentioning it (do NOT run it in the shell)`;
-  let out = content.replace(/SlashCommand\(\s*"([^"]*)"\s*\)/g, (_, inner) => mention(inner));
+  const base = workflowsBase || '$HOME/.codex/get-shit-done/workflows/';
+  const directive = (name, args) => {
+    const workflow = String(name).replace(/^\$?gsd[:-]/, '').toLowerCase();
+    const argStr = args && args.trim() ? ` with arguments: \`${args.trim()}\`` : '';
+    return `read and execute the workflow file \`${base}${workflow}.md\` in this context` +
+      `${argStr} (do NOT mention \`$gsd-${workflow}\` or shell it out — a mention does not ` +
+      `reliably trigger a skill mid-run)`;
+  };
+  // SlashCommand("$gsd-plan-phase 2 --auto ${GSD_WS}") — inner already $gsd-*.
+  let out = content.replace(/SlashCommand\(\s*"([^"]*)"\s*\)/g, (_, inner) => {
+    const m = String(inner).trim().match(/^\$?gsd[:-]([a-z0-9-]+)\s*([\s\S]*)$/i);
+    return m ? directive(m[1], m[2]) : directive(inner, '');
+  });
+  // Skill(skill="gsd:plan-phase", args="..."). Tolerate escaped quotes \" so
+  // Skill(\"...\") embedded in an Agent()/Task() prompt is also rewritten (E3).
   out = out.replace(
-    /Skill\(\s*skill\s*=\s*"(gsd[:-][a-z0-9-]+)"\s*(?:,\s*args\s*=\s*"([^"]*)")?\s*\)/gi,
-    (_, skill, args) => {
-      const name = `$${skill.replace(/^gsd:/, 'gsd-')}`;
-      const argStr = args && args.trim() ? ` ${args.trim()}` : '';
-      return mention(`${name}${argStr}`);
-    },
+    /Skill\(\s*skill\s*=\s*\\?"(gsd[:-][a-z0-9-]+)\\?"\s*(?:,\s*args\s*=\s*\\?"([^"\\]*)\\?")?\s*\)/gi,
+    (_, skill, args) => directive(skill, args || ''),
   );
   return out;
 }
 
-function convertClaudeToCodexMarkdown(content) {
+function convertClaudeToCodexMarkdown(content, pathPrefix) {
+  // pathPrefix (e.g. "$HOME/.codex/" global, or an absolute "/proj/.codex/" local)
+  // is the resolved install base; derive the workflow dir so chain directives
+  // inline a path that resolves under both install forms (Fable5 ①).
+  const workflowsBase = pathPrefix ? `${pathPrefix}get-shit-done/workflows/` : undefined;
   let converted = convertSlashCommandsToCodexSkillMentions(content);
-  converted = convertChainedInvocationsToCodex(converted);
+  converted = convertChainedInvocationsToCodex(converted, workflowsBase);
   converted = converted.replace(/\$ARGUMENTS\b/g, '{{GSD_ARGS}}');
   // Remove /clear references — Codex has no equivalent command
   // Handle backtick-wrapped: `\/clear` then: → (removed)
@@ -1749,6 +1765,7 @@ GSD workflows use \`Task(...)\` (Claude Code syntax). Translate to Codex collabo
 
 Direct mapping:
 - \`Task(subagent_type="X", prompt="Y")\` → \`spawn_agent(agent_type="X", message="Y")\`
+- \`Agent(subagent_type="X", prompt="Y")\` (and the background \`Agent(...)\` form used in autonomous chains) maps identically — ANY GSD spawn verb (\`Task\` / \`Agent\`) → \`spawn_agent\`.
 - \`Task(model="...")\` → omit (Codex uses per-role config, not inline model selection)
 - \`fork_context: false\` by default — GSD agents load their own context via \`<files_to_read>\` blocks
 
@@ -1774,15 +1791,16 @@ Single-level rule (Codex spawning limits):
   inline.
 
 ## D. Chaining to the Next GSD Command
-When a workflow tells you to run another GSD command (e.g. \`$gsd-plan-phase 2\`, or a \`mention ...\` / \`invoke the skill\` directive):
+When a workflow tells you to run another GSD command (you will usually see a rewritten "read and execute the workflow file \`.../workflows/<name>.md\` in this context" directive; you may also hit a bare \`$gsd-*\` reference):
 - A \`$gsd-*\` token is a SKILL MENTION, never a shell command. NEVER pass it to \`Shell\`/\`Bash\` — the shell expands the leading \`$gsd\` as an empty variable, leaving \`-plan-phase ...\`, which fails with \`command not found: -plan-phase\`.
-- To continue, finish the current skill and mention the next skill (\`$gsd-plan-phase 2\`) as a new turn — do not shell it out.
-- If you need to act programmatically instead of handing back to the user, the workflows are thin shells over \`gsd-remix-sdk\`: run the SDK route directly (e.g. \`gsd-remix-sdk query ...\`) rather than shell-running a \`$gsd-*\` mention.
+- A bare mention does NOT reliably trigger a skill mid-run: inside a gate or an autonomous chain there is no human turn to pick it up, so the step silently no-ops. To continue, READ the target workflow's \`.md\` (under \`<GSD install>/get-shit-done/workflows/\`) and EXECUTE its steps in THIS context, carrying every argument through verbatim (dropping e.g. \`--auto\` turns a silent skip into a mid-run interactive hang). This applies equally to gate skills (code review, security review) and to each step of an autonomous chain.
+- Do NOT substitute \`gsd-remix-sdk query ...\` for running a workflow: \`query\` returns state/JSON only — it does not spawn agents, run gates, or commit. Running a query is not running the workflow.
+- Context budget (single-level spawn): chaining several workflows in THIS context stacks their text. Prefer \`spawn_agent\` for the next unit of work when a slot is free; when you cannot spawn, run it inline and accept the added context — never hard-block a step that can run inline.
 </codex_skill_adapter>`;
 }
 
-function convertClaudeCommandToCodexSkill(content, skillName) {
-  const converted = convertClaudeToCodexMarkdown(content);
+function convertClaudeCommandToCodexSkill(content, skillName, pathPrefix) {
+  const converted = convertClaudeToCodexMarkdown(content, pathPrefix);
   const { frontmatter, body } = extractFrontmatterAndBody(converted);
   let description = `Run GSD workflow ${skillName}.`;
   if (frontmatter) {
@@ -3735,7 +3753,7 @@ function copyCommandsAsCodexSkills(srcDir, skillsDir, prefix, pathPrefix, runtim
       content = content.replace(localClaudeRegex, `./${getDirName(runtime)}/`);
       content = content.replace(codexDirRegex, pathPrefix);
       content = processAttribution(content, getCommitAttribution(runtime));
-      content = convertClaudeCommandToCodexSkill(content, skillName);
+      content = convertClaudeCommandToCodexSkill(content, skillName, pathPrefix);
 
       fs.writeFileSync(path.join(skillDir, 'SKILL.md'), content);
     }
@@ -4255,7 +4273,7 @@ function copyWithPathReplacement(srcDir, destDir, pathPrefix, runtime, isCommand
           fs.writeFileSync(destPath, content);
         }
       } else if (isCodex) {
-        content = convertClaudeToCodexMarkdown(content);
+        content = convertClaudeToCodexMarkdown(content, pathPrefix);
         fs.writeFileSync(destPath, content);
       } else if (isCopilot) {
         content = convertClaudeToCopilotContent(content, isGlobal);
@@ -6916,6 +6934,8 @@ if (process.env.GSD_TEST_MODE) {
   module.exports = {
     yamlIdentifier,
     getCodexSkillAdapterHeader,
+    convertClaudeToCodexMarkdown,
+    convertChainedInvocationsToCodex,
     convertClaudeCommandToCursorSkill,
     convertClaudeAgentToCursorAgent,
     convertClaudeToGeminiAgent,

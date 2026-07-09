@@ -282,7 +282,7 @@ tools: Read
     assert.ok(result.includes('$gsd-execute-phase'), 'command converted');
   });
 
-  test('rewrites SlashCommand() chaining to a skill-mention directive (not shell)', () => {
+  test('rewrites SlashCommand() chaining to a read-and-execute directive (not a mention/shell)', () => {
     const input = `---
 name: gsd-test
 description: Test
@@ -293,12 +293,13 @@ Exit skill and invoke SlashCommand("/gsd-plan-phase [X+1] --auto \${GSD_WS}")`;
 
     const result = convertClaudeCommandToCodexSkill(input, 'gsd-test');
     assert.ok(!result.includes('SlashCommand('), 'SlashCommand wrapper removed');
-    assert.ok(result.includes('$gsd-plan-phase [X+1] --auto ${GSD_WS}'), 'inner mention + args preserved');
-    assert.ok(/skill by mentioning it/.test(result), 'framed as a skill mention');
-    assert.ok(/do NOT run it in the shell/i.test(result), 'warns off the shell');
+    assert.ok(result.includes('get-shit-done/workflows/plan-phase.md'), 'points at the workflow .md');
+    assert.ok(result.includes('[X+1] --auto ${GSD_WS}'), 'carries args verbatim (Fable5 A1/①)');
+    assert.ok(!/skill by mentioning it/.test(result), 'no longer the old mention directive');
+    assert.ok(/do NOT mention .* or shell it out/i.test(result), 'warns off mention + shell');
   });
 
-  test('rewrites Skill(skill=, args=) chaining to a skill-mention directive', () => {
+  test('rewrites Skill(skill=, args=) chaining to a read-and-execute directive', () => {
     const input = `---
 name: gsd-test
 description: Test
@@ -309,8 +310,8 @@ Launch: Skill(skill="gsd-plan-phase", args="\${PHASE} --auto")`;
 
     const result = convertClaudeCommandToCodexSkill(input, 'gsd-test');
     assert.ok(!result.includes('Skill(skill='), 'Skill wrapper removed');
-    assert.ok(result.includes('$gsd-plan-phase ${PHASE} --auto'), 'converts to $-mention with args');
-    assert.ok(/do NOT run it in the shell/i.test(result), 'warns off the shell');
+    assert.ok(result.includes('get-shit-done/workflows/plan-phase.md'), 'points at the workflow .md');
+    assert.ok(result.includes('${PHASE} --auto'), 'carries args verbatim');
   });
 
   test('rewrites colon-style Skill(skill="gsd:...") chaining', () => {
@@ -323,7 +324,8 @@ tools: Read
 Skill(skill="gsd:discuss-phase", args="\${PHASE_NUM}")`;
 
     const result = convertClaudeCommandToCodexSkill(input, 'gsd-test');
-    assert.ok(result.includes('$gsd-discuss-phase ${PHASE_NUM}'), 'normalizes gsd: to $gsd- mention');
+    assert.ok(result.includes('get-shit-done/workflows/discuss-phase.md'), 'resolves gsd: to the workflow .md');
+    assert.ok(result.includes('${PHASE_NUM}'), 'carries args');
     assert.ok(!result.includes('Skill(skill='), 'Skill wrapper removed');
   });
 });
