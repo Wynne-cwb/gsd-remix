@@ -18,7 +18,7 @@ Display the complete GSD command reference. Output ONLY the reference content. D
 GSD evolves fast. Update periodically:
 
 ```bash
-npx get-shit-done-cc@latest
+npx gsd-remix@latest
 ```
 
 ## Core Workflow
@@ -59,6 +59,15 @@ Map an existing codebase for brownfield projects.
 Usage: `/gsd-map-codebase`
 
 ### Phase Planning
+
+**`/gsd-brainstorm [topic]`**
+Converge a rough idea into an approved PRD before a milestone or phase.
+
+- Requirement-level clarification — turns a vague idea into a reviewed PRD
+- Use before planning when the *what* isn't settled yet
+- Stops after PRD approval; does not write code
+
+Usage: `/gsd-brainstorm "offline sync"`
 
 **`/gsd-discuss-phase <number>`**
 Help articulate your vision for a phase before planning.
@@ -108,6 +117,42 @@ Execute all plans in a phase, or run a specific wave.
 
 Usage: `/gsd-execute-phase 5`
 Usage: `/gsd-execute-phase 5 --wave 2`
+
+**`/gsd-autonomous [--from N] [--to N] [--only N]`**
+Run all remaining phases autonomously — discuss → plan → execute per phase.
+
+- Drives the milestone unattended; pauses only for genuine human decisions
+- Re-reads ROADMAP.md after each phase to pick up inserted phases
+- Team mode (capability-gated) front-loads decisions and defers UAT
+
+Usage: `/gsd-autonomous`
+Usage: `/gsd-autonomous --from 3 --to 5`
+
+**`/gsd-next`**
+Automatically advance to the next logical step in the GSD workflow.
+
+- Inspects project state and routes to the right next command
+- Use when you want GSD to decide what comes next
+
+Usage: `/gsd-next`
+
+### Code Review
+
+**`/gsd-code-review [phase]`**
+Review source files changed during a phase for bugs, security, and quality.
+
+- Produces `REVIEW.md` with severity-classified findings
+- Advisory — reports issues without blocking
+
+Usage: `/gsd-code-review 4`
+
+**`/gsd-code-review-fix [phase]`**
+Auto-fix issues found by code review.
+
+- Reads `REVIEW.md`, applies fixes, commits each atomically
+- Produces `REVIEW-FIX.md` summary
+
+Usage: `/gsd-code-review-fix 4`
 
 ### Smart Router
 
@@ -161,6 +206,16 @@ For tasks too small to justify planning: typo fixes, config changes, forgotten c
 Usage: `/gsd-fast "fix the typo in README"`
 Usage: `/gsd-fast "add .env to gitignore"`
 
+---
+
+**`/gsd-escalate`**
+Escalate a completed quick task into a heavy phase, carrying its work forward as evidence.
+
+- Promotes a `/gsd-quick` task that turned out to need the full flow
+- Preserves the quick task's work as evidence in the new phase
+
+Usage: `/gsd-escalate`
+
 ### Roadmap Management
 
 **`/gsd-add-phase <description>`**
@@ -192,6 +247,22 @@ Remove a future phase and renumber subsequent phases.
 
 Usage: `/gsd-remove-phase 17`
 Result: Phase 17 deleted, phases 18-20 become 17-19
+
+**`/gsd-add-backlog <description>`**
+Add an idea to the backlog parking lot (999.x numbering).
+
+- Parks future work without disrupting the active roadmap
+- Promote later with `/gsd-review-backlog`
+
+Usage: `/gsd-add-backlog "audit logging"`
+
+**`/gsd-review-backlog`**
+Review and promote backlog items to the active milestone.
+
+- Lists parked backlog items
+- Promotes selected items into the current roadmap
+
+Usage: `/gsd-review-backlog`
 
 ### Milestone Management
 
@@ -320,6 +391,14 @@ Validate built features through conversational UAT.
 
 Usage: `/gsd-verify-work 3`
 
+**`/gsd-add-tests [phase]`**
+Generate tests for a completed phase based on UAT criteria and implementation.
+
+- Derives tests from the phase's SUMMARY.md and UAT deliverables
+- Use after a phase is built to backfill automated coverage
+
+Usage: `/gsd-add-tests 3`
+
 ### Ship Work
 
 **`/gsd-pr-branch [target]`**
@@ -355,6 +434,23 @@ Archive accumulated phase directories from completed milestones.
 - Use after multiple milestones to reduce `.planning/phases/` clutter
 
 Usage: `/gsd-cleanup`
+
+**`/gsd-health`**
+Diagnose planning or runtime health, repair planning issues, or rebuild the bundled SDK.
+
+- Checks planning-state integrity and runtime/SDK health
+- `--repair` fixes planning issues; `--runtime --repair` repairs the SDK CLI
+
+Usage: `/gsd-health`
+Usage: `/gsd-health --runtime --repair`
+
+**`/gsd-undo`**
+Safe git revert — roll back phase or plan commits using the phase manifest.
+
+- Uses the phase manifest with dependency checks before reverting
+- Safer than a raw `git revert` for GSD-tracked work
+
+Usage: `/gsd-undo`
 
 **`/gsd-help`**
 Show this command reference.
