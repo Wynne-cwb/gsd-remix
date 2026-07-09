@@ -29,7 +29,7 @@ npx gsd-remix@latest
 
 <br>
 
-[Core idea](#the-core-idea) · [Three lanes](#one-entry-point-three-lanes) · [The heavy loop](#the-heavy-loop) · [Getting started](#getting-started) · [Commands](#commands) · [Why it works](#why-it-works) · [User Guide](docs/USER-GUIDE.md)
+[Core idea](#the-core-idea) · [Three lanes](#one-entry-point-three-lanes) · [Full flow](#the-full-flow) · [The heavy loop](#the-heavy-loop) · [Getting started](#getting-started) · [Commands](#commands) · [Why it works](#why-it-works) · [User Guide](docs/USER-GUIDE.md)
 
 </div>
 
@@ -77,6 +77,68 @@ Started small, turned out big? `/gsd-escalate` promotes a completed quick task i
 
 ```
 /gsd-escalate 250706-abc        # quick task → heavy phase, prior work preserved
+```
+
+---
+
+## The Full Flow
+
+What actually happens after you type `/gsd-do` — from size routing, through the HEAVY spec-first gate, into the autonomous per-phase cycle. Solid boxes are decision gates on the critical path; dashed boxes are branch exits and fallbacks.
+
+```mermaid
+flowchart TD
+  input["User freeform input"]
+  do["/gsd-do<br/>intent + size, two axes"]
+  clear["Clear intent<br/>→ jump to the named command"]
+  route["Size routing<br/>SDK evidence + LLM judgment"]
+  judge{"Judge · first match"}
+  risk["High-risk surface hit<br/>→ force HEAVY (hard rule)"]
+
+  input --> do
+  do -.-> clear
+  do --> route --> judge
+  risk --> judge
+
+  judge --> light["LIGHT"] --> fast["/gsd-fast · inline"]
+  judge --> medium["MEDIUM"] --> quick["/gsd-quick"]
+  judge --> heavy["HEAVY"]
+  fast --> lmdone["LIGHT / MEDIUM → done, stands alone"]
+  quick --> lmdone
+
+  heavy --> spec{"spec ripe?"}
+  spec -->|"not ripe"| brainstorm["/gsd-brainstorm → approved PRD"]
+  spec -->|"ripe / has PRD"| skip["skip brainstorm"]
+  brainstorm --> init["new-project / new-milestone / add-phase"]
+  skip --> init
+  init --> roadmap["ROADMAP ready"]
+  roadmap --> gate{"milestone autopilot gate<br/>runtime = claude/codex · team_mode ≠ off · auto_milestone ≠ off"}
+  gate -->|"fail / decline"| manual["fall back → run phases by hand"]
+  gate --> auto["/gsd-autonomous --auto"]
+  auto --> teamgate{"Team Mode gate<br/>coarse: runtime · fine: no-op spawn probe"}
+  teamgate -->|"fail + auto"| inlineloop["Inline loop, serial"]
+  teamgate -->|"fail + on"| err["error & stop"]
+  teamgate --> harvest["Decision Harvest — front-loaded, human in the loop<br/>Claude: discuss teammate per phase · Codex: --power leaves + Question Barrier"]
+  inlineloop -.-> plan
+
+  harvest --> plan
+
+  subgraph cycle["Per-phase cycle"]
+    direction LR
+    subgraph P["PLAN · loop ≤3"]
+      p1["phase-researcher → RESEARCH"] --> p2["pattern-mapper → PATTERNS"] --> p3["architecture selection"] --> p4["gsd-planner → PLAN.md"] --> p5["plan-checker → revise loop"]
+    end
+    subgraph E["EXECUTE · waves"]
+      e1["dependency analysis → waves"] --> e2["gsd-executor per plan, parallel"] --> e3["commit + SUMMARY.md"] --> e4["code-review gate → fix"] --> e5["security gate"]
+    end
+    subgraph V["VERIFY · goal-backward"]
+      v1["must-haves"] --> v2["artifacts / wiring"] --> v3["behavioral tests"] --> v4["antipatterns"] --> v5["VERIFICATION.md + status"]
+    end
+    P --> E --> V
+  end
+
+  V -->|"not met → fix · met and more phases → next phase"| P
+  V -->|"all phases done"| uat["Deferred UAT — one consolidated packet, human in the loop"]
+  uat --> done(["Milestone complete"])
 ```
 
 ---
