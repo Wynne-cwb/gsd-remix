@@ -12,10 +12,13 @@ import { readFile } from 'node:fs/promises';
 import { resolve, join, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { GSD } from './index.js';
+// GSD (./index.js) and InitRunner (./init-runner.js) transitively load
+// @anthropic-ai/claude-agent-sdk (via session-runner / event-stream). The hot
+// `query` path never touches them, so they are dynamically imported inside the
+// run/init/auto branch below to keep query startup light (D5). The transports
+// only import type modules, so they stay static.
 import { CLITransport } from './cli-transport.js';
 import { WSTransport } from './ws-transport.js';
-import { InitRunner } from './init-runner.js';
 import { validateWorkstreamName } from './workstream-utils.js';
 
 // ─── Parsed CLI args ─────────────────────────────────────────────────────────
@@ -445,6 +448,12 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
     process.exitCode = 1;
     return;
   }
+
+  // D5: load the heavy runtime (GSD + InitRunner → @anthropic-ai/claude-agent-sdk)
+  // only now that we know the command is run/init/auto. The `query` path returned
+  // above without paying this cost.
+  const { GSD } = await import('./index.js');
+  const { InitRunner } = await import('./init-runner.js');
 
   // ─── Init command ─────────────────────────────────────────────────────────
   if (args.command === 'init') {
