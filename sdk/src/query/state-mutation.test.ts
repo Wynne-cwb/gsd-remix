@@ -195,15 +195,15 @@ describe('acquireStateLock / releaseStateLock', () => {
     expect(_heldStateLocks.has(lockPath)).toBe(false);
   });
 
-  it('returns lockPath on non-EEXIST errors instead of throwing', async () => {
-    // Simulate a non-EEXIST error by using a path in a non-existent directory
-    // This triggers ENOENT (not EEXIST), which should return lockPath gracefully
+  it('throws (fails loud) on non-EEXIST errors instead of returning unlocked (Fable5 A6)', async () => {
+    // A non-EEXIST error (here ENOENT from a missing parent dir) is an
+    // environment fault, not contention. acquireStateLock must fail loud rather
+    // than silently returning a lockPath it does not hold — otherwise the caller
+    // writes STATE.md with no mutual exclusion.
     const { acquireStateLock } = await import('./state-mutation.js');
     const badPath = join(tmpDir, 'nonexistent-dir', 'subdir', 'STATE.md');
 
-    // Should NOT throw — should return lockPath gracefully
-    const lockPath = await acquireStateLock(badPath);
-    expect(lockPath).toBe(badPath + '.lock');
+    await expect(acquireStateLock(badPath)).rejects.toThrow(/cannot create/);
   });
 });
 

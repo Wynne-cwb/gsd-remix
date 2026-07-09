@@ -902,12 +902,31 @@ function syncStateFrontmatter(content, cwd) {
  * Acquire a lockfile for STATE.md operations.
  * Returns the lock path for later release.
  */
+// A lock is safe to reclaim only if its holder is gone: the PID that wrote it
+// is dead (PID-liveness), or the file is older than the stale threshold. A
+// live, fresh lock must never be stolen (Fable5 A1).
+function isStateLockReclaimable(lockPath) {
+  let st;
+  try { st = fs.statSync(lockPath); } catch { return true; } // vanished — safe to retry create
+  if (Date.now() - st.mtimeMs > 10000) return true;          // stale by age
+  try {
+    const pid = parseInt(String(fs.readFileSync(lockPath, 'utf-8')).trim(), 10);
+    if (Number.isInteger(pid) && pid > 0) {
+      try { process.kill(pid, 0); }                      // signal 0 — probes existence only
+      catch (e) { if (e.code === 'ESRCH') return true; } // holder process is dead
+    }
+  } catch { /* unreadable pid — treat as live, fall through */ }
+  return false;
+}
+
 function acquireStateLock(statePath) {
   const lockPath = statePath + '.lock';
   const maxRetries = 10;
   const retryDelay = 200; // ms
+  let contention = 0;
+  let reclaims = 0;
 
-  for (let i = 0; i < maxRetries; i++) {
+  while (true) {
     try {
       const fd = fs.openSync(lockPath, fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_WRONLY);
       fs.writeSync(fd, String(process.pid));
@@ -917,27 +936,29 @@ function acquireStateLock(statePath) {
       _heldStateLocks.add(lockPath);
       return lockPath;
     } catch (err) {
-      if (err.code === 'EEXIST') {
-        try {
-          const stat = fs.statSync(lockPath);
-          if (Date.now() - stat.mtimeMs > 10000) {
-            fs.unlinkSync(lockPath);
-            continue;
-          }
-        } catch { /* lock was released between check — retry */ }
-
-        if (i === maxRetries - 1) {
-          try { fs.unlinkSync(lockPath); } catch {}
-          return lockPath;
-        }
-        const jitter = Math.floor(Math.random() * 50);
-        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, retryDelay + jitter);
+      if (err.code !== 'EEXIST') {
+        // Environment error (EACCES/ENOSPC/EROFS/EMFILE…), not contention. Fail
+        // loud rather than silently proceeding without the lock (Fable5 A6).
+        throw new Error(`acquireStateLock: cannot create ${lockPath}: ${err.message}`);
+      }
+      // Reclaim a dead/stale lock immediately (bounded, to avoid a livelock).
+      if (reclaims < maxRetries && isStateLockReclaimable(lockPath)) {
+        reclaims++;
+        try { fs.unlinkSync(lockPath); } catch { /* raced with another reclaimer */ }
         continue;
       }
-      return lockPath; // non-EEXIST error — proceed without lock
+      // Held by a live process: back off and retry within the budget. Never
+      // steal a live lock — fail loud once the budget is exhausted (Fable5 A1).
+      if (++contention >= maxRetries) {
+        throw new Error(
+          `acquireStateLock: could not acquire ${lockPath} within ~${maxRetries * retryDelay}ms ` +
+          `(held by a live process). Refusing to write STATE.md unlocked.`
+        );
+      }
+      const jitter = Math.floor(Math.random() * 50);
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, retryDelay + jitter);
     }
   }
-  return statePath + '.lock';
 }
 
 function releaseStateLock(lockPath) {

@@ -175,12 +175,31 @@ async function isLockProcessDead(lockPath: string): Promise<boolean | null> {
  * @param statePath - Path to STATE.md
  * @returns Path to the lockfile
  */
+/**
+ * A lock is safe to reclaim only if its holder is gone: the PID that wrote it
+ * is dead (PID-liveness) or the file is stale (>10s). A live, fresh lock must
+ * never be stolen (Fable5 A1).
+ */
+async function isStateLockReclaimable(lockPath: string): Promise<boolean> {
+  try {
+    if ((await isLockProcessDead(lockPath)) === true) return true;
+    const s = await stat(lockPath);
+    if (Date.now() - s.mtimeMs > 10000) return true;
+  } catch {
+    // stat/read failed — lock likely vanished between checks; safe to retry create.
+    return true;
+  }
+  return false;
+}
+
 export async function acquireStateLock(statePath: string): Promise<string> {
   const lockPath = statePath + '.lock';
   const maxRetries = 10;
   const retryDelay = 200;
+  let contention = 0;
+  let reclaims = 0;
 
-  for (let i = 0; i < maxRetries; i++) {
+  while (true) {
     try {
       const fd = await open(lockPath, constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY);
       await fd.writeFile(String(process.pid));
@@ -188,32 +207,33 @@ export async function acquireStateLock(statePath: string): Promise<string> {
       _heldStateLocks.add(lockPath);
       return lockPath;
     } catch (err: unknown) {
-      if (err instanceof Error && (err as NodeJS.ErrnoException).code === 'EEXIST') {
-        try {
-          const dead = await isLockProcessDead(lockPath);
-          if (dead === true) {
-            await unlink(lockPath);
-            continue;
-          }
-          const s = await stat(lockPath);
-          if (Date.now() - s.mtimeMs > 10000) {
-            await unlink(lockPath);
-            continue;
-          }
-        } catch { /* lock released between check */ }
-
-        if (i === maxRetries - 1) {
-          try { await unlink(lockPath); } catch { /* ignore */ }
-          return lockPath;
-        }
-        await new Promise<void>(r => setTimeout(r, retryDelay + Math.floor(Math.random() * 50)));
-      } else {
-        // D3: Graceful degradation on non-EEXIST errors (match CJS state.cjs:889)
-        return lockPath;
+      const code = err instanceof Error ? (err as NodeJS.ErrnoException).code : undefined;
+      if (code !== 'EEXIST') {
+        // Environment error (EACCES/ENOSPC/EROFS/EMFILE…), not contention. Fail
+        // loud rather than silently proceeding without the lock (Fable5 A6).
+        throw new GSDError(
+          `acquireStateLock: cannot create ${lockPath}: ${err instanceof Error ? err.message : String(err)}`,
+          ErrorClassification.Blocked,
+        );
       }
+      // Reclaim a dead/stale lock immediately (bounded, to avoid a livelock).
+      if (reclaims < maxRetries && (await isStateLockReclaimable(lockPath))) {
+        reclaims++;
+        try { await unlink(lockPath); } catch { /* raced with another reclaimer */ }
+        continue;
+      }
+      // Held by a live process: back off and retry within the budget. Never
+      // steal a live lock — fail loud once the budget is exhausted (Fable5 A1).
+      if (++contention >= maxRetries) {
+        throw new GSDError(
+          `acquireStateLock: could not acquire ${lockPath} within ~${maxRetries * retryDelay}ms ` +
+          `(held by a live process). Refusing to write STATE.md unlocked.`,
+          ErrorClassification.Blocked,
+        );
+      }
+      await new Promise<void>(r => setTimeout(r, retryDelay + Math.floor(Math.random() * 50)));
     }
   }
-  return lockPath;
 }
 
 /**
