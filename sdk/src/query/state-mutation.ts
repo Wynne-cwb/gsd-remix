@@ -18,7 +18,7 @@
  * ```
  */
 
-import { open, unlink, stat, readFile, writeFile, readdir } from 'node:fs/promises';
+import { open, unlink, stat, readFile, writeFile, rename, readdir } from 'node:fs/promises';
 import {
   constants, unlinkSync, existsSync, mkdirSync, writeFileSync, readdirSync, readFileSync,
 } from 'node:fs';
@@ -277,7 +277,7 @@ async function readModifyWriteStateMd(
     const modified = await modifier(body);
     const synced = await syncStateFrontmatter(modified, projectDir);
     const normalized = normalizeMd(synced);
-    await writeFile(statePath, normalized, 'utf-8');
+    await atomicWriteStateMd(statePath, normalized);
     return normalized;
   } finally {
     await releaseStateLock(lockPath);
@@ -304,9 +304,26 @@ export async function readModifyWriteStateMdFull(
     }
     const modified = await modifier(content);
     const synced = await syncStateFrontmatter(modified, projectDir);
-    await writeFile(statePath, normalizeMd(synced), 'utf-8');
+    await atomicWriteStateMd(statePath, normalizeMd(synced));
   } finally {
     await releaseStateLock(lockPath);
+  }
+}
+
+/**
+ * Write STATE.md atomically via temp file + rename to prevent partial/truncated
+ * writes on a mid-write crash or disk-full (Fable5 A2). Mirrors atomicWriteConfig
+ * in config-mutation.ts; the CJS path already uses atomicWriteFileSync.
+ */
+async function atomicWriteStateMd(statePath: string, content: string): Promise<void> {
+  const tmpPath = statePath + '.tmp.' + process.pid;
+  try {
+    await writeFile(tmpPath, content, 'utf-8');
+    await rename(tmpPath, statePath);
+  } catch {
+    // Rename-failure fallback — clean up temp, fall back to direct write.
+    try { await unlink(tmpPath); } catch { /* already gone */ }
+    await writeFile(statePath, content, 'utf-8');
   }
 }
 
