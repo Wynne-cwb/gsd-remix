@@ -1,6 +1,6 @@
 # Manual Update (Non-npm Install)
 
-Use this procedure when `npx get-shit-done-cc@latest` is unavailable — e.g. during a publish outage or if you are working directly from the source repo.
+Use this procedure when `npx gsd-remix@latest` is unavailable — e.g. during a publish outage or if you are working directly from the source repo.
 
 ## Prerequisites
 

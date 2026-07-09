@@ -976,7 +976,7 @@ Test suite that scans all agent, workflow, and command files for embedded inject
 
 ### 55. Multi-Runtime Installer Selection
 
-**Part of:** `npx get-shit-done-cc`
+**Part of:** `npx gsd-remix`
 
 **Purpose:** Select multiple runtimes in a single interactive install session.
 
@@ -995,7 +995,7 @@ Test suite that scans all agent, workflow, and command files for embedded inject
 
 ### 56. Windsurf Runtime Support
 
-**Part of:** `npx get-shit-done-cc`
+**Part of:** `npx gsd-remix`
 
 **Purpose:** Add Windsurf as a supported AI CLI runtime for GSD installation and execution.
 
@@ -1212,7 +1212,7 @@ Test suite that scans all agent, workflow, and command files for embedded inject
 
 ### 68. Claude Code Skills Migration
 
-**Part of:** `npx get-shit-done-cc`
+**Part of:** `npx gsd-remix`
 
 **Purpose:** Migrate GSD commands to Claude Code 2.1.88+ skills format with backward compatibility.
 
@@ -1459,7 +1459,7 @@ Test suite that scans all agent, workflow, and command files for embedded inject
 
 ### 85. New Runtime Support (Trae, Cline, Augment Code)
 
-**Part of:** `npx get-shit-done-cc`
+**Part of:** `npx gsd-remix`
 
 **Purpose:** Extend GSD installation to Trae IDE, Cline, and Augment Code runtimes.
 
@@ -1697,7 +1697,7 @@ Test suite that scans all agent, workflow, and command files for embedded inject
 
 ### 104. New Runtime Support (Cline, CodeBuddy, Qwen Code)
 
-**Part of:** `npx get-shit-done-cc`
+**Part of:** `npx gsd-remix`
 
 **Purpose:** Extend GSD installation to Cline, CodeBuddy, and Qwen Code runtimes.
 
