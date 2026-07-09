@@ -4,7 +4,7 @@
 // Scans file content being written to .planning/ for prompt injection patterns.
 // Defense-in-depth: catches injected instructions before they enter agent context.
 //
-// Triggers on: Write and Edit tool calls targeting .planning/ files
+// Triggers on: Write, Edit, and MultiEdit tool calls targeting .planning/ files
 // Action: Advisory warning (does not block) — logs detection for awareness
 //
 // Why advisory-only: Blocking would prevent legitimate workflow operations.
@@ -42,8 +42,9 @@ process.stdin.on('end', () => {
     const data = JSON.parse(input);
     const toolName = data.tool_name;
 
-    // Only scan Write and Edit operations
-    if (toolName !== 'Write' && toolName !== 'Edit') {
+    // Only scan Write, Edit, and MultiEdit operations (Fable5 A7: MultiEdit was
+    // previously unguarded, letting bulk edits into .planning/ bypass this scan).
+    if (toolName !== 'Write' && toolName !== 'Edit' && toolName !== 'MultiEdit') {
       process.exit(0);
     }
 
@@ -54,8 +55,12 @@ process.stdin.on('end', () => {
       process.exit(0);
     }
 
-    // Get the content being written
-    const content = data.tool_input?.content || data.tool_input?.new_string || '';
+    // Get the content being written. Write → content; Edit → new_string;
+    // MultiEdit → concatenation of every edit's new_string.
+    let content = data.tool_input?.content || data.tool_input?.new_string || '';
+    if (!content && Array.isArray(data.tool_input?.edits)) {
+      content = data.tool_input.edits.map((e) => (e && e.new_string) || '').join('\n');
+    }
     if (!content) {
       process.exit(0);
     }
