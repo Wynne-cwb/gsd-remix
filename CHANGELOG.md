@@ -6,6 +6,47 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 > **Note on versioning:** `gsd-remix` uses its own npm version line (1.0.x → 1.5.x), published independently. It is **not** the same as the upstream GSD version history (1.37.x and earlier) preserved further down this file. The remix entries below sit above the inherited upstream history.
 
+## [1.7.0] — Fable5 deep-review pass: lock/atomicity fixes, install speedup, config confluence — 2026-07-09
+
+A two-part external review (Fable5) of correctness, security, build, docs, config, and dead code, followed by a terminal re-review. Fixes landed only where independently verified; several review recommendations were rejected or narrowed after evidence showed the premise didn't hold on the current tree.
+
+### Fixed
+
+- **STATE.md lock could break mutual exclusion.** After exhausting lock-acquisition retries the code returned the lock path without re-holding the lock, and non-`EEXIST` errors silently degraded to lock-free writes. Now fails loud (retry O_EXCL then throw), registers the fd, and the SDK's PID-liveness check was ported into the CJS path. (`bin/lib/state.cjs`, `sdk/src/query/state-mutation.ts`)
+- **SDK STATE.md writes were non-atomic.** The two read-modify-write paths used bare `writeFile`; both now go through an atomic temp+rename helper, matching the config writer. (`sdk/src/query/state-mutation.ts`)
+- **`/gsd-escalate` bypassed injection scanning.** Quick-task `priorDecisions`/`priorPlan` were spliced verbatim into a heavy-phase CONTEXT.md via `fs.writeFile`, skipping both injection hooks; the content now passes `sanitizeForPrompt` first. (`sdk/src/query/route-escalate.ts`)
+- **SDK `commit` skipped path-containment validation.** Caller file paths now run through `resolvePathUnderProject`, aligning with `commitToSubrepo`. (`sdk/src/query/commit.ts`)
+- **Injection-guard hook never fired on MultiEdit.** The hook script handled MultiEdit but the installer registered the prompt/read/workflow/phase-boundary guards with a `Write|Edit` matcher, so MultiEdit escaped; matchers now include `MultiEdit` and a migration widens the matcher for existing installs. (`bin/install.js`)
+- **SUMMARY spot-check used the wrong filename template** (`{plan_number}` twice), mis-detecting completed plans as failed. (`workflows/execute-phase.md`)
+
+### Changed / Performance
+
+- **Faster install: ship a prebuilt SDK.** The npm package now ships `sdk/dist` (not `sdk/src`), so `npm i -g` skips the ~130 MB dev-dependency install and the `tsc` compile entirely and goes straight to the global install. Source checkouts (git clone / `npx github:`) still build from source; a source tree with a stale prebuilt dist now rebuilds rather than installing stale code. (`package.json`, `bin/install.js`, `Makefile`)
+- **Faster query startup.** `cli.ts` no longer statically imports the GSD/InitRunner modules (which transitively pull `@anthropic-ai/claude-agent-sdk`); they load dynamically only in the run/init/auto branches, so the hot `query` path stays light (~150 ms → ~80 ms cold). (`sdk/src/cli.ts`)
+- **Lighter executor spawns.** `checkpoints.md` (~30.5 KB) was preloaded into every executor spawn twice; it now loads on demand only for plans that actually have checkpoints. `ios-scaffold.md` and `tdd.md` likewise switched from unconditional `@`-include to on-demand `Read`. (`agents/gsd-executor.md`, `agents/gsd-planner.md`, `workflows/execute-phase.md`)
+- **Model aliases updated to current IDs** (opus → `claude-opus-4-8`, sonnet → `claude-sonnet-5`). (`sdk/src/query/resolve-model.ts`)
+
+### Configuration
+
+- **SDK config surface realigned with the canonical schema.** `config.set` now accepts all 54 keys (14 were missing) plus the `claude_md_assembly.blocks.*` dynamic pattern; `commit`/`checkCommit` now honor nested `planning.commit_docs` and the `.planning/` gitignore auto-detect via a shared `resolveCommitDocs`; the legacy `security_enforcement`/`nyquist_validation` gate defaults were corrected to `false` to match canonical. New parity test locks the SDK whitelist to `config-schema.cjs`. (`sdk/src/query/config-mutation.ts`, `commit.ts`, `config-gates.ts`)
+
+### Codex
+
+- **Chained `$gsd-*` calls made reliable.** Codex chaining now instructs "read the workflow.md and execute in place" instead of the unreliable mention, with parameters and inlined paths preserved. (`bin/install.js`)
+
+### Documentation
+
+- Fork identity: purged remaining upstream `get-shit-done-cc` references (install messages, `--help`, `VERSIONING.md`, issue template, demo asset) in favor of `gsd-remix`, and widened the purity guard to `bin`/`VERSIONING.md`. (`.github` CI workflows deliberately left for a separate process decision.)
+- Fixed agent-contract ghost entries, `help.md` command coverage, README team-mode wording, INVENTORY/ARCHITECTURE counts, gate must-vs-advisory wording, and stale upstream version pins; `FEATURES.md` §60 rewritten from a ghost-key security model to the current `security_review`. (`references/agent-contracts.md`, `workflows/help.md`, `README*.md`, `docs/*`)
+
+### Removed
+
+- Deleted verified-dead surfaces: `workflows/discovery-phase.md`, `references/decimal-phase-calculation.md`, `references/git-planning-commit.md`, and three orphaned templates (`spec.md`, `continue-here.md`, `phase-prompt.md`). Inventory + manifest synced.
+
+### Tests
+
+- Added drift + shared-contract guards for the two hand-maintained near-duplicate headless agents (`gsd-roadmapper`, `gsd-research-synthesizer`), plus MultiEdit-matcher and SDK/CJS config-parity regressions.
+
 ## [1.6.1] — `/gsd-do` auto-triggers on dev requests — 2026-07-08
 
 ### Fixed
