@@ -144,7 +144,7 @@ Specialized agent definitions with frontmatter specifying:
 
 ### References (`get-shit-done/references/*.md`)
 
-Shared knowledge documents that workflows and agents `@-reference` (see [`docs/INVENTORY.md`](INVENTORY.md#references-41-shipped) for the authoritative count and full roster):
+Shared knowledge documents that workflows and agents `@-reference` (see [`docs/INVENTORY.md`](INVENTORY.md#references-37-shipped) for the authoritative count and full roster):
 
 **Core references:**
 
