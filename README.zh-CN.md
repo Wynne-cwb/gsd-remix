@@ -187,7 +187,7 @@ flowchart TD
 
 ### Team 模式(自动化,能力门控)
 
-当 runtime 支持 agent team(Claude Code)时,`/gsd-autonomous` 会以 **Team Lead** 方式运行:开跑前先把所有人工决策集中收齐(Decision Harvest),每个边界步骤派一个全新 teammate,并把 UAT 推迟到末尾统一成一个 packet。由 `workflow.team_mode: auto` 默认开启——能力探针通过才启用,失败则静默回退到内联;设 `off` 可强制走内联。
+当 runtime 支持 agent team(Claude Code,或 Codex —— 单层)时,`/gsd-autonomous` 会以 **Team Lead** 方式运行:开跑前先把所有人工决策集中收齐(Decision Harvest),每个边界步骤派一个全新 teammate,并把 UAT 推迟到末尾统一成一个 packet。由 `workflow.team_mode: auto` 默认开启——能力探针通过才启用,失败则静默回退到内联;设 `off` 可强制走内联。
 
 而且你不用手动启动它:当 `/gsd-new-project` 或 `/gsd-new-milestone` 在 team 可用的 runtime 上建完 roadmap,会顺势提议直接交给 autonomous Team Lead 跑完整个 milestone(`workflow.auto_milestone` 默认 `ask`——确认一次;`auto` 无缝直接跑;`off` 则永远停在 roadmap)。
 
