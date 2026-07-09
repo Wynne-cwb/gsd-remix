@@ -25,6 +25,8 @@ animation/
 reports/
 RAILROAD_ARCHITECTURE.md
 .planning/
+.plans/
+.codex-team/
 analysis/
 docs/GSD-MASTER-ARCHITECTURE.md
 docs/GSD-RUST-IMPLEMENTATION-GUIDE.md
