@@ -435,10 +435,10 @@ Execute each selected wave in sequence. Within a wave: parallel if `PARALLELIZAT
        <execution_context>
        @~/.claude/get-shit-done/workflows/execute-plan.md
        @~/.claude/get-shit-done/templates/summary.md
-       @~/.claude/get-shit-done/references/checkpoints.md
        @~/.claude/get-shit-done/references/tdd.md
        ${CONTEXT_WINDOW < 200000 ? '' : '@~/.claude/get-shit-done/references/executor-examples.md'}
        </execution_context>
+       <!-- checkpoints.md intentionally not preloaded (D2): gsd-executor Reads it on demand only for Pattern B (has-checkpoint) plans. -->
 
        <files_to_read>
        Read these files at execution start using the Read tool:
