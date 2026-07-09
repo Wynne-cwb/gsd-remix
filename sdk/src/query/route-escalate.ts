@@ -23,7 +23,7 @@ import { existsSync, realpathSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { GSDError, ErrorClassification } from '../errors.js';
-import { planningPaths } from './helpers.js';
+import { planningPaths, sanitizeForPrompt } from './helpers.js';
 import { phaseAdd } from './phase-lifecycle.js';
 import { stateReplaceField } from './state-mutation.js';
 import { readModifyWriteStateMdFull } from './state-mutation.js';
@@ -160,11 +160,15 @@ export const routeEscalate: QueryHandler = async (args, projectDir) => {
   // 2. Seed CONTEXT.md — carries intent + prior work as evidence. NO PLAN.md is
   //    written, so gsd-next routes this phase to plan-phase (not verify).
   const contextPath = join(projectDir, added.directory, `${added.padded}-CONTEXT.md`);
+  // Quick-task CONTEXT/PLAN are untrusted content spliced into a heavy-phase
+  // CONTEXT.md via node fs (no Write tool → PreToolUse prompt-guard never fires;
+  // the read scanner excludes .planning/ paths). Neutralize instruction-mimicking
+  // markers before they can ride into the planner's context (Fable5 A5).
   const priorDecisions = quickContext
-    ? quickContext.replace(/^---[\s\S]*?---\n/, '').trim()
+    ? sanitizeForPrompt(quickContext.replace(/^---[\s\S]*?---\n/, '').trim())
     : '(no CONTEXT.md was captured for the quick task)';
   const priorPlan = quickPlan
-    ? '```\n' + quickPlan.replace(/^---[\s\S]*?---\n/, '').trim().slice(0, 4000) + '\n```'
+    ? '```\n' + sanitizeForPrompt(quickPlan.replace(/^---[\s\S]*?---\n/, '').trim()).slice(0, 4000) + '\n```'
     : '(no PLAN.md was captured for the quick task)';
   const commitList = commits.length
     ? commits.map((c) => `- ${c}`).join('\n')
