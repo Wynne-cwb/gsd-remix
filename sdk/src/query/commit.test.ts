@@ -201,6 +201,64 @@ describe('checkCommit', () => {
   });
 });
 
+// ─── commit_docs resolution (B2) ─────────────────────────────────────────────
+// The handlers used to read a bare top-level `commit_docs`; these guard the two
+// forms the CJS loadConfig honors that were previously ignored.
+
+describe('commit_docs resolution (B2)', () => {
+  it('commit: nested planning.commit_docs:false blocks commit without --force', async () => {
+    const { commit } = await import('./commit.js');
+    await writeFile(
+      join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ planning: { commit_docs: false } }),
+    );
+    await writeFile(join(tmpDir, '.planning', 'STATE.md'), '# State\n');
+    const result = await commit(['docs: update state'], tmpDir);
+    expect((result.data as { committed: boolean }).committed).toBe(false);
+    expect((result.data as { reason: string }).reason).toContain('commit_docs');
+  });
+
+  it('commit: gitignored .planning/ with no explicit value blocks commit (auto-detect)', async () => {
+    const { commit } = await import('./commit.js');
+    await writeFile(join(tmpDir, '.gitignore'), '.planning/\n');
+    // No commit_docs key at all — must default to false because .planning/ is ignored.
+    await writeFile(join(tmpDir, '.planning', 'config.json'), JSON.stringify({}));
+    await writeFile(join(tmpDir, '.planning', 'STATE.md'), '# State\n');
+    const result = await commit(['docs: update state'], tmpDir);
+    expect((result.data as { committed: boolean }).committed).toBe(false);
+    expect((result.data as { reason: string }).reason).toContain('commit_docs');
+  });
+
+  it('resolveCommitDocs: explicit top-level value wins over gitignored .planning/', async () => {
+    const { resolveCommitDocs } = await import('./commit.js');
+    await writeFile(join(tmpDir, '.gitignore'), '.planning/\n');
+    const configPath = join(tmpDir, '.planning', 'config.json');
+    await writeFile(configPath, JSON.stringify({ commit_docs: true }));
+    // Explicit true must beat the gitignore auto-detect (which would say false).
+    expect(await resolveCommitDocs(tmpDir, configPath)).toBe(true);
+  });
+
+  it('resolveCommitDocs: top-level commit_docs takes precedence over planning section', async () => {
+    const { resolveCommitDocs } = await import('./commit.js');
+    const configPath = join(tmpDir, '.planning', 'config.json');
+    await writeFile(configPath, JSON.stringify({ commit_docs: true, planning: { commit_docs: false } }));
+    expect(await resolveCommitDocs(tmpDir, configPath)).toBe(true);
+  });
+
+  it('checkCommit: nested planning.commit_docs:false rejects staged planning files', async () => {
+    const { checkCommit } = await import('./commit.js');
+    await writeFile(
+      join(tmpDir, '.planning', 'config.json'),
+      JSON.stringify({ planning: { commit_docs: false } }),
+    );
+    await writeFile(join(tmpDir, '.planning', 'STATE.md'), '# State\n');
+    execSync('git add -f .planning/STATE.md', { cwd: tmpDir, stdio: 'pipe' });
+    const result = await checkCommit([], tmpDir);
+    expect((result.data as { can_commit: boolean }).can_commit).toBe(false);
+    expect((result.data as { commit_docs: boolean }).commit_docs).toBe(false);
+  });
+});
+
 // ─── commitToSubrepo ───────────────────────────────────────────────────────
 
 interface SubrepoData {

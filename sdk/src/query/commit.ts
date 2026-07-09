@@ -48,6 +48,64 @@ export function execGit(cwd: string, args: string[]): { exitCode: number; stdout
   };
 }
 
+// ─── resolveCommitDocs ────────────────────────────────────────────────────
+
+/**
+ * Resolve the effective `commit_docs` setting, mirroring the CJS
+ * `loadConfig` semantics in `get-shit-done/bin/lib/core.cjs`.
+ *
+ * The query handlers previously read config with a bare `JSON.parse` and
+ * only inspected the top-level `commit_docs` key. That silently ignored two
+ * real configurations the CJS side honors (B2):
+ *   - `planning.commit_docs: false` written under the nested `planning`
+ *     section (the canonical form for sub-repo / gitignored setups); and
+ *   - the auto-detection that defaults `commit_docs` to `false` when
+ *     `.planning/` is gitignored and no explicit value is set.
+ * The result was the SDK committing `.planning/` against the user's intent.
+ *
+ * Precedence matches CJS `get('commit_docs', {section:'planning', field:'commit_docs'})`
+ * followed by the gitignore fallback:
+ *   1. explicit top-level `commit_docs`  → honor it
+ *   2. explicit `planning.commit_docs`   → honor it
+ *   3. `.planning/` is gitignored        → false
+ *   4. otherwise                         → true (default)
+ *
+ * @returns `true` when planning docs should be committed.
+ */
+export async function resolveCommitDocs(projectDir: string, configPath: string): Promise<boolean> {
+  let parsed: Record<string, unknown> = {};
+  try {
+    const raw = await readFile(configPath, 'utf-8');
+    parsed = JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    // No config or malformed — fall through to gitignore auto-detection.
+  }
+
+  const planning = parsed.planning as Record<string, unknown> | undefined;
+  const explicit =
+    parsed.commit_docs !== undefined
+      ? parsed.commit_docs
+      : planning && planning.commit_docs !== undefined
+        ? planning.commit_docs
+        : undefined;
+
+  // CJS treats commit_docs via a falsy check (`if (!config.commit_docs)`).
+  if (explicit !== undefined) return Boolean(explicit);
+
+  // Auto-detect: unset + `.planning/` gitignored → docs not committed by default.
+  return !isPlanningGitIgnored(projectDir);
+}
+
+/**
+ * Whether `.planning/` matches a gitignore rule. Mirrors CJS `isGitIgnored`
+ * (`git check-ignore -q --no-index`), which reports ignored status even for
+ * already-tracked paths — the common case when `.planning/` was committed
+ * before being added to `.gitignore`.
+ */
+function isPlanningGitIgnored(projectDir: string): boolean {
+  return execGit(projectDir, ['check-ignore', '-q', '--no-index', '--', '.planning/']).exitCode === 0;
+}
+
 // ─── sanitizeCommitMessage ────────────────────────────────────────────────
 
 /**
@@ -116,17 +174,13 @@ export const commit: QueryHandler = async (args, projectDir) => {
     return { data: { committed: false, reason: 'commit message required' } };
   }
 
-  // Check commit_docs config unless --force
+  // Check commit_docs config unless --force. Resolve via the shared helper so
+  // the nested `planning.commit_docs` form and the gitignore auto-detection are
+  // honored (B2) — a bare top-level read silently committed against both.
   if (!hasForce) {
     const paths = planningPaths(projectDir);
-    try {
-      const raw = await readFile(paths.config, 'utf-8');
-      const config = JSON.parse(raw) as Record<string, unknown>;
-      if (config.commit_docs === false) {
-        return { data: { committed: false, reason: 'commit_docs disabled' } };
-      }
-    } catch {
-      // No config or malformed — allow commit
+    if (!(await resolveCommitDocs(projectDir, paths.config))) {
+      return { data: { committed: false, reason: 'commit_docs disabled' } };
     }
   }
 
@@ -199,16 +253,9 @@ export const commit: QueryHandler = async (args, projectDir) => {
 export const checkCommit: QueryHandler = async (_args, projectDir) => {
   const paths = planningPaths(projectDir);
 
-  let commitDocs = true;
-  try {
-    const raw = await readFile(paths.config, 'utf-8');
-    const config = JSON.parse(raw) as Record<string, unknown>;
-    if (config.commit_docs === false) {
-      commitDocs = false;
-    }
-  } catch {
-    // No config — default to allowing commits
-  }
+  // Resolve via the shared helper: honors `planning.commit_docs` and the
+  // gitignore auto-detection, matching CJS cmdCheckCommit (B2).
+  const commitDocs = await resolveCommitDocs(projectDir, paths.config);
 
   // Check staged files
   const diffResult = execGit(projectDir, ['diff', '--cached', '--name-only']);
