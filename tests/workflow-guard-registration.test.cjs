@@ -51,7 +51,7 @@ describe('workflow-guard hook registration (#1767)', () => {
     const content = fs.readFileSync(INSTALL_JS, 'utf-8');
     // Extract the section between "workflow-guard" command construction
     // and the next console.log confirmation. The push block should have:
-    // matcher: 'Write|Edit' and command referencing workflow-guard
+    // matcher: 'Write|Edit|MultiEdit' and command referencing workflow-guard
     const workflowGuardSection = content.match(
       /workflowGuardCommand[\s\S]*?console\.log\([^)]*workflow.guard/i
     );

@@ -16,7 +16,9 @@ import { fileURLToPath } from 'node:url';
 // @anthropic-ai/claude-agent-sdk (via session-runner / event-stream). The hot
 // `query` path never touches them, so they are dynamically imported inside the
 // run/init/auto branch below to keep query startup light (D5). The transports
-// only import type modules, so they stay static.
+// stay static: cli-transport is dependency-free and ws-transport only pulls the
+// lightweight `ws` package — neither drags in claude-agent-sdk, which is the
+// heavy module the query path must avoid.
 import { CLITransport } from './cli-transport.js';
 import { WSTransport } from './ws-transport.js';
 import { validateWorkstreamName } from './workstream-utils.js';

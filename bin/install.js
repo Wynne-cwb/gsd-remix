@@ -139,7 +139,7 @@ Please install a Linux-native Node.js inside WSL:
   curl -fsSL https://fnm.vercel.app/install | bash
   fnm install --lts
 
-Then re-run: npx get-shit-done-cc@latest
+Then re-run: npx gsd-remix@latest
 `);
     process.exit(1);
   }
@@ -447,7 +447,7 @@ if (hasUninstall) {
 
 // Show help if requested
 if (hasHelp) {
-  console.log(`  ${yellow}Usage:${reset} npx get-shit-done-cc [options]\n\n  ${yellow}Options:${reset}\n    ${cyan}-g, --global${reset}              Install globally (to config directory)\n    ${cyan}-l, --local${reset}               Install locally (to current directory)\n    ${cyan}--claude${reset}                  Install for Claude Code only\n    ${cyan}--opencode${reset}                Install for OpenCode only\n    ${cyan}--gemini${reset}                  Install for Gemini only\n    ${cyan}--kilo${reset}                    Install for Kilo only\n    ${cyan}--codex${reset}                   Install for Codex only\n    ${cyan}--copilot${reset}                 Install for Copilot only\n    ${cyan}--antigravity${reset}             Install for Antigravity only\n    ${cyan}--cursor${reset}                  Install for Cursor only\n    ${cyan}--windsurf${reset}                Install for Windsurf only\n    ${cyan}--augment${reset}                 Install for Augment only\n    ${cyan}--trae${reset}                    Install for Trae only\n    ${cyan}--qwen${reset}                    Install for Qwen Code only\n    ${cyan}--cline${reset}                   Install for Cline only\n    ${cyan}--codebuddy${reset}              Install for CodeBuddy only\n    ${cyan}--all${reset}                     Install for all runtimes\n    ${cyan}-u, --uninstall${reset}           Uninstall GSD (remove all GSD files)\n    ${cyan}-c, --config-dir <path>${reset}   Specify custom config directory\n    ${cyan}-h, --help${reset}                Show this help message\n    ${cyan}--force-statusline${reset}        Replace existing statusline config\n    ${cyan}--portable-hooks${reset}          Emit \$HOME-relative hook paths in settings.json\n                              (for WSL/Docker bind-mount setups; also GSD_PORTABLE_HOOKS=1)\n\n  ${yellow}Examples:${reset}\n    ${dim}# Interactive install (prompts for runtime and location)${reset}\n    npx get-shit-done-cc\n\n    ${dim}# Install for Claude Code globally${reset}\n    npx get-shit-done-cc --claude --global\n\n    ${dim}# Install for Gemini globally${reset}\n    npx get-shit-done-cc --gemini --global\n\n    ${dim}# Install for Kilo globally${reset}\n    npx get-shit-done-cc --kilo --global\n\n    ${dim}# Install for Codex globally${reset}\n    npx get-shit-done-cc --codex --global\n\n    ${dim}# Install for Copilot globally${reset}\n    npx get-shit-done-cc --copilot --global\n\n    ${dim}# Install for Copilot locally${reset}\n    npx get-shit-done-cc --copilot --local\n\n    ${dim}# Install for Antigravity globally${reset}\n    npx get-shit-done-cc --antigravity --global\n\n    ${dim}# Install for Antigravity locally${reset}\n    npx get-shit-done-cc --antigravity --local\n\n    ${dim}# Install for Cursor globally${reset}\n    npx get-shit-done-cc --cursor --global\n\n    ${dim}# Install for Cursor locally${reset}\n    npx get-shit-done-cc --cursor --local\n\n    ${dim}# Install for Windsurf globally${reset}\n    npx get-shit-done-cc --windsurf --global\n\n    ${dim}# Install for Windsurf locally${reset}\n    npx get-shit-done-cc --windsurf --local\n\n    ${dim}# Install for Augment globally${reset}\n    npx get-shit-done-cc --augment --global\n\n    ${dim}# Install for Augment locally${reset}\n    npx get-shit-done-cc --augment --local\n\n    ${dim}# Install for Trae globally${reset}\n    npx get-shit-done-cc --trae --global\n\n    ${dim}# Install for Trae locally${reset}\n    npx get-shit-done-cc --trae --local\n\n    ${dim}# Install for Cline locally${reset}\n    npx get-shit-done-cc --cline --local\n\n    ${dim}# Install for CodeBuddy globally${reset}\n    npx get-shit-done-cc --codebuddy --global\n\n    ${dim}# Install for CodeBuddy locally${reset}\n    npx get-shit-done-cc --codebuddy --local\n\n    ${dim}# Install for all runtimes globally${reset}\n    npx get-shit-done-cc --all --global\n\n    ${dim}# Install to custom config directory${reset}\n    npx get-shit-done-cc --kilo --global --config-dir ~/.kilo-work\n\n    ${dim}# Install to current project only${reset}\n    npx get-shit-done-cc --claude --local\n\n    ${dim}# Uninstall GSD from Cursor globally${reset}\n    npx get-shit-done-cc --cursor --global --uninstall\n\n  ${yellow}Notes:${reset}\n    The --config-dir option is useful when you have multiple configurations.\n    It takes priority over CLAUDE_CONFIG_DIR / OPENCODE_CONFIG_DIR / GEMINI_CONFIG_DIR / KILO_CONFIG_DIR / CODEX_HOME / COPILOT_CONFIG_DIR / ANTIGRAVITY_CONFIG_DIR / CURSOR_CONFIG_DIR / WINDSURF_CONFIG_DIR / AUGMENT_CONFIG_DIR / TRAE_CONFIG_DIR / QWEN_CONFIG_DIR / CLINE_CONFIG_DIR / CODEBUDDY_CONFIG_DIR environment variables.\n`);
+  console.log(`  ${yellow}Usage:${reset} npx gsd-remix [options]\n\n  ${yellow}Options:${reset}\n    ${cyan}-g, --global${reset}              Install globally (to config directory)\n    ${cyan}-l, --local${reset}               Install locally (to current directory)\n    ${cyan}--claude${reset}                  Install for Claude Code only\n    ${cyan}--opencode${reset}                Install for OpenCode only\n    ${cyan}--gemini${reset}                  Install for Gemini only\n    ${cyan}--kilo${reset}                    Install for Kilo only\n    ${cyan}--codex${reset}                   Install for Codex only\n    ${cyan}--copilot${reset}                 Install for Copilot only\n    ${cyan}--antigravity${reset}             Install for Antigravity only\n    ${cyan}--cursor${reset}                  Install for Cursor only\n    ${cyan}--windsurf${reset}                Install for Windsurf only\n    ${cyan}--augment${reset}                 Install for Augment only\n    ${cyan}--trae${reset}                    Install for Trae only\n    ${cyan}--qwen${reset}                    Install for Qwen Code only\n    ${cyan}--cline${reset}                   Install for Cline only\n    ${cyan}--codebuddy${reset}              Install for CodeBuddy only\n    ${cyan}--all${reset}                     Install for all runtimes\n    ${cyan}-u, --uninstall${reset}           Uninstall GSD (remove all GSD files)\n    ${cyan}-c, --config-dir <path>${reset}   Specify custom config directory\n    ${cyan}-h, --help${reset}                Show this help message\n    ${cyan}--force-statusline${reset}        Replace existing statusline config\n    ${cyan}--portable-hooks${reset}          Emit \$HOME-relative hook paths in settings.json\n                              (for WSL/Docker bind-mount setups; also GSD_PORTABLE_HOOKS=1)\n\n  ${yellow}Examples:${reset}\n    ${dim}# Interactive install (prompts for runtime and location)${reset}\n    npx gsd-remix\n\n    ${dim}# Install for Claude Code globally${reset}\n    npx gsd-remix --claude --global\n\n    ${dim}# Install for Gemini globally${reset}\n    npx gsd-remix --gemini --global\n\n    ${dim}# Install for Kilo globally${reset}\n    npx gsd-remix --kilo --global\n\n    ${dim}# Install for Codex globally${reset}\n    npx gsd-remix --codex --global\n\n    ${dim}# Install for Copilot globally${reset}\n    npx gsd-remix --copilot --global\n\n    ${dim}# Install for Copilot locally${reset}\n    npx gsd-remix --copilot --local\n\n    ${dim}# Install for Antigravity globally${reset}\n    npx gsd-remix --antigravity --global\n\n    ${dim}# Install for Antigravity locally${reset}\n    npx gsd-remix --antigravity --local\n\n    ${dim}# Install for Cursor globally${reset}\n    npx gsd-remix --cursor --global\n\n    ${dim}# Install for Cursor locally${reset}\n    npx gsd-remix --cursor --local\n\n    ${dim}# Install for Windsurf globally${reset}\n    npx gsd-remix --windsurf --global\n\n    ${dim}# Install for Windsurf locally${reset}\n    npx gsd-remix --windsurf --local\n\n    ${dim}# Install for Augment globally${reset}\n    npx gsd-remix --augment --global\n\n    ${dim}# Install for Augment locally${reset}\n    npx gsd-remix --augment --local\n\n    ${dim}# Install for Trae globally${reset}\n    npx gsd-remix --trae --global\n\n    ${dim}# Install for Trae locally${reset}\n    npx gsd-remix --trae --local\n\n    ${dim}# Install for Cline locally${reset}\n    npx gsd-remix --cline --local\n\n    ${dim}# Install for CodeBuddy globally${reset}\n    npx gsd-remix --codebuddy --global\n\n    ${dim}# Install for CodeBuddy locally${reset}\n    npx gsd-remix --codebuddy --local\n\n    ${dim}# Install for all runtimes globally${reset}\n    npx gsd-remix --all --global\n\n    ${dim}# Install to custom config directory${reset}\n    npx gsd-remix --kilo --global --config-dir ~/.kilo-work\n\n    ${dim}# Install to current project only${reset}\n    npx gsd-remix --claude --local\n\n    ${dim}# Uninstall GSD from Cursor globally${reset}\n    npx gsd-remix --cursor --global --uninstall\n\n  ${yellow}Notes:${reset}\n    The --config-dir option is useful when you have multiple configurations.\n    It takes priority over CLAUDE_CONFIG_DIR / OPENCODE_CONFIG_DIR / GEMINI_CONFIG_DIR / KILO_CONFIG_DIR / CODEX_HOME / COPILOT_CONFIG_DIR / ANTIGRAVITY_CONFIG_DIR / CURSOR_CONFIG_DIR / WINDSURF_CONFIG_DIR / AUGMENT_CONFIG_DIR / TRAE_CONFIG_DIR / QWEN_CONFIG_DIR / CLINE_CONFIG_DIR / CODEBUDDY_CONFIG_DIR environment variables.\n`);
   process.exit(0);
 }
 
@@ -6207,6 +6207,26 @@ function install(isGlobal, runtime = 'claude') {
       settings.hooks[preToolEvent] = [];
     }
 
+    // Fable5 A7: the edit-content guards below inspect MultiEdit payloads too,
+    // but older installs registered them with a 'Write|Edit' matcher, so the
+    // MultiEdit branch in the hook scripts never fired. Idempotently widen an
+    // existing entry's matcher to include MultiEdit (mirrors the context-monitor
+    // migration above). Only touches the exact legacy value we shipped.
+    const migrateEditMatcher = (entries, hookName) => {
+      let migrated = false;
+      for (const entry of entries || []) {
+        if (
+          entry.matcher === 'Write|Edit' &&
+          entry.hooks &&
+          entry.hooks.some(h => h.command && h.command.includes(hookName))
+        ) {
+          entry.matcher = 'Write|Edit|MultiEdit';
+          migrated = true;
+        }
+      }
+      return migrated;
+    };
+
     const hasPromptGuardHook = settings.hooks[preToolEvent].some(entry =>
       entry.hooks && entry.hooks.some(h => h.command && h.command.includes('gsd-prompt-guard'))
     );
@@ -6214,7 +6234,7 @@ function install(isGlobal, runtime = 'claude') {
     const promptGuardFile = path.join(targetDir, 'hooks', 'gsd-prompt-guard.js');
     if (!hasPromptGuardHook && fs.existsSync(promptGuardFile)) {
       settings.hooks[preToolEvent].push({
-        matcher: 'Write|Edit',
+        matcher: 'Write|Edit|MultiEdit',
         hooks: [
           {
             type: 'command',
@@ -6226,6 +6246,8 @@ function install(isGlobal, runtime = 'claude') {
       console.log(`  ${green}✓${reset} Configured prompt injection guard hook`);
     } else if (!hasPromptGuardHook && !fs.existsSync(promptGuardFile)) {
       console.warn(`  ${yellow}⚠${reset}  Skipped prompt guard hook — gsd-prompt-guard.js not found at target`);
+    } else if (migrateEditMatcher(settings.hooks[preToolEvent], 'gsd-prompt-guard')) {
+      console.log(`  ${green}✓${reset} Updated prompt injection guard hook (matcher +MultiEdit)`);
     }
 
     // Configure PreToolUse hook for read-before-edit guidance (#1628)
@@ -6238,7 +6260,7 @@ function install(isGlobal, runtime = 'claude') {
     const readGuardFile = path.join(targetDir, 'hooks', 'gsd-read-guard.js');
     if (!hasReadGuardHook && fs.existsSync(readGuardFile)) {
       settings.hooks[preToolEvent].push({
-        matcher: 'Write|Edit',
+        matcher: 'Write|Edit|MultiEdit',
         hooks: [
           {
             type: 'command',
@@ -6250,6 +6272,8 @@ function install(isGlobal, runtime = 'claude') {
       console.log(`  ${green}✓${reset} Configured read-before-edit guard hook`);
     } else if (!hasReadGuardHook && !fs.existsSync(readGuardFile)) {
       console.warn(`  ${yellow}⚠${reset}  Skipped read guard hook — gsd-read-guard.js not found at target`);
+    } else if (migrateEditMatcher(settings.hooks[preToolEvent], 'gsd-read-guard')) {
+      console.log(`  ${green}✓${reset} Updated read-before-edit guard hook (matcher +MultiEdit)`);
     }
 
     // Configure PostToolUse hook for read-time prompt injection scanning (#2201)
@@ -6294,7 +6318,7 @@ function install(isGlobal, runtime = 'claude') {
     const workflowGuardFile = path.join(targetDir, 'hooks', 'gsd-workflow-guard.js');
     if (!hasWorkflowGuardHook && fs.existsSync(workflowGuardFile)) {
       settings.hooks[preToolEvent].push({
-        matcher: 'Write|Edit',
+        matcher: 'Write|Edit|MultiEdit',
         hooks: [
           {
             type: 'command',
@@ -6306,6 +6330,8 @@ function install(isGlobal, runtime = 'claude') {
       console.log(`  ${green}✓${reset} Configured workflow guard hook (opt-in via hooks.workflow_guard)`);
     } else if (!hasWorkflowGuardHook && !fs.existsSync(workflowGuardFile)) {
       console.warn(`  ${yellow}⚠${reset}  Skipped workflow guard hook — gsd-workflow-guard.js not found at target`);
+    } else if (migrateEditMatcher(settings.hooks[preToolEvent], 'gsd-workflow-guard')) {
+      console.log(`  ${green}✓${reset} Updated workflow guard hook (matcher +MultiEdit)`);
     }
 
     // Configure commit validation hook (Conventional Commits enforcement, opt-in)
@@ -6367,7 +6393,7 @@ function install(isGlobal, runtime = 'claude') {
     const phaseBoundaryFile = path.join(targetDir, 'hooks', 'gsd-phase-boundary.sh');
     if (!hasPhaseBoundaryHook && fs.existsSync(phaseBoundaryFile)) {
       settings.hooks[postToolEvent].push({
-        matcher: 'Write|Edit',
+        matcher: 'Write|Edit|MultiEdit',
         hooks: [
           {
             type: 'command',
@@ -6379,6 +6405,8 @@ function install(isGlobal, runtime = 'claude') {
       console.log(`  ${green}✓${reset} Configured phase boundary detection hook (opt-in via config)`);
     } else if (!hasPhaseBoundaryHook && !fs.existsSync(phaseBoundaryFile)) {
       console.warn(`  ${yellow}⚠${reset}  Skipped phase boundary hook — gsd-phase-boundary.sh not found at target`);
+    } else if (migrateEditMatcher(settings.hooks[postToolEvent], 'gsd-phase-boundary')) {
+      console.log(`  ${green}✓${reset} Updated phase boundary detection hook (matcher +MultiEdit)`);
     }
   }
 
@@ -6785,7 +6813,7 @@ function installSdkIfNeeded() {
         console.log(`  ${green}✓${reset} GSD Remix SDK already installed (gsd-remix-sdk on PATH at ${resolved})`);
         return;
       }
-      console.log(`  ${yellow}⚠${reset} gsd-remix-sdk on PATH at ${resolved} is broken (health probe failed) — rebuilding from source`);
+      console.log(`  ${yellow}⚠${reset} gsd-remix-sdk on PATH at ${resolved} is broken (health probe failed) — reinstalling the SDK`);
     }
   }
 
@@ -6803,17 +6831,23 @@ function installSdkIfNeeded() {
 
   const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
-  // A published npm tarball ships a PREBUILT sdk/dist (root package.json `files`
-  // lists "sdk/dist"). When present we skip the ~130MB dev-dependency install and
-  // the ~7s `tsc` compile entirely and go straight to the global install — the
-  // slow, historically fragile part of first-run setup (#2439/#2453). Source-only
-  // trees (git clone, `npx github:…`) ship sdk/src but no dist, so we build it
-  // from source as before. (D1)
+  // A published npm tarball ships a PREBUILT sdk/dist and NO sdk/src (root
+  // package.json `files` lists "sdk/dist", not "sdk/src"). When we see dist
+  // WITHOUT src we know it's a published install and trust it: skip the ~130MB
+  // dev-dependency install and the ~7s `tsc` compile entirely and go straight to
+  // the global install — the slow, historically fragile part of first-run setup
+  // (#2439/#2453). (D1)
+  //
+  // A source tree (git clone, `npx github:…`) always carries sdk/src. Fable5 D1:
+  // if such a tree ALSO has a stale sdk/dist (a dev built it once, then edited
+  // src), trusting dist would silently global-install outdated code. So whenever
+  // src is present we rebuild from source rather than trusting a possibly-stale
+  // dist — matching the pre-D1 behavior for dev checkouts.
   const distCli = path.join(sdkDir, 'dist', 'cli.js');
   const hasPrebuiltDist = fs.existsSync(distCli);
   const hasSrc = fs.existsSync(path.join(sdkDir, 'src'));
 
-  if (hasPrebuiltDist) {
+  if (hasPrebuiltDist && !hasSrc) {
     console.log(`\n  ${cyan}Installing GSD Remix SDK (prebuilt dist, ${sdkDir})…${reset}`);
   } else {
     if (!hasSrc) {
@@ -6822,7 +6856,11 @@ function installSdkIfNeeded() {
         { globalBin: null, exitCode: 1 },
       );
     }
-    console.log(`\n  ${cyan}Building GSD Remix SDK from source (${sdkDir})…${reset}`);
+    console.log(
+      hasPrebuiltDist
+        ? `\n  ${cyan}Rebuilding GSD Remix SDK from source (${sdkDir}) — source tree present, refreshing possibly-stale dist…${reset}`
+        : `\n  ${cyan}Building GSD Remix SDK from source (${sdkDir})…${reset}`
+    );
 
     // 1. Install sdk build-time dependencies (tsc, etc.)
     const installResult = spawnSync(npmCmd, ['install'], { cwd: sdkDir, stdio: 'inherit' });

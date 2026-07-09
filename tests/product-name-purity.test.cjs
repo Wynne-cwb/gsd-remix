@@ -106,7 +106,13 @@ describe('product name purity (#1777)', () => {
 describe('upstream package-name purity (fork identity, Fable5 B9)', () => {
   test('shipped code references gsd-remix, not upstream get-shit-done-cc', () => {
     const { execSync } = require('child_process');
-    const dirs = ['sdk/src', 'get-shit-done', 'agents', 'commands', 'hooks'];
+    // Scan shipped code + the install entrypoint (bin/) and the versioning doc.
+    // Fable5 B9: install.js user-facing strings and VERSIONING.md previously
+    // leaked the upstream package name; the scan list omitted them so the leak
+    // slipped through. `.github/` CI workflows are deliberately excluded — they
+    // reference the npm package name for real publish operations and are gated
+    // separately from fork-identity purity.
+    const dirs = ['sdk/src', 'get-shit-done', 'agents', 'commands', 'hooks', 'bin', 'VERSIONING.md'];
     const violations = [];
     for (const dir of dirs) {
       const abs = path.join(ROOT, dir);

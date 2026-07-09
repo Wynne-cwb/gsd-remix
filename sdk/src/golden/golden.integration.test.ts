@@ -18,7 +18,11 @@ function omitAgentInstallFields(data: Record<string, unknown>): Record<string, u
   const o = { ...data };
   delete o.agents_installed;
   delete o.missing_agents;
-  // SDK intentionally drops legacy `git check-ignore` config fallback for `commit_docs`
+  // B2 tail (Fable5): the SDK commit path (commit.ts `resolveCommitDocs`) now honors
+  // the legacy `git check-ignore` fallback for `commit_docs`, but the read/report path
+  // (config.ts) does NOT yet — so init.* payloads can over-report `commit_docs: true`.
+  // Normalize both sides to true here so this golden covers the rest until config.ts
+  // is unified (or folded into the B3 kill-plan).
   if ('commit_docs' in o) o.commit_docs = true;
   return o;
 }
@@ -204,7 +208,9 @@ describe('Golden file tests', () => {
     });
   });
 
-  /** Normalize init.* payloads where legacy CJS injects commit_docs: false dynamically */
+  /** Normalize init.* payloads: CJS injects commit_docs:false via gitignore detection,
+   *  while SDK config.ts (the report path, not yet unified — see B2 tail above) reports
+   *  true. Force both to true so parity covers the rest until config.ts is folded in. */
   const verifyInitParity = (sdk: unknown, cjs: unknown) => {
     const s = structuredClone(sdk as Record<string, unknown>);
     const c = structuredClone(cjs as Record<string, unknown>);
