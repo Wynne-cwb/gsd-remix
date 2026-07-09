@@ -973,7 +973,7 @@ Selected wave finished successfully. This phase still has incomplete plans, so p
 </step>
 
 <step name="code_review_gate" required="true">
-**This step is REQUIRED and must not be skipped.** Auto-invoke code review on the phase's source changes. Advisory only — never blocks execution flow.
+**Always run this step; its findings never block — on any error, report and proceed.** Auto-invoke code review on the phase's source changes.
 
 **Config gate:**
 ```bash
