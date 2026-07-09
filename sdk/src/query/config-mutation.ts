@@ -49,36 +49,54 @@ async function atomicWriteConfig(configPath: string, config: Record<string, unkn
 /**
  * Allowlist of valid config key paths.
  *
- * Ported from config.cjs lines 14-37.
- * Dynamic patterns (agent_skills.*, features.*) are handled
- * separately in isValidConfigKey.
+ * MUST stay identical to the canonical CJS set in
+ * `get-shit-done/bin/lib/config-schema.cjs` — `tests/config-schema-sdk-parity.test.cjs`
+ * fails on any divergence. Previously this list drifted and rejected 14 valid
+ * keys the CJS side accepts (B1): a user running `config set workflow.tdd_mode …`
+ * through the SDK got a spurious "invalid key" error.
+ *
+ * Dynamic patterns (agent_skills.*, features.*, claude_md_assembly.blocks.*) are
+ * handled separately in isValidConfigKey.
  */
 const VALID_CONFIG_KEYS = new Set([
   'mode', 'granularity', 'parallelization', 'commit_docs', 'model_profile',
   'search_gitignored', 'brave_search', 'firecrawl', 'exa_search',
   'workflow.research', 'workflow.plan_check', 'workflow.verifier',
-  'workflow.nyquist_validation',
-  'workflow.security_enforcement', 'workflow.security_review',
+  'workflow.nyquist_validation', 'workflow.ai_integration_phase',
   'workflow.auto_advance', 'workflow.node_repair', 'workflow.node_repair_budget',
+  'workflow.tdd_mode',
   'workflow.text_mode',
   'workflow.research_before_questions',
   'workflow.discuss_mode',
   'workflow.skip_discuss',
+  'workflow.auto_prune_state',
   'workflow._auto_chain_active',
   'workflow.use_worktrees',
   'workflow.code_review',
   'workflow.code_review_depth',
+  'workflow.quick_plan_gate',
+  'workflow.team_mode',
+  'workflow.team_max_parallel',
+  'workflow.brainstorm_visual',
+  'workflow.auto_milestone',
+  'workflow.pattern_mapper',
+  'workflow.security_enforcement',
+  'workflow.security_review',
   'git.branching_strategy', 'git.base_branch', 'git.phase_branch_template',
   'git.milestone_branch_template', 'git.quick_branch_template',
-  'planning.commit_docs', 'planning.search_gitignored',
+  'planning.commit_docs', 'planning.search_gitignored', 'planning.sub_repos',
   'workflow.subagent_timeout',
+  'workflow.inline_plan_threshold',
   'hooks.context_warnings',
+  'context',
   'features.global_learnings',
   'learnings.max_inject',
-  'context',
   'project_code', 'phase_naming',
   'manager.flags.discuss', 'manager.flags.plan', 'manager.flags.execute',
   'response_language',
+  'intel.enabled',
+  'claude_md_path',
+  'claude_md_assembly.mode',
 ]);
 
 // ─── CONFIG_KEY_SUGGESTIONS (D9 — match CJS config.cjs:57-67) ────────────
@@ -119,6 +137,9 @@ export function isValidConfigKey(keyPath: string): { valid: boolean; suggestion?
 
   // Dynamic patterns: features.<feature_name>
   if (/^features\.[a-zA-Z0-9_]+$/.test(keyPath)) return { valid: true };
+
+  // Dynamic patterns: claude_md_assembly.blocks.<section> (parity with CJS config-schema.cjs)
+  if (/^claude_md_assembly\.blocks\.[a-zA-Z0-9_]+$/.test(keyPath)) return { valid: true };
 
   // D9: Check curated suggestions before LCP fallback
   if (CONFIG_KEY_SUGGESTIONS[keyPath]) {
