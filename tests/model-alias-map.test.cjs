@@ -13,12 +13,12 @@ const assert = require('node:assert/strict');
 const { MODEL_ALIAS_MAP } = require('../get-shit-done/bin/lib/core.cjs');
 
 describe('MODEL_ALIAS_MAP (#1690 regression)', () => {
-  test('opus maps to claude-opus-4-6', () => {
-    assert.equal(MODEL_ALIAS_MAP.opus, 'claude-opus-4-6');
+  test('opus maps to claude-opus-4-8', () => {
+    assert.equal(MODEL_ALIAS_MAP.opus, 'claude-opus-4-8');
   });
 
-  test('sonnet maps to claude-sonnet-4-6', () => {
-    assert.equal(MODEL_ALIAS_MAP.sonnet, 'claude-sonnet-4-6');
+  test('sonnet maps to claude-sonnet-5', () => {
+    assert.equal(MODEL_ALIAS_MAP.sonnet, 'claude-sonnet-5');
   });
 
   test('haiku maps to claude-haiku-4-5', () => {
