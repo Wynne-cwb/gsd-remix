@@ -26,14 +26,8 @@ release-check:
 	git diff --quiet
 	git diff --cached --quiet
 	npm --prefix sdk run build
-	node --test \
-		tests/runtime-health-command.test.cjs \
-		tests/runtime-health-preflight.test.cjs \
-		tests/bug-2334-quick-gsd-sdk-preflight.test.cjs \
-		tests/bug-2439-set-profile-gsd-sdk-preflight.test.cjs \
-		tests/bugs-1656-1657.test.cjs \
-		tests/bug-2453-sdk-cli-chmod.test.cjs
-	npx vitest run sdk/src/runtime-health.test.ts sdk/src/query/registry.test.ts
+	node scripts/run-tests.cjs
+	npm --prefix sdk run test:unit
 	npm pack --dry-run --json >/tmp/gsd-remix-pack-dry-run.json
 	node -e "const pack=require('/tmp/gsd-remix-pack-dry-run.json')[0]; console.log(JSON.stringify({name:pack.name,version:pack.version,filename:pack.filename,files:pack.files.length}, null, 2))"
 
