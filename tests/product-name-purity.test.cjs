@@ -102,3 +102,27 @@ describe('product name purity (#1777)', () => {
     );
   });
 });
+
+describe('upstream package-name purity (fork identity, Fable5 B9)', () => {
+  test('shipped code references gsd-remix, not upstream get-shit-done-cc', () => {
+    const { execSync } = require('child_process');
+    const dirs = ['sdk/src', 'get-shit-done/bin'];
+    const violations = [];
+    for (const dir of dirs) {
+      const abs = path.join(ROOT, dir);
+      if (!fs.existsSync(abs)) continue;
+      let out = '';
+      try {
+        out = execSync(`grep -rn "get-shit-done-cc" "${abs}" || true`, { encoding: 'utf-8' });
+      } catch { /* grep exit 1 = no match */ }
+      out.split('\n').filter(Boolean).forEach(l => violations.push(l));
+    }
+    assert.strictEqual(
+      violations.length, 0,
+      [
+        'Shipped code must reference the fork package "gsd-remix", not upstream "get-shit-done-cc".',
+        ...violations.map(v => '  ' + v),
+      ].join('\n')
+    );
+  });
+});

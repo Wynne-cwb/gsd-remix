@@ -37,7 +37,7 @@ function loadConfigCjs(projectDir: string): Record<string, unknown> {
   const corePath = resolveCoreCjsPath(projectDir);
   if (!corePath) {
     throw new GSDError(
-      'state load: get-shit-done/bin/lib/core.cjs not found. Install GSD (e.g. npm i -g get-shit-done-cc) or clone with get-shit-done next to the SDK.',
+      'state load: get-shit-done/bin/lib/core.cjs not found. Install GSD (e.g. npm i -g gsd-remix) or clone with get-shit-done next to the SDK.',
       ErrorClassification.Blocked,
     );
   }
