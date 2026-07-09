@@ -106,7 +106,7 @@ describe('product name purity (#1777)', () => {
 describe('upstream package-name purity (fork identity, Fable5 B9)', () => {
   test('shipped code references gsd-remix, not upstream get-shit-done-cc', () => {
     const { execSync } = require('child_process');
-    const dirs = ['sdk/src', 'get-shit-done/bin'];
+    const dirs = ['sdk/src', 'get-shit-done', 'agents', 'commands', 'hooks'];
     const violations = [];
     for (const dir of dirs) {
       const abs = path.join(ROOT, dir);

@@ -189,7 +189,7 @@ Extract from init JSON: `researcher_model`, `synthesizer_model`, `roadmapper_mod
 Subagent spawns (gsd-project-researcher, gsd-research-synthesizer, gsd-roadmapper) will fail
 with "agent type not found". Run the installer with --global to make agents available:
 
-  npx get-shit-done-cc@latest --global
+  npx gsd-remix@latest --global
 
 Proceeding without research subagents — roadmap will be generated inline.
 ```
