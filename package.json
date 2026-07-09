@@ -12,11 +12,10 @@
     "agents",
     "hooks",
     "scripts",
-    "sdk/src",
+    "sdk/dist",
     "sdk/prompts",
     "sdk/package.json",
-    "sdk/package-lock.json",
-    "sdk/tsconfig.json"
+    "sdk/package-lock.json"
   ],
   "keywords": [
     "claude",
@@ -52,7 +51,8 @@
   },
   "scripts": {
     "build:hooks": "node scripts/build-hooks.js",
-    "prepublishOnly": "npm run build:hooks",
+    "build:sdk": "npm --prefix sdk run build",
+    "prepublishOnly": "npm run build:hooks && npm run build:sdk",
     "release": "make release-publish",
     "release:check": "make release-check",
     "release:whoami": "make release-whoami",

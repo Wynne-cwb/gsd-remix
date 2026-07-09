@@ -29,7 +29,7 @@ release-check:
 	node scripts/run-tests.cjs
 	npm --prefix sdk run test:unit
 	npm pack --dry-run --json >/tmp/gsd-remix-pack-dry-run.json
-	node -e "const pack=require('/tmp/gsd-remix-pack-dry-run.json')[0]; console.log(JSON.stringify({name:pack.name,version:pack.version,filename:pack.filename,files:pack.files.length}, null, 2))"
+	node -e "const pack=require('/tmp/gsd-remix-pack-dry-run.json')[0]; const files=pack.files.map(f=>f.path); if(!files.includes('sdk/dist/cli.js')) throw new Error('sdk/dist/cli.js missing from tarball — the prebuilt SDK dist did not pack (run npm --prefix sdk run build)'); if(files.some(f=>f.startsWith('sdk/src/'))) throw new Error('sdk/src/ leaked into tarball — remove it from package.json files'); console.log(JSON.stringify({name:pack.name,version:pack.version,filename:pack.filename,files:pack.files.length,sdk_dist_shipped:true}, null, 2))"
 
 release-pack:
 	npm pack --dry-run --json >/tmp/gsd-remix-pack-dry-run.json

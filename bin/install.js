@@ -6753,8 +6753,9 @@ function emitSdkFatal(reason, { globalBin, exitCode }) {
     }
   } else {
     console.error('');
-    console.error(`  Build manually to retry:`);
-    console.error(`    ${cyan}cd <install-dir>/sdk && npm install && npm run build && npm install -g .${reset}`);
+    console.error(`  Install manually to retry:`);
+    console.error(`    ${cyan}cd <install-dir>/sdk && npm install -g .${reset}   ${dim}# prebuilt dist${reset}`);
+    console.error(`    ${dim}from a source checkout: cd <install-dir>/sdk && npm install && npm run build && npm install -g .${reset}`);
   }
 
   console.error(`${redBold}${bar}${reset}`);
@@ -6800,19 +6801,40 @@ function installSdkIfNeeded() {
     emitSdkFatal(`SDK source tree not found at ${sdkDir}.`, { globalBin: null, exitCode: 1 });
   }
 
-  console.log(`\n  ${cyan}Building GSD Remix SDK from source (${sdkDir})…${reset}`);
   const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
-  // 1. Install sdk build-time dependencies (tsc, etc.)
-  const installResult = spawnSync(npmCmd, ['install'], { cwd: sdkDir, stdio: 'inherit' });
-  if (installResult.status !== 0) {
-    emitSdkFatal('Failed to `npm install` in sdk/.', { globalBin: null, exitCode: 1 });
-  }
+  // A published npm tarball ships a PREBUILT sdk/dist (root package.json `files`
+  // lists "sdk/dist"). When present we skip the ~130MB dev-dependency install and
+  // the ~7s `tsc` compile entirely and go straight to the global install — the
+  // slow, historically fragile part of first-run setup (#2439/#2453). Source-only
+  // trees (git clone, `npx github:…`) ship sdk/src but no dist, so we build it
+  // from source as before. (D1)
+  const distCli = path.join(sdkDir, 'dist', 'cli.js');
+  const hasPrebuiltDist = fs.existsSync(distCli);
+  const hasSrc = fs.existsSync(path.join(sdkDir, 'src'));
 
-  // 2. Compile TypeScript → sdk/dist/
-  const buildResult = spawnSync(npmCmd, ['run', 'build'], { cwd: sdkDir, stdio: 'inherit' });
-  if (buildResult.status !== 0) {
-    emitSdkFatal('Failed to `npm run build` in sdk/.', { globalBin: null, exitCode: 1 });
+  if (hasPrebuiltDist) {
+    console.log(`\n  ${cyan}Installing GSD Remix SDK (prebuilt dist, ${sdkDir})…${reset}`);
+  } else {
+    if (!hasSrc) {
+      emitSdkFatal(
+        `Neither sdk/dist nor sdk/src found at ${sdkDir}. The package looks incomplete — reinstall gsd-remix.`,
+        { globalBin: null, exitCode: 1 },
+      );
+    }
+    console.log(`\n  ${cyan}Building GSD Remix SDK from source (${sdkDir})…${reset}`);
+
+    // 1. Install sdk build-time dependencies (tsc, etc.)
+    const installResult = spawnSync(npmCmd, ['install'], { cwd: sdkDir, stdio: 'inherit' });
+    if (installResult.status !== 0) {
+      emitSdkFatal('Failed to `npm install` in sdk/.', { globalBin: null, exitCode: 1 });
+    }
+
+    // 2. Compile TypeScript → sdk/dist/
+    const buildResult = spawnSync(npmCmd, ['run', 'build'], { cwd: sdkDir, stdio: 'inherit' });
+    if (buildResult.status !== 0) {
+      emitSdkFatal('Failed to `npm run build` in sdk/.', { globalBin: null, exitCode: 1 });
+    }
   }
 
   // 3. Install the built package globally so `gsd-remix-sdk` lands on PATH.
