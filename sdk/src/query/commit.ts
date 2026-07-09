@@ -133,6 +133,21 @@ export const commit: QueryHandler = async (args, projectDir) => {
   // Sanitize message
   const sanitized = message ? sanitizeCommitMessage(message) : message;
 
+  // A8: validate caller-supplied paths stay within the project (parity with
+  // commitToSubrepo). git itself rejects out-of-repo paths, but this makes the
+  // trust boundary explicit and returns a clean validation error instead of a
+  // confusing git failure.
+  for (const file of filePaths) {
+    try {
+      await resolvePathUnderProject(projectDir, file);
+    } catch (err) {
+      if (err instanceof GSDError) {
+        return { data: { committed: false, reason: `${err.message}: ${file}` } };
+      }
+      throw err;
+    }
+  }
+
   // Stage files
   const filesToStage = filePaths.length > 0 ? filePaths : ['.planning/'];
   for (const file of filesToStage) {
