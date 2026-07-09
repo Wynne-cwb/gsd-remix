@@ -1,21 +1,18 @@
 /**
  * Route acceptance matrix — Phase 0 guardrail (impl plan 0.1).
  *
- * The size-axis router (design D5/D6) does not exist yet. This test locks the
- * GOLDEN DATASET (tests/fixtures/route-matrix.json) that Phase 1 will run
- * route.size-classify + gsd-do judgment against. Locking the dataset first is
- * the Fable5 non-blocking precondition: without it, router behavior ships with
- * no guardrail.
+ * The size-axis router (design D5/D6) IS live: `route.size-classify` is
+ * registered (sdk/src/query/index.ts) and drives gsd-do's size_route step.
+ * This file locks the GOLDEN DATASET (tests/fixtures/route-matrix.json) — its
+ * schema, coverage, and the routing invariants that must hold no matter how the
+ * classifier is built (most importantly that `unknown → MEDIUM` never swallows
+ * LIGHT, and that every `hard` risk hit forces HEAVY).
  *
- * Phase 0 (this file, live): validate the dataset's schema, coverage, and the
- *   routing invariants that must hold no matter how the classifier is built —
- *   most importantly that `unknown → MEDIUM` never swallows LIGHT, and that
- *   every `hard` risk hit forces HEAVY.
- *
- * Phase 1 (behavioral block below, currently skipped): for each sample, invoke
- *   the classifier and assert `expected_lane`. Remove the skip once
- *   route.size-classify is registered (sdk/src/query/index.ts) and the bundle
- *   is rebuilt.
+ * The behavioral gate — running each sample through the real scanner and
+ * asserting risk evidence — lives in the SDK vitest suite:
+ *   sdk/src/query/route-size-classify.test.ts
+ *     → "route matrix — deterministic risk evidence (golden gate)"
+ * (see the footer of this file). This CJS file is dataset invariants only.
  */
 
 'use strict';
